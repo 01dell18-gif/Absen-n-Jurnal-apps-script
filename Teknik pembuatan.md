@@ -15,7 +15,7 @@ Dalam rekayasa perangkat lunak web modern, arsitektur yang diterapkan dalam apli
 5. **Two-Tier Role-Based Access Control (RBAC) dengan Field Auto-Locking & State Persistence**
 6. **SheetJS Fast Excel Processing dengan Safe Administrator Preservation Engine**
 7. **Dynamic Adaptive Print & PDF Engine (Smart Kop Divider & Source Data Injection)**
-8. **Mobile-First Responsive Off-Canvas Drawer & Accordion Navigation**
+8. **Mobile-First Responsive Off-Canvas Drawer & Closed-by-Default Accordion Navigation**
 
 ---
 
@@ -374,9 +374,44 @@ Pada modal edit jurnal ([HasilJurnal.html](file:///d:/Downloads/Share-DKV%20F/CO
    - **Root Folder Guard**: Sistem membandingkan ID berkas lama dengan ID folder utama Google Drive (`folderIdDrive`). Jika ID tersebut bukan folder utama, berkas dipindahkan ke tempat sampah via `DriveApp.getFileById(cleanId).setTrashed(true)` atau `DriveApp.getFolderById(cleanId).setTrashed(true)`.
 3. **Penyimpanan Berkas Baru**: Berkas baru diunggah ke folder Drive instansi, menghasilkan tautan baru yang otomatis disimpan ke Kolom M (13) Sheet `DataJurnalGlobal`.
 
+### D. Dual-Mode Kop Surat Ingestion: Web URL vs Direct Google Drive Storage (Kolom K)
+
+Pada menu **Pengaturan Sistem** ([Pengaturan.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Pengaturan.html)), disediakan sistem *Mode Switcher* antara pengisian teks/URL dan unggah berkas fisik:
+
+1. **Mode URL / Teks**: Menerima input URL gambar banner eksternal / Drive atau susunan teks resmi instansi.
+2. **Mode Upload File Gambar**:
+   - Pengguna memilih berkas gambar (PNG, JPG, WEBP).
+   - `FileReader` pada klien membaca berkas ke format Base64 Data URL dan langsung merender gambar pada `#preview-kop-container` secara instan (*zero delay feedback*).
+   - Saat formulir disimpan via `google.script.run.savePengaturanData(payload)`, backend [Code.gs](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Code.gs) mendekode Base64, mengambil `folderIdDrive` dari Kolom K, membuat berkas via `folder.createFile(blob)`, menetapkan izin visibilitas tautan (`DriveApp.Access.ANYONE_WITH_LINK`), dan menyimpan URL Drive yang dihasilkan ke Kolom F Baris 2 Sheet `Pengaturan`.
+
+### E. Dynamic Time-Based Greeting & Real-Time Local Hardware Clock Engine
+
+Pada [Dashboard.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Dashboard.html), sistem mengintegrasikan jam perangkat keras lokal (*Hardware Client Clock*) dan penyapa waktu adaptif:
+
+1. **Logika Rentang Waktu (*Greeting Matrix*)**:
+   - Pukul `04:00 - 10:59`: *Selamat Pagi*
+   - Pukul `11:00 - 14:59`: *Selamat Siang*
+   - Pukul `15:00 - 17:59`: *Selamat Sore*
+   - Pukul `18:00 - 03:59`: *Selamat Malam*
+2. **Sinkronisasi Detik (*Live Ticker Engine*)**:
+   - Fungsi `updateDeviceDateTime()` berjalan setiap 1000 milidetik (`setInterval`) menggunakan nama hari dan bulan bahasa Indonesia (`id-ID`) untuk memformat `[Hari], [Tanggal] [Bulan] [Tahun] • [HH:mm:ss]`, memberikan impresi aplikasi yang hidup, dinamis, dan terhubung langsung dengan waktu nyata guru yang bertugas.
+
 ---
 
-## 🗄️ 9. Struktur Skema Database 5 Sheet Terpadu
+## 📱 9. Mobile-First Responsive Off-Canvas Drawer & Closed-by-Default Accordion Navigation
+
+Komponen sidebar navigasi ([Sidebar.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Sidebar.html)) dirancang dengan pola *Accordion Navigation* modern:
+
+1. **Closed-by-Default Architecture**:
+   - Seluruh kontainer submenu (`#submenu-utama`, `#submenu-master`, `#submenu-rekap`, `#submenu-pengaturan`) diinisialisasi dengan class `hidden` dan chevron indikator `-rotate-90`.
+   - Mengurangi *visual clutter* saat pengguna pertama kali membuka aplikasi sehingga antarmuka tampak rapi, minimalis, dan tidak membebani ruang vertikal.
+2. **Stateful Interaction & Session Preservation**:
+   - Fungsi `toggleNavGroup(groupKey)` mengatur buka-tutup grup dan menyimpan status ke `sessionStorage.setItem('siguru_nav_' + groupKey, state)`.
+   - Jika pengguna sengaja membuka grup tertentu, status tersebut dipertahankan selama sesi aktif browser tanpa membuka grup lainnya yang tidak relevan.
+
+---
+
+## 🗄️ 10. Struktur Skema Database 5 Sheet Terpadu
 
 Sistem menggunakan 1 Google Spreadsheet dengan **5 Sheet Utama** yang saling berelasi:
 
@@ -419,7 +454,7 @@ Teknik ini menjamin konfigurasi tidak hilang meskipun pengguna menyusun daftar k
 
 ---
 
-## ⚡ 10. Komunikasi Klien-Server (Asynchronous RPC via `google.script.run`)
+## ⚡ 11. Komunikasi Klien-Server (Asynchronous RPC via `google.script.run`)
 
 Frontend berkomunikasi dengan backend menggunakan pola asinkron yang dibungkus dengan Promise:
 
@@ -443,7 +478,7 @@ sequenceDiagram
 
 ---
 
-## 📊 11. Perbandingan Arsitektur: SIGURU vs Web Konvensional
+## 📊 12. Perbandingan Arsitektur: SIGURU vs Web Konvensional
 
 | Dimensi Rekayasa | Web Konvensional (PHP / Laravel / Node.js) | Arsitektur SIGURU v3.0 (Google Cloud) |
 | :--- | :--- | :--- |
@@ -456,7 +491,7 @@ sequenceDiagram
 
 ---
 
-## 📝 12. Kesimpulan
+## 📝 13. Kesimpulan
 
 Arsitektur **SIGURU v3.0** mengoptimalkan seluruh potensi ekosistem Google Workspace menjadi aplikasi web enterprise tingkat sekolah yang tangguh, aman, dan berdaya guna tinggi.
 

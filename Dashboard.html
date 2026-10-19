@@ -21,9 +21,15 @@
       <!-- HERO WELCOME BANNER -->
       <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 p-6 md:p-8 text-white shadow-xl shadow-brand-900/10">
         <div class="relative z-10 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold mb-3">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="banner-role-text">Portal Operasional Sekolah</span>
+          <div class="flex flex-wrap items-center gap-2.5 mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="banner-role-text">Portal Operasional Sekolah</span>
+            </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium">
+              <i class="fa-regular fa-clock text-amber-300"></i>
+              <span id="dashboard-device-clock">Memuat tanggal & waktu...</span>
+            </div>
           </div>
           <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2" id="dashboard-welcome-name">
             Selamat Datang di SIGURU
@@ -177,10 +183,42 @@
   <?!= include('AppJS'); ?>
 
   <script>
+    function getTimeGreeting() {
+      const hour = new Date().getHours();
+      if (hour >= 4 && hour < 11) return 'Selamat Pagi';
+      if (hour >= 11 && hour < 15) return 'Selamat Siang';
+      if (hour >= 15 && hour < 18) return 'Selamat Sore';
+      return 'Selamat Malam';
+    }
+
+    function updateDeviceDateTime() {
+      const now = new Date();
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+      const dayName = days[now.getDay()];
+      const dateNum = now.getDate();
+      const monthName = months[now.getMonth()];
+      const yearNum = now.getFullYear();
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const hours = pad(now.getHours());
+      const minutes = pad(now.getMinutes());
+      const seconds = pad(now.getSeconds());
+
+      const el = document.getElementById('dashboard-device-clock');
+      if (el) {
+        el.innerText = `${dayName}, ${dateNum} ${monthName} ${yearNum} • ${hours}:${minutes}:${seconds}`;
+      }
+    }
+
     function updateDashboardWelcome() {
       const uname = getCurrentUser();
       const role = getCurrentRole();
       let namaGuru = getLoggedInNamaGuru();
+      const greeting = getTimeGreeting();
 
       if (uname) {
         const displayName = (role === 'Admin') 
@@ -189,7 +227,7 @@
 
         const welcomeEl = document.getElementById('dashboard-welcome-name');
         if (welcomeEl) {
-          welcomeEl.innerText = `Selamat Datang, ${displayName}!`;
+          welcomeEl.innerText = `${greeting}, ${displayName}!`;
         }
         const roleEl = document.getElementById('banner-role-text');
         if (roleEl) {
@@ -198,7 +236,7 @@
       } else {
         const welcomeEl = document.getElementById('dashboard-welcome-name');
         if (welcomeEl) {
-          welcomeEl.innerText = `Selamat Datang di SIGURU`;
+          welcomeEl.innerText = `${greeting} di SIGURU`;
         }
         const roleEl = document.getElementById('banner-role-text');
         if (roleEl) {
@@ -218,6 +256,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+      updateDeviceDateTime();
+      setInterval(updateDeviceDateTime, 1000);
       updateDashboardWelcome();
       if (window.globalData && window.globalData.muridList) {
         onDataLoaded(window.globalData);

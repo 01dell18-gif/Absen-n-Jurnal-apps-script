@@ -80,24 +80,78 @@
           </div>
 
           <!-- Kop Surat (Kolom F) -->
-          <div class="space-y-2 pt-2 border-t border-slate-100">
-            <div class="flex items-center justify-between">
-              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                Kop Surat Laporan
-              </label>
-              <span
-                class="text-[10px] text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full font-bold border border-brand-200">
-                Kolom F
-              </span>
+          <div class="space-y-3 pt-3 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  Kop Surat Laporan
+                </label>
+                <span
+                  class="text-[10px] text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full font-bold border border-brand-200">
+                  Kolom F
+                </span>
+              </div>
+
+              <!-- Switch Pilihan Input: Link URL / Teks vs Upload File -->
+              <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
+                <button type="button" id="btn-switch-url" onclick="switchKopMode('url')"
+                  class="px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm">
+                  <i class="fa-solid fa-link text-[10px]"></i>
+                  <span>Link URL / Teks</span>
+                </button>
+                <button type="button" id="btn-switch-file" onclick="switchKopMode('file')"
+                  class="px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-800">
+                  <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+                  <span>Upload File Kop</span>
+                </button>
+              </div>
             </div>
-            <p class="text-[11px] text-slate-400">
-              Dapat diisi <strong>URL Gambar Banner Kop Surat</strong> (Link Hosting / Google Drive) atau <strong>Teks
-                Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Export PDF otomatis
-              dibuat <strong>rata tengah</strong>.
-            </p>
-            <textarea id="pengaturan-kop" rows="3" oninput="previewKopSurat()"
-              placeholder="Contoh link gambar: https://drive.google.com/file/d/... atau https://domain.com/kop.png&#10;Atau susunan teks kop resmi..."
-              class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700"></textarea>
+
+            <!-- Panel Mode 1: Link URL / Teks -->
+            <div id="panel-kop-url" class="space-y-2">
+              <p class="text-[11px] text-slate-400">
+                Dapat diisi <strong>URL Gambar Banner Kop Surat</strong> (Link Hosting / Google Drive) atau <strong>Teks
+                  Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Export PDF otomatis
+                dibuat <strong>rata tengah</strong>.
+              </p>
+              <textarea id="pengaturan-kop" rows="3" oninput="previewKopSurat()"
+                placeholder="Contoh link gambar: https://drive.google.com/file/d/... atau https://domain.com/kop.png&#10;Atau susunan teks kop resmi..."
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700"></textarea>
+            </div>
+
+            <!-- Panel Mode 2: Upload File Gambar ke Google Drive -->
+            <div id="panel-kop-file" class="space-y-2 hidden">
+              <p class="text-[11px] text-slate-400">
+                Pilih file gambar banner kop surat dari perangkat Anda (PNG, JPG, WEBP). File akan otomatis diunggah dan disimpan ke folder Google Drive (<strong>Kolom K</strong>) saat Anda klik <em>Simpan Pengaturan</em>.
+              </p>
+              <div class="border-2 border-dashed border-slate-200 hover:border-brand-400 bg-slate-50/50 hover:bg-brand-50/20 rounded-2xl p-5 text-center transition cursor-pointer" onclick="document.getElementById('pengaturan-kop-file').click()">
+                <input type="file" id="pengaturan-kop-file" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden" onchange="handleKopFileSelected(event)">
+                <div id="kop-file-empty-state" class="space-y-2">
+                  <div class="w-12 h-12 mx-auto rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl border border-brand-100">
+                    <i class="fa-solid fa-image"></i>
+                  </div>
+                  <div>
+                    <span class="text-xs font-bold text-slate-700">Klik untuk memilih file gambar kop surat</span>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Format: PNG, JPG, JPEG, WEBP (Maksimal 10 MB)</p>
+                  </div>
+                </div>
+                <!-- Info File yang Dipilih -->
+                <div id="kop-file-selected-state" class="hidden flex items-center justify-between p-3 bg-white rounded-xl border border-emerald-200 text-left">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                      <i class="fa-solid fa-file-circle-check"></i>
+                    </div>
+                    <div>
+                      <p id="kop-file-name" class="text-xs font-bold text-slate-800 truncate max-w-xs">kop-surat.png</p>
+                      <p id="kop-file-size" class="text-[10px] text-slate-400">0 KB</p>
+                    </div>
+                  </div>
+                  <button type="button" onclick="cancelKopFileUpload(event)" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-2.5 py-1 rounded-lg hover:bg-rose-50 transition">
+                    <i class="fa-solid fa-xmark"></i> Batal
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <!-- Live Preview Kop Surat -->
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
@@ -259,6 +313,88 @@
       img.src = url ? formatDriveImageUrl(url) : 'https://via.placeholder.com/60';
     }
 
+    let currentKopMode = 'url';
+    let pendingKopFile = null;
+
+    function switchKopMode(mode) {
+      currentKopMode = mode;
+      const btnUrl = document.getElementById('btn-switch-url');
+      const btnFile = document.getElementById('btn-switch-file');
+      const panelUrl = document.getElementById('panel-kop-url');
+      const panelFile = document.getElementById('panel-kop-file');
+
+      if (mode === 'url') {
+        btnUrl.className = 'px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm';
+        btnFile.className = 'px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-800';
+        panelUrl.classList.remove('hidden');
+        panelFile.classList.add('hidden');
+        previewKopSurat();
+      } else {
+        btnFile.className = 'px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 bg-white text-brand-600 shadow-sm';
+        btnUrl.className = 'px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-800';
+        panelFile.classList.remove('hidden');
+        panelUrl.classList.add('hidden');
+        if (pendingKopFile && pendingKopFile.base64) {
+          renderKopImagePreview(pendingKopFile.base64);
+        } else {
+          previewKopSurat();
+        }
+      }
+    }
+
+    function handleKopFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast('warning', 'Format Tidak Sesuai', 'Silakan pilih berkas gambar (PNG, JPG, JPEG, atau WEBP).');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('warning', 'Berkas Terlalu Besar', 'Maksimal ukuran file gambar adalah 10 MB.');
+        event.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        pendingKopFile = {
+          name: file.name,
+          mimeType: file.type,
+          base64: e.target.result
+        };
+
+        document.getElementById('kop-file-empty-state').classList.add('hidden');
+        document.getElementById('kop-file-selected-state').classList.remove('hidden');
+        document.getElementById('kop-file-name').innerText = file.name;
+        document.getElementById('kop-file-size').innerText = (file.size / 1024).toFixed(1) + ' KB';
+
+        renderKopImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function cancelKopFileUpload(e) {
+      if (e) e.stopPropagation();
+      pendingKopFile = null;
+      const fileInput = document.getElementById('pengaturan-kop-file');
+      if (fileInput) fileInput.value = '';
+      document.getElementById('kop-file-empty-state').classList.remove('hidden');
+      document.getElementById('kop-file-selected-state').classList.add('hidden');
+      previewKopSurat();
+    }
+
+    function renderKopImagePreview(imgSrc) {
+      const container = document.getElementById('preview-kop-container');
+      if (!container) return;
+      container.innerHTML = `
+        <div style="text-align: center; width: 100%; padding: 6px 0;">
+          <img src="${imgSrc}" style="max-height: 110px; max-width: 100%; display: inline-block; object-fit: contain;" alt="Kop Surat">
+        </div>
+      `;
+    }
+
     function previewKopSurat() {
       const kop = document.getElementById('pengaturan-kop').value.trim();
       const container = document.getElementById('preview-kop-container');
@@ -349,6 +485,13 @@
         return;
       }
 
+      if (currentKopMode === 'file' && pendingKopFile) {
+        if (!folderIdDrive) {
+          showToast('warning', 'Folder ID Wajib', 'Harap isi Folder ID Google Drive (Kolom K) di bagian 2 agar file gambar kop surat dapat disimpan ke Drive.');
+          return;
+        }
+      }
+
       const payload = {
         namaSekolah,
         logoUrl,
@@ -358,7 +501,8 @@
         linkHasilJurnal,
         mapelList,
         kelasList,
-        taList
+        taList,
+        kopFile: (currentKopMode === 'file' && pendingKopFile) ? pendingKopFile : null
       };
 
       showLoading('Menyimpan Pengaturan ke Sheet...');
@@ -366,6 +510,16 @@
         .withSuccessHandler(function (res) {
           closeLoading();
           if (res && res.success) {
+            if (res.kopSuratUrl) {
+              document.getElementById('pengaturan-kop').value = res.kopSuratUrl;
+              pendingKopFile = null;
+              const fileInput = document.getElementById('pengaturan-kop-file');
+              if (fileInput) fileInput.value = '';
+              document.getElementById('kop-file-empty-state').classList.remove('hidden');
+              document.getElementById('kop-file-selected-state').classList.add('hidden');
+              switchKopMode('url');
+              previewKopSurat();
+            }
             Swal.fire({
               icon: 'success',
               title: 'Pengaturan Tersimpan!',

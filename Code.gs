@@ -991,6 +991,40 @@ function savePengaturanData(payload) {
     sheet.appendRow(["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "", "", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"]);
   }
 
+  // Jika ada file kop surat baru yang diunggah ke Google Drive
+  let uploadedKopUrl = null;
+  if (payload.kopFile && payload.kopFile.base64) {
+    const folderId = String(payload.folderIdDrive || getDriveFolderId()).trim();
+    if (!folderId) {
+      return { 
+        success: false, 
+        message: "Folder ID Google Drive (Kolom K) belum ditentukan! Harap isi Folder ID terlebih dahulu agar berkas kop surat dapat disimpan." 
+      };
+    }
+
+    try {
+      const folder = DriveApp.getFolderById(folderId);
+      const base64Data = payload.kopFile.base64.indexOf(',') > -1 
+        ? payload.kopFile.base64.split(',')[1] 
+        : payload.kopFile.base64;
+      const mimeType = payload.kopFile.mimeType || "image/png";
+      const fileName = payload.kopFile.name || ("Kop_Surat_" + new Date().getTime() + ".png");
+      const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, fileName);
+      const file = folder.createFile(blob);
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (eShare) {}
+      
+      uploadedKopUrl = file.getUrl();
+      payload.kopSurat = uploadedKopUrl;
+    } catch (errDrive) {
+      return { 
+        success: false, 
+        message: "Gagal menyimpan berkas Kop Surat ke Google Drive: " + errDrive.message 
+      };
+    }
+  }
+
   const lr = sheet.getLastRow();
   if (lr > 1) {
     sheet.getRange(2, 1, lr - 1, 11).clearContent();
@@ -1019,5 +1053,9 @@ function savePengaturanData(payload) {
   }
 
   sheet.getRange(2, 1, rows.length, 11).setValues(rows);
-  return { success: true, message: "Pengaturan sistem berhasil disimpan ke sheet Pengaturan!" };
+  return { 
+    success: true, 
+    message: "Pengaturan sistem berhasil disimpan ke sheet Pengaturan!",
+    kopSuratUrl: payload.kopSurat
+  };
 }

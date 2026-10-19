@@ -33,10 +33,10 @@
           <i class="fa-solid fa-layer-group text-[9px] text-brand-400"></i>
           <span>Menu Utama</span>
         </span>
-        <i id="chevron-utama" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+        <i id="chevron-utama" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 -rotate-90"></i>
       </button>
       
-      <div id="submenu-utama" class="space-y-1 transition-all duration-200 pt-1">
+      <div id="submenu-utama" class="space-y-1 transition-all duration-200 pt-1 hidden">
         <a href="javascript:void(0)" onclick="goToPage('dashboard')" 
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'dashboard') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-house-chimney"></i></div>
@@ -65,10 +65,10 @@
           <i class="fa-solid fa-database text-[9px] text-purple-400"></i>
           <span>Master Data</span>
         </span>
-        <i id="chevron-master" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+        <i id="chevron-master" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 -rotate-90"></i>
       </button>
 
-      <div id="submenu-master" class="space-y-1 transition-all duration-200 pt-1">
+      <div id="submenu-master" class="space-y-1 transition-all duration-200 pt-1 hidden">
         <a href="javascript:void(0)" onclick="goToPage('master-data')" 
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'master-data') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-file-excel text-emerald-400"></i></div>
@@ -85,10 +85,10 @@
           <i class="fa-solid fa-chart-pie text-[9px] text-emerald-400"></i>
           <span>Laporan & Rekap</span>
         </span>
-        <i id="chevron-rekap" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+        <i id="chevron-rekap" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 -rotate-90"></i>
       </button>
 
-      <div id="submenu-rekap" class="space-y-1 transition-all duration-200 pt-1">
+      <div id="submenu-rekap" class="space-y-1 transition-all duration-200 pt-1 hidden">
         <a href="javascript:void(0)" onclick="goToPage('rekap-absen')" 
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'rekap-absen') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-chart-column text-emerald-400"></i></div>
@@ -111,10 +111,10 @@
           <i class="fa-solid fa-gears text-[9px] text-amber-400"></i>
           <span>Pengaturan</span>
         </span>
-        <i id="chevron-pengaturan" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+        <i id="chevron-pengaturan" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 -rotate-90"></i>
       </button>
 
-      <div id="submenu-pengaturan" class="space-y-1 transition-all duration-200 pt-1">
+      <div id="submenu-pengaturan" class="space-y-1 transition-all duration-200 pt-1 hidden">
         <a href="javascript:void(0)" onclick="goToPage('pengaturan')" 
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'pengaturan') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-sliders text-amber-400"></i></div>
@@ -149,26 +149,19 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      // Inisialisasi buka-tutup grup menu sesuai preferensi atau active page
-      const current = "<?= (typeof currentPage !== 'undefined') ? currentPage : '' ?>";
-      const groupMap = {
-        'utama': ['dashboard', 'form-absen', 'form-jurnal'],
-        'master': ['master-data'],
-        'rekap': ['rekap-absen', 'hasil-jurnal'],
-        'pengaturan': ['pengaturan', 'user-management']
-      };
-
-      Object.keys(groupMap).forEach(key => {
+      // Inisialisasi: Semua grup menu tertutup dulu secara bawaan
+      // Hanya dibuka jika pengguna telah membukanya pada sesi aktif (sessionStorage === 'open')
+      const groupKeys = ['utama', 'master', 'rekap', 'pengaturan'];
+      groupKeys.forEach(key => {
         const submenu = document.getElementById('submenu-' + key);
         const chevron = document.getElementById('chevron-' + key);
         if (!submenu) return;
         const saved = sessionStorage.getItem('siguru_nav_' + key);
-        const isCurrentInGroup = groupMap[key].includes(current);
 
-        if (isCurrentInGroup || saved === 'open' || saved === null) {
+        if (saved === 'open') {
           submenu.classList.remove('hidden');
           if (chevron) chevron.classList.remove('-rotate-90');
-        } else if (saved === 'closed') {
+        } else {
           submenu.classList.add('hidden');
           if (chevron) chevron.classList.add('-rotate-90');
         }

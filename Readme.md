@@ -38,6 +38,13 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
 
 ### 2. 🏠 Dashboard Adaptif & Personalisasi Pengguna
 
+- **Salam Waktu Dinamis (*Time-Based Greeting*)**: Ucapan selamat datang otomatis berganti sesuai waktu lokal perangkat pengguna:
+  - `Selamat Pagi` (04:00 - 10:59)
+  - `Selamat Siang` (11:00 - 14:59)
+  - `Selamat Sore` (15:00 - 17:59)
+  - `Selamat Malam` (18:00 - 03:59)
+  - Diikuti nama guru yang sedang login (contoh: *Selamat Siang, Guru Mapel 1!* atau *Selamat Malam, Administrator!*).
+- **Penunjuk Tanggal & Jam Realtime**: Menampilkan hari, tanggal lengkap bahasa Indonesia, dan jam digital yang berdetak setiap detik (*live ticker*) bersumber langsung dari perangkat lokal pengguna (`[Hari], [Tanggal] [Bulan] [Tahun] • [HH:mm:ss]`).
 - Indikator status login dan peran aktif di sidebar bawah dan banner dashboard.
 - Navbar atas dilengkapi tombol aksi **Icon-Only** ringkas: Sinkron Data Spreadsheet, Hapus Cache Web & Refresh, serta Login/Keluar.
 - Ringkasan statistik operasional real-time (Total Siswa, Dewan Guru, Rombel/Kelas, dan Mata Pelajaran).
@@ -83,8 +90,10 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
 Dapat diakses oleh Administrator untuk mengelola parameter operasional langsung dari web tanpa menyentuh spreadsheet:
 
 - **Identitas Sekolah & Logo**: Nama instansi dan URL logo untuk kop, header, dan sidebar.
-- **Kop Surat Laporan (Kolom F)**: Tautan gambar banner kop surat atau susunan teks instansi dengan live preview.
-- **Integrasi Google Drive (Kolom K)**: Folder ID Google Drive untuk penyimpanan foto dokumentasi KBM.
+- **Kop Surat Laporan (Kolom F) dengan Switch Mode**:
+  - **Mode Link URL / Teks**: Mendukung tautan URL hosting luar atau Google Drive, serta format teks resmi instansi multi-baris.
+  - **Mode Upload File Kop Surat**: Pengguna dapat mengunggah file banner kop langsung dari komputer/HP (PNG, JPG, WEBP). Berkas otomatis diunggah dan disimpan ke Folder Google Drive yang ditentukan pada **Kolom K**, menghasilkan tautan publik siap pakai yang otomatis disimpan ke Kolom F Sheet `Pengaturan` beserta pratinjau langsung (*live preview*).
+- **Integrasi Google Drive (Kolom K)**: Folder ID Google Drive untuk penyimpanan foto dokumentasi KBM dan berkas kop surat laporan.
 - **Sumber Data Hasil Absen (Kolom I)**: Tautan atau teks sumber data yang dicantumkan saat Cetak PDF Rekap Absen.
 - **Sumber Data Hasil Jurnal (Kolom J)**: Tautan atau teks sumber data yang dicantumkan saat Cetak PDF Jurnal KBM.
 - **Parameter Kurikulum**: Pengaturan Mata Pelajaran (Kolom C), Rombel/Kelas (Kolom D), dan Tahun Ajaran (Kolom E) (satu baris per entri dengan auto-counter).
@@ -100,8 +109,10 @@ Dapat diakses oleh Administrator untuk mengelola parameter operasional langsung 
 
 ### 8. 📱 Desain Responsif & Ramah Perangkat Mobile (Mobile-Friendly)
 
+- **Grup Menu Tertutup Bawaan (*Closed-by-Default Accordion*)**:
+  - Seluruh grup menu navigasi di sidebar (*Menu Utama*, *Master Data*, *Laporan & Rekap*, dan *Pengaturan*) secara bawaan berada dalam keadaan tertutup (*collapsed*).
+  - Menu baru menampilkan daftar halamannya saat grup tersebut diklik oleh pengguna, menciptakan tampilan navigasi yang rapi, ringkas, dan fokus.
 - **Off-Canvas Drawer Navigation**: Di perangkat smartphone/tablet, sidebar tersembunyi rapi dan dapat dibuka via tombol hamburger navbar atas dengan backdrop overlay blur.
-- **Sidebar Akordion**: Grup menu (Menu Utama, Master Data, Laporan & Rekap, Pengaturan) dapat dibuka-tutup (*collapsible*) dan statusnya tersimpan di `sessionStorage`.
 - **Tabel Horisontal Geser**: Seluruh tabel dibungkus `overflow-x-auto` agar nyaman digeser pada layar sentuh.
 - **Desain Modern**: Memanfaatkan Tailwind CSS, palet warna elegan, FontAwesome 6, dan modal interaktif SweetAlert2.
 
