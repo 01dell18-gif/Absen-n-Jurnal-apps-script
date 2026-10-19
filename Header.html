@@ -7,11 +7,13 @@
       <i class="fa-solid fa-bars text-lg"></i>
     </button>
     
-    <!-- BRAND SEKOLAH (Tampil jika sidebar tertutup di mobile) -->
-    <div id="header-brand-info" class="hidden sm:flex items-center space-x-2.5 border-l border-slate-300 pl-3">
-      <img id="header-logo" src="https://via.placeholder.com/60" alt="Logo" class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain border border-slate-200 shadow-sm">
-      <span id="header-sekolah" class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-tight truncate max-w-[180px] lg:max-w-xs">NAMA SEKOLAH</span>
-    </div>
+    <!-- BRAND SEKOLAH (Klik menuju Beranda / Dashboard) -->
+    <a href="javascript:void(0)" onclick="goToPage('dashboard')" id="header-brand-info" 
+       class="hidden sm:flex items-center space-x-2.5 border-l border-slate-300 pl-3 group cursor-pointer hover:opacity-90 transition-opacity" 
+       title="Menuju Beranda / Dashboard Utama">
+      <img id="header-logo" src="https://via.placeholder.com/60" alt="Logo" class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain border border-slate-200 shadow-sm group-hover:scale-105 transition-transform">
+      <span id="header-sekolah" class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-tight truncate max-w-[180px] lg:max-w-xs group-hover:text-brand-600 transition-colors">NAMA SEKOLAH</span>
+    </a>
 
     <!-- Page Title Badge -->
     <div class="flex items-center gap-2">

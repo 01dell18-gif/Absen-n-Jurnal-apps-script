@@ -6,20 +6,22 @@
     <i class="fa-solid fa-xmark text-lg"></i>
   </button>
 
-  <!-- BRAND HEADER: Logo & Identitas Sekolah -->
-  <div class="p-5 border-b border-white/10 flex flex-col items-center text-center pt-8 md:pt-6 relative">
-    <div class="relative mb-2.5">
-      <div class="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg shadow-black/30 flex items-center justify-center ring-2 ring-brand-500/30">
+  <!-- BRAND HEADER: Logo & Identitas Sekolah (Klik menuju Beranda / Dashboard) -->
+  <a href="javascript:void(0)" onclick="goToPage('dashboard')" 
+     class="p-5 border-b border-white/10 flex flex-col items-center text-center pt-8 md:pt-6 relative group cursor-pointer hover:bg-white/5 transition-all duration-200"
+     title="Menuju Beranda / Dashboard Utama">
+    <div class="relative mb-2.5 transform group-hover:scale-105 transition-transform duration-200">
+      <div class="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg shadow-black/30 flex items-center justify-center ring-2 ring-brand-500/30 group-hover:ring-brand-400/60 transition-all">
         <img id="sidebar-logo" src="https://via.placeholder.com/60" alt="Logo Sekolah" class="w-full h-full object-contain rounded-xl">
       </div>
     </div>
-    <span id="sidebar-sekolah" class="font-extrabold text-xs sm:text-sm uppercase tracking-wider text-white line-clamp-2 px-1">
+    <span id="sidebar-sekolah" class="font-extrabold text-xs sm:text-sm uppercase tracking-wider text-white line-clamp-2 px-1 group-hover:text-brand-300 transition-colors">
       NAMA SEKOLAH
     </span>
-    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-full bg-brand-500/20 border border-brand-500/30 text-[10px] font-semibold text-brand-200">
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-full bg-brand-500/20 border border-brand-500/30 text-[10px] font-semibold text-brand-200 group-hover:bg-brand-500/30 transition-colors">
       <i class="fa-solid fa-graduation-cap text-emerald-400"></i> Absensi & Jurnal v3.0
     </div>
-  </div>
+  </a>
   
   <!-- MENU NAVIGASI -->
   <!-- MENU NAVIGASI -->

@@ -411,6 +411,8 @@ Komponen sidebar navigasi ([Sidebar.html](file:///d:/Downloads/Share-DKV%20F/COB
 2. **Stateful Interaction & Session Preservation**:
    - Fungsi `toggleNavGroup(groupKey)` mengatur buka-tutup grup dan menyimpan status ke `sessionStorage.setItem('siguru_nav_' + groupKey, state)`.
    - Jika pengguna sengaja membuka grup tertentu, status tersebut dipertahankan selama sesi aktif browser tanpa membuka grup lainnya yang tidak relevan.
+3. **Direct Home Brand Navigation**:
+   - Logo dan identitas sekolah pada komponen [Sidebar.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Sidebar.html) maupun [Header.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Header.html) dibungkus elemen interaktif (`onclick="goToPage('dashboard')"`) dengan efek hover halus (`scale-105` dan transisi warna), menghadirkan navigasi cepat ke Beranda/Dashboard Utama sesuai konvensi web modern.
 
 ---
 
