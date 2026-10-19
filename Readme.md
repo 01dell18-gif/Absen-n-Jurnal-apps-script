@@ -101,6 +101,10 @@ Dapat diakses oleh Administrator untuk mengelola parameter operasional langsung 
 ### 7. 👥 Manajemen User & Impor/Ekspor Excel Cepat (Sheet `DataUser`)
 
 - Dikelola pada sheet `DataUser` dengan skema `[No, Username, Password, Role, Nama Guru, NIP]`.
+- **Kolom Password & Tombol Mata Interaktif (*Show/Hide Password*)**:
+  - Tabel pengguna kini menampilkan kolom **Password** yang dilengkapi tombol mata (`fa-eye` / `fa-eye-slash`).
+  - Secara bawaan kata sandi disamarkan (`••••••••`) demi keamanan privasi dan dapat diintip/disalin secara langsung hanya dengan menekan ikon mata.
+  - Tombol mata interaktif juga disematkan pada form modal Tambah/Edit Pengguna, modal Login Header, dan form Login Portal.
 - **Export Excel (`.xls` / `.xlsx`)**: Mengunduh seluruh data akun guru ke format Excel untuk pembaharuan massal. Akun Administrator sengaja tidak disertakan dalam berkas ekspor demi keamanan.
 - **Import Excel (Replace)**: Menggantikan (*replace*) seluruh akun guru lama dengan data baru dari file Excel secara instan.
 - **🛡️ Proteksi Akun Administrator**:

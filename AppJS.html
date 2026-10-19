@@ -214,6 +214,21 @@ function closeLoginModal() {
   if (modal) modal.classList.add('hidden');
 }
 
+function toggleHeaderLoginPass() {
+  const input = document.getElementById('login-pass');
+  const icon = document.getElementById('login-pass-eye');
+  if (!input || !icon) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash', 'text-brand-600');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash', 'text-brand-600');
+    icon.classList.add('fa-eye');
+  }
+}
+
 function handleLoginSubmit(e) {
   e.preventDefault();
   const username = document.getElementById('login-user').value.trim();

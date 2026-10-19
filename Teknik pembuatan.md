@@ -326,6 +326,7 @@ function importUsersFromExcel(usersArray) {
 
 - Seluruh akun Administrator tidak akan pernah terhapus atau tertimpa oleh file Excel.
 - Tombol hapus pada baris Admin di tabel UI dinonaktifkan dengan lencana `[Dilindungi]`.
+- Kolom Kata Sandi pada tabel mengadopsi mekanisme *Safe Obfuscation & Dynamic De-obfuscation* via tombol mata interaktif, mencegah intipan bahu (*shoulder surfing*) di ruang guru namun tetap mudah dikelola dan disalin saat dibutuhkan.
 
 ---
 
