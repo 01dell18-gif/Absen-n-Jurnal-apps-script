@@ -495,10 +495,55 @@ function updateBrandingUI() {
   if (loginLogo && p.logoUrl) loginLogo.src = p.logoUrl;
 }
 
-// Dropdown Helper Utility
+// Dropdown & Searchable Combobox Helper Utility
 function populateSelect(selectId, items, placeholder = '-- Pilih --', selectedVal = '') {
   const el = document.getElementById(selectId);
   if (!el) return;
+
+  // Kasus 1: Elemen adalah INPUT teks ber-datalist
+  if (el.tagName === 'INPUT' && el.getAttribute('list')) {
+    const listId = el.getAttribute('list');
+    let dl = document.getElementById(listId);
+    if (!dl) {
+      dl = document.createElement('datalist');
+      dl.id = listId;
+      if (el.parentNode) el.parentNode.appendChild(dl);
+    }
+    dl.innerHTML = '';
+    (items || []).forEach(item => {
+      if (!item) return;
+      const opt = document.createElement('option');
+      opt.value = item;
+      dl.appendChild(opt);
+    });
+
+    if (placeholder) {
+      el.placeholder = placeholder;
+    }
+    if (selectedVal !== undefined && selectedVal !== null && selectedVal !== '') {
+      el.value = selectedVal;
+    }
+    return;
+  }
+
+  // Kasus 2: Elemen adalah DATALIST langsung
+  if (el.tagName === 'DATALIST') {
+    el.innerHTML = '';
+    (items || []).forEach(item => {
+      if (!item) return;
+      const opt = document.createElement('option');
+      opt.value = item;
+      el.appendChild(opt);
+    });
+    const pairedInput = document.querySelector(`input[list="${selectId}"]`);
+    if (pairedInput) {
+      if (placeholder) pairedInput.placeholder = placeholder;
+      if (selectedVal !== undefined && selectedVal !== null && selectedVal !== '') pairedInput.value = selectedVal;
+    }
+    return;
+  }
+
+  // Kasus 3: SELECT konvensional
   el.innerHTML = '';
   if (placeholder) {
     const opt = document.createElement('option');

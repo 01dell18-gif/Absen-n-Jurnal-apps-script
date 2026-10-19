@@ -525,21 +525,27 @@ Setiap kali status centang pada panel murid berubah, event listener secara reakt
 `[Nama Murid] (S), [Nama Murid] (A)`
 Teks ini langsung diinjeksikan ke input teks `#jurnal-tidak-hadir`. Guru tetap mempertahankan fleksibilitas penuh untuk mengetik catatan tambahan secara manual jika diperlukan.
 
-### 4. Flexible Free-Text Datalist Architecture
+### 4. Flexible Free-Text Datalist Architecture & Searchable Combobox Engine
 
-Pada field **Ketuntasan Materi**, baik di `FormJurnal.html` maupun modal edit `HasilJurnal.html`, sistem beralih dari elemen `<select>` statis ke pola **HTML5 Datalist Input**:
+Pada field **Ketuntasan Materi**, serta di seluruh field **Mata Pelajaran** dan **Rombel / Kelas** (FormAbsen, FormJurnal, RekapAbsen, HasilJurnal termasuk modal dialog edit), sistem beralih dari elemen `<select>` konvensional ke pola **Searchable Combobox Input Datalist**:
 
 ```html
-<input type="text" id="edit-jurnal-ketuntasan" list="list-edit-ketuntasan" placeholder="Pilih atau ketik status ketuntasan...">
-<datalist id="list-edit-ketuntasan">
-  <option value="Tuntas">
-  <option value="Belum Tuntas">
-  <option value="Berlanjut">
-  <option value="-">
-</datalist>
+<div class="datalist-input-wrapper">
+  <input type="text" id="jurnal-mapel" list="list-jurnal-mapel" autocomplete="off"
+    placeholder="-- Pilih / Ketik Mapel --" onfocus="this.select()" required
+    class="w-full text-xs p-2.5 pr-8 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-slate-800">
+  <datalist id="list-jurnal-mapel"></datalist>
+  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+    <i class="fa-solid fa-chevron-down text-[10px]"></i>
+  </div>
+</div>
 ```
 
-Arsitektur ini memberikan pengalaman terbaik: kemudahan memilih opsi standar sekolah dengan 1 klik sekaligus kebebasan mengetik deskripsi capaian kustom (contoh: *Tuntas 85%*, *Remedial 3 Siswa*).
+Keunggulan rekayasa yang dihasilkan:
+
+- **Fast Filtering**: Guru cukup mengetik sebagian nama mapel/kelas (misal: `DKV` atau `Kreativitas`) untuk menyaring puluhan opsi tanpa perlu menggulir (*scrolling*) daftar opsi yang panjang.
+- **Universal Handler di `populateSelect`**: Fungsi global `populateSelect` secara cerdas mendeteksi apakah target elemen berupa `<input list="...">`, `<datalist>`, atau `<select>`, sehingga logic backend dan inisialisasi data tetap terpusat dan konsisten.
+- **Native Picker Indicator Overlay**: Menggunakan teknik CSS `::-webkit-calendar-picker-indicator` transparan yang diposisikan di atas ikon FontAwesome chevron, memungkinkan pengguna membuka daftar opsi via klik tombol panah kanan ATAU langsung mengetikkan teks.
 
 ---
 

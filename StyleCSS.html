@@ -119,4 +119,23 @@
     top: 0;
     z-index: 10;
   }
+
+  /* Custom Datalist Searchable Combobox */
+  .datalist-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .datalist-input-wrapper input[list]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+    position: absolute;
+    right: 4px;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    height: 100%;
+    z-index: 2;
+  }
 </style>

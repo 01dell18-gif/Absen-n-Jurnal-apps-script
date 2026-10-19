@@ -54,6 +54,7 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
 
 - **Input Absensi**:
   - Pilihan parameter kelas, mata pelajaran, semester, tanggal pertemuan, dan tahun ajaran.
+  - **Pencarian Cepat (*Searchable Combobox*)**: Seluruh field **Mata Pelajaran** dan **Rombel / Kelas** di semua form dan filter (Formulir Absensi, Formulir Jurnal, Rekap Absen, dan Hasil Jurnal termasuk modal edit) kini dapat diketik secara langsung untuk mencari opsi dengan cepat tanpa harus scrolling panjang.
   - Kolom nama guru otomatis terkunci pada guru yang sedang login (untuk hak akses Guru), sedangkan Admin dapat memilih nama guru.
   - Status presensi lengkap: Hadir (H), Sakit (S), Izin (I), Alpa (A), dan Dispensasi (Dispen).
   - Tombol aksi instan *Set Semua Hadir* dan *Reset* untuk pengisian cepat.
