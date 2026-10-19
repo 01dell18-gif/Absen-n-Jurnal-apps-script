@@ -6,7 +6,7 @@ Sistem Informasi Guru Terpadu (Absensi Siswa & Jurnal Mengajar KBM) Berbasis Goo
 
 ## 📌 1. Klasifikasi & Nama Teknik Arsitektur
 
-Dalam rekayasa perangkat lunak web modern, arsitektur yang diterapkan dalam aplikasi ini diklasifikasikan ke dalam 8 pilar teknologi:
+Dalam rekayasa perangkat lunak web modern, arsitektur yang diterapkan dalam aplikasi ini diklasifikasikan ke dalam 10 pilar teknologi:
 
 1. **Google Apps Script HTML Service — Server-Side Template Inclusion (Scriptlet Pattern)**
 2. **Multi-Page Serverless Web Application (MPA) berbasis Query Parameter Routing**
@@ -16,6 +16,8 @@ Dalam rekayasa perangkat lunak web modern, arsitektur yang diterapkan dalam apli
 6. **SheetJS Fast Excel Processing dengan Safe Administrator Preservation Engine**
 7. **Dynamic Adaptive Print & PDF Engine (Smart Kop Divider & Source Data Injection)**
 8. **Mobile-First Responsive Off-Canvas Drawer & Closed-by-Default Accordion Navigation**
+9. **Cross-Module KBM Attendance Verification & Synchronized Absentee Checklist Engine**
+10. **Flexible Free-Text Datalist Architecture untuk Status Ketuntasan Pembelajaran**
 
 ---
 
@@ -479,7 +481,69 @@ sequenceDiagram
 
 ---
 
-## 📊 12. Perbandingan Arsitektur: SIGURU vs Web Konvensional
+## 🔄 12. Cross-Module Attendance Verification & Synchronized Absentee Checklist Engine
+
+Untuk menjamin integritas data antara presensi siswa dan catatan jurnal KBM, dikembangkan modul verifikasi lintas modul (*cross-module verification*) yang menghubungkan Sheet `HasilAbsen` dengan formulir input `FormJurnal`:
+
+### 1. Backend Verification RPC (`getAbsensiForJurnal`)
+
+Backend mengeksekusi pemindaian terfilter terhadap baris-baris pada sheet `HasilAbsen` berdasarkan 6 parameter KBM utama:
+
+- `tanggal`: Format YYYY-MM-DD
+- `namaGuru`: Nama guru pengampu (dengan sanitasi gelar dan case-insensitivity)
+- `semester`: Ganjil / Genap
+- `tahunAjaran`: Contoh: `2026/2027`
+- `mapel`: Mata pelajaran KBM
+- `kelas`: Rombongan belajar yang diajar
+
+```javascript
+function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, kelas) {
+  // 1. Ekstraksi seluruh baris sheet HasilAbsen
+  // 2. Normalisasi string (trim & toLowerCase)
+  // 3. Pencocokan 6 parameter KBM
+  // 4. Pengembalian daftar murid beserta status keterangannya:
+  //    [{ nisn, nama, jk, keterangan: 'H'|'S'|'I'|'A'|'Dispen' }]
+}
+```
+
+### 2. State & UI Feedback Engine
+
+Di sisi frontend (`FormJurnal.html`), sistem mengadopsi 3 kondisi UI dinamis:
+
+1. **Unchecked / Loading State**: Menampilkan indikator pemindaian status presensi saat guru melengkapi parameter KBM.
+2. **Missing Attendance State (Guarded Warning)**:
+   - Jika belum ada data presensi yang tercatat untuk sesi KBM tersebut, kontainer menampilkan kartu peringatan kuning dan dialog SweetAlert interaktif.
+   - Dilengkapi tombol pintasan (*direct call-to-action*) `Isi Absen Murid Sekarang` yang langsung memanggil `goToPage('form-absen')`.
+3. **Verified Attendance State (Interactive Checklist Panel)**:
+   - Menampilkan seluruh murid kelas beserta lencana status kehadiran (`badge` warna-warni untuk Sakit, Izin, Alpa, Dispensasi, dan Hadir).
+   - Murid yang **tidak hadir** otomatis dicentang (*auto-checked*) saat pertama kali dimuat.
+   - Menyediakan tombol cepat: `Pilih Yg Tidak Hadir` dan `Semua Hadir (Nihil)`.
+
+### 3. Two-Way Input Synchronization
+
+Setiap kali status centang pada panel murid berubah, event listener secara reaktif menyusun teks format standar:
+`[Nama Murid] (S), [Nama Murid] (A)`
+Teks ini langsung diinjeksikan ke input teks `#jurnal-tidak-hadir`. Guru tetap mempertahankan fleksibilitas penuh untuk mengetik catatan tambahan secara manual jika diperlukan.
+
+### 4. Flexible Free-Text Datalist Architecture
+
+Pada field **Ketuntasan Materi**, baik di `FormJurnal.html` maupun modal edit `HasilJurnal.html`, sistem beralih dari elemen `<select>` statis ke pola **HTML5 Datalist Input**:
+
+```html
+<input type="text" id="edit-jurnal-ketuntasan" list="list-edit-ketuntasan" placeholder="Pilih atau ketik status ketuntasan...">
+<datalist id="list-edit-ketuntasan">
+  <option value="Tuntas">
+  <option value="Belum Tuntas">
+  <option value="Berlanjut">
+  <option value="-">
+</datalist>
+```
+
+Arsitektur ini memberikan pengalaman terbaik: kemudahan memilih opsi standar sekolah dengan 1 klik sekaligus kebebasan mengetik deskripsi capaian kustom (contoh: *Tuntas 85%*, *Remedial 3 Siswa*).
+
+---
+
+## 📊 13. Perbandingan Arsitektur: SIGURU vs Web Konvensional
 
 | Dimensi Rekayasa | Web Konvensional (PHP / Laravel / Node.js) | Arsitektur SIGURU v3.0 (Google Cloud) |
 | :--- | :--- | :--- |
@@ -492,8 +556,8 @@ sequenceDiagram
 
 ---
 
-## 📝 13. Kesimpulan
+## 📝 14. Kesimpulan
 
 Arsitektur **SIGURU v3.0** mengoptimalkan seluruh potensi ekosistem Google Workspace menjadi aplikasi web enterprise tingkat sekolah yang tangguh, aman, dan berdaya guna tinggi.
 
-Dengan perpaduan **Server-Side Template Inclusion**, **Query Parameter Routing bebas blank putih**, **Two-Tier RBAC dengan Field Auto-Locking**, **SheetJS Fast Excel Processing dengan Safe Admin Preservation Engine**, serta **Dynamic Adaptive Print & PDF Engine**, aplikasi ini menjadi standar percontohan digitalisasi administrasi pendidikan modern yang hemat biaya, fleksibel, dan sangat mudah dirawat.
+Dengan perpaduan **Server-Side Template Inclusion**, **Query Parameter Routing bebas blank putih**, **Two-Tier RBAC dengan Field Auto-Locking**, **SheetJS Fast Excel Processing dengan Safe Admin Preservation Engine**, **Dynamic Adaptive Print & PDF Engine**, serta **Cross-Module Attendance Verification**, aplikasi ini menjadi standar percontohan digitalisasi administrasi pendidikan modern yang hemat biaya, fleksibel, dan sangat mudah dirawat.

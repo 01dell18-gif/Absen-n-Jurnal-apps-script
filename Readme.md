@@ -61,6 +61,13 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
   - Pencatatan jam pelajaran, pertemuan ke-, model pembelajaran, rincian materi, murid tidak hadir, dan status ketuntasan materi.
   - Pengunggahan berkas bukti kegiatan (*multi-file upload*) yang otomatis dikonversi dan disimpan ke Google Drive.
   - Kolom nama guru otomatis terkunci sesuai akun guru yang sedang aktif.
+  - **Pengecekan Presensi Otomatis & Checklist Siswa Tidak Hadir**:
+    - Sebelum mengisi murid tidak hadir, sistem menyediakan verifikasi presensi berdasarkan 6 parameter KBM yang telah diisi: **Tanggal**, **Nama Guru**, **Semester**, **Tahun Ajaran**, **Mata Pelajaran**, dan **Kelas**.
+    - Jika absensi untuk sesi KBM terkait **belum diisi**, sistem menampilkan kotak peringatan interaktif dan modal dialog yang mengarahkan guru untuk mengisi absensi terlebih dahulu dengan tombol langsung ke halaman Form Absensi Murid.
+    - Jika absensi **sudah dicatat**, sistem menampilkan daftar murid kelas tersebut lengkap dengan status kehadiran masing-masing (Hadir, Sakit, Izin, Alpa, Dispensasi).
+    - Murid yang berstatus tidak hadir (Sakit, Izin, Alpa, Dispensasi) otomatis tercentang secara bawaan dan rincian namanya langsung mengisi kolom input *Siswa Tidak Hadir* (contoh: `Budi Santoso (S), Siti Aisyah (A)`). Guru juga dapat mencentang atau menghapus centang murid secara manual dengan sinkronisasi teks otomatis.
+  - **Status Ketuntasan Materi Fleksibel (Datalist Bebas Ketik)**:
+    - Field ketuntasan materi dilengkapi fitur rekomendasi cepat (`Tuntas`, `Belum Tuntas`, `Berlanjut`, `-`) sekaligus dapat diketik bebas sesuai deskripsi perkembangan pencapaian materi pembelajaran.
 
 ### 4. 📊 Laporan Rekapitulasi & Log Jurnal Mengajar
 
@@ -72,6 +79,7 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
   - Rekapitulasi materi pembelajaran, persentase ketercapaian target hari efektif mengajar, dan pratinjau tautan bukti dokumentasi Drive.
   - Untuk hak akses Guru, riwayat jurnal otomatis terisolasi untuk guru yang bersangkutan.
   - **Edit & Penggantian Berkas Drive Otomatis**: Formulir edit jurnal tetap menyertakan kolom tautan URL Drive sekaligus input upload file pengganti. Saat berkas baru diunggah, berkas/folder lama di Google Drive secara otomatis dihapus (dengan proteksi folder utama) dan digantikan berkas baru tanpa merusak tautan spreadsheet.
+  - **Ketuntasan Materi yang Dapat Diketik Saat Edit**: Modal edit catatan jurnal kini mengizinkan guru untuk memilih dari daftar opsi rekomendasi atau mengetik langsung teks ketuntasan secara fleksibel (*editable datalist*), selaras dengan formulir input log jurnal KBM.
 
 ### 5. 🖨️ Cetak & Ekspor Dokumen PDF Berstandar Resmi
 

@@ -520,6 +520,81 @@ function getAutoPertemuan(namaGuru, semester, tahunAjaran, mapel, kelas) {
 }
 
 /**
+ * CEK DATA PRESENSI MURID UNTUK LOG JURNAL KBM
+ * Parameter: Tanggal, Nama Guru, Semester, Tahun Ajaran, Mapel, Kelas
+ */
+function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, kelas) {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("HasilAbsen");
+  if (!sheet || sheet.getLastRow() <= 1) {
+    return { success: true, found: false, message: "Belum ada catatan presensi pada sheet HasilAbsen." };
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const targetTgl = String(tanggal || '').trim();
+  const targetGuru = String(namaGuru || '').trim().toLowerCase();
+  const targetSem = String(semester || '').trim().toLowerCase();
+  const targetTA = String(tahunAjaran || '').trim().toLowerCase();
+  const targetMapel = String(mapel || '').trim().toLowerCase();
+  const targetKelas = String(kelas || '').trim().toLowerCase();
+
+  const timeZone = Session.getScriptTimeZone();
+  const students = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    let rowTgl = row[4];
+    if (rowTgl instanceof Date) {
+      rowTgl = Utilities.formatDate(rowTgl, timeZone, "yyyy-MM-dd");
+    } else {
+      rowTgl = String(rowTgl || '').trim();
+    }
+
+    const rowKelas = String(row[3] || '').trim().toLowerCase();
+    const rowMapel = String(row[6] || '').trim().toLowerCase();
+    const rowSem = String(row[7] || '').trim().toLowerCase();
+    const rowTA = String(row[8] || '').trim().toLowerCase();
+    const rowGuru = String(row[9] || '').trim().toLowerCase();
+
+    // Syarat pencocokan: Tanggal, Kelas, Mapel, Semester, Tahun Ajaran, dan Guru
+    const matchTgl = !targetTgl || rowTgl === targetTgl;
+    const matchKelas = !targetKelas || rowKelas === targetKelas;
+    const matchMapel = !targetMapel || rowMapel === targetMapel;
+    const matchSem = !targetSem || rowSem === targetSem;
+    const matchTA = !targetTA || rowTA === targetTA;
+    const matchGuru = !targetGuru || !rowGuru || rowGuru === targetGuru || rowGuru.includes(targetGuru) || targetGuru.includes(rowGuru);
+
+    if (matchTgl && matchKelas && matchMapel && matchSem && matchTA && matchGuru) {
+      let nisnRaw = String(row[0] || '').replace(/'/g, '').trim();
+      if (nisnRaw.length > 0 && !isNaN(nisnRaw)) {
+        nisnRaw = ("0000000000" + nisnRaw).slice(-10);
+      }
+      students.push({
+        nisn: nisnRaw,
+        nama: String(row[1] || '').trim(),
+        jk: String(row[2] || '').trim(),
+        keterangan: String(row[5] || 'H').trim()
+      });
+    }
+  }
+
+  if (students.length === 0) {
+    return {
+      success: true,
+      found: false,
+      message: `Belum ada data presensi murid untuk kelas ${kelas}, mapel ${mapel}, pada tanggal ${tanggal}.`
+    };
+  }
+
+  return {
+    success: true,
+    found: true,
+    total: students.length,
+    students: students
+  };
+}
+
+/**
  * AMBIL DATA REKAP ABSEN
  */
 function getRekapAbsenData() {

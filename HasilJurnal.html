@@ -241,12 +241,15 @@
               class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500">
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-700 mb-1">Ketuntasan</label>
-            <select id="edit-jurnal-ketuntasan"
-              class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500">
-              <option value="Tuntas">Tuntas</option>
-              <option value="Belum Tuntas">Belum Tuntas</option>
-            </select>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Ketuntasan Materi</label>
+            <input type="text" id="edit-jurnal-ketuntasan" list="list-edit-ketuntasan" placeholder="Pilih atau ketik..."
+              class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            <datalist id="list-edit-ketuntasan">
+              <option value="Tuntas"></option>
+              <option value="Belum Tuntas"></option>
+              <option value="Berlanjut"></option>
+              <option value="-"></option>
+            </datalist>
           </div>
         </div>
 

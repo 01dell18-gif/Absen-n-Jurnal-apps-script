@@ -39,7 +39,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Tanggal Mengajar</label>
-              <input type="date" id="jurnal-tanggal" required 
+              <input type="date" id="jurnal-tanggal" required onchange="autoFillPertemuan()"
                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
             </div>
 
@@ -104,9 +104,24 @@
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Siswa Tidak Hadir (Jika Ada)</label>
-              <input type="text" id="jurnal-tidak-hadir" placeholder="Cth: Budi (S), Siti (A)" 
-                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-[11px] font-bold text-slate-700">Siswa Tidak Hadir</label>
+                <button type="button" onclick="checkAbsensiForJurnal(true)" 
+                        class="text-[10px] font-bold text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded-lg border border-brand-200 transition flex items-center gap-1 shadow-xs"
+                        title="Periksa data presensi murid sesuai kelas dan mapel">
+                  <i class="fa-solid fa-clipboard-check text-brand-500"></i>
+                  <span>Cek Data Absen</span>
+                </button>
+              </div>
+              <div class="relative">
+                <input type="text" id="jurnal-tidak-hadir" placeholder="Cth: Budi (S), Siti (A) atau Nihil" 
+                       class="w-full text-xs p-2.5 pr-8 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                <button type="button" onclick="checkAbsensiForJurnal(true)" 
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition" 
+                        title="Periksa dan sinkronkan data absensi">
+                  <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                </button>
+              </div>
             </div>
 
             <div>
@@ -119,6 +134,9 @@
                 <option value="-"></option>
               </datalist>
             </div>
+
+            <!-- CONTAINER CEKLIST SISWA DARI DATA ABSENSI -->
+            <div id="container-absen-checker" class="hidden col-span-1 sm:col-span-3"></div>
           </div>
 
           <!-- BARIS 4: RINCIAN MATERI PEMBELAJARAN -->
@@ -236,7 +254,248 @@
             document.getElementById('jurnal-pertemuan').value = val || 1;
           })
           .getAutoPertemuan(g, sem, ta, m, k);
+
+        // Otomatis cek data presensi murid jika tanggal sudah terisi
+        if (document.getElementById('jurnal-tanggal').value) {
+          checkAbsensiForJurnal(false);
+        }
       }
+    }
+
+    let currentAbsenStudents = [];
+
+    function checkAbsensiForJurnal(isManual = false) {
+      const tgl = document.getElementById('jurnal-tanggal').value;
+      const userRole = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const selGuru = document.getElementById('jurnal-guru').value;
+      const g = (userRole === 'Guru' && loggedGuru) ? loggedGuru : (selGuru || loggedGuru || getCurrentUser());
+      const sem = document.getElementById('jurnal-semester').value;
+      const ta = document.getElementById('jurnal-ta').value;
+      const m = document.getElementById('jurnal-mapel').value;
+      const k = document.getElementById('jurnal-kelas').value;
+
+      if (!tgl || !g || !sem || !ta || !m || !k) {
+        if (isManual) {
+          showToast('warning', 'Lengkapi Data KBM', 'Pilih Tanggal, Guru, Semester, TA, Mapel, dan Kelas terlebih dahulu.');
+        }
+        return;
+      }
+
+      const container = document.getElementById('container-absen-checker');
+      if (container && isManual) {
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center gap-2.5 text-xs text-slate-500">
+            <i class="fa-solid fa-spinner fa-spin text-brand-600 text-sm"></i>
+            <span>Memeriksa catatan presensi murid di database...</span>
+          </div>
+        `;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.found || !res.students || res.students.length === 0) {
+            currentAbsenStudents = [];
+            if (container) {
+              container.classList.remove('hidden');
+              container.innerHTML = `
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-900 shadow-sm animate-fadeIn">
+                  <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                      <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-amber-900">Data Presensi Belum Tercatat!</p>
+                      <p class="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+                        Belum ditemukan data absensi untuk kelas <strong>${k}</strong> mata pelajaran <strong>${m}</strong> pada tanggal <strong>${tgl}</strong>. Silakan lakukan absensi murid terlebih dahulu.
+                      </p>
+                    </div>
+                  </div>
+                  <button type="button" onclick="goToPage('form-absen')" 
+                          class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-600/20 transition flex items-center justify-center gap-1.5 flex-shrink-0">
+                    <i class="fa-solid fa-clipboard-user"></i>
+                    <span>Isi Absen Murid</span>
+                  </button>
+                </div>
+              `;
+            }
+
+            if (isManual) {
+              Swal.fire({
+                title: 'Presensi Belum Ada',
+                html: `Belum ada data presensi siswa yang dicatat untuk kelas <strong>${k}</strong> mata pelajaran <strong>${m}</strong> pada tanggal <strong>${tgl}</strong>.<br><br><span class="text-xs text-slate-500">Silakan lakukan absensi murid terlebih dahulu agar data jurnal sinkron dengan kehadiran kelas.</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fa-solid fa-clipboard-user mr-1.5"></i> Buka Menu Absen Murid',
+                cancelButtonText: 'Tetap Lanjut Isi Jurnal'
+              }).then((r) => {
+                if (r.isConfirmed) {
+                  goToPage('form-absen');
+                }
+              });
+            }
+            return;
+          }
+
+          // Data presensi ditemukan
+          currentAbsenStudents = res.students;
+          renderAbsenStudentsChecklist(res.students, k, m, tgl);
+        })
+        .withFailureHandler(function(err) {
+          if (container) {
+            container.innerHTML = `
+              <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center justify-between">
+                <span>Gagal memeriksa presensi: ${err.message}</span>
+                <button type="button" onclick="checkAbsensiForJurnal(true)" class="font-bold underline ml-2">Coba Lagi</button>
+              </div>
+            `;
+          }
+        })
+        .getAbsensiForJurnal(tgl, g, sem, ta, m, k);
+    }
+
+    function renderAbsenStudentsChecklist(students, kelas, mapel, tanggal) {
+      const container = document.getElementById('container-absen-checker');
+      if (!container) return;
+
+      container.classList.remove('hidden');
+
+      let rowsHtml = '';
+      let nonHadirCount = 0;
+
+      students.forEach((s, idx) => {
+        const ket = String(s.keterangan || 'H').trim();
+        const isNonHadir = ket.toUpperCase() !== 'H' && ket.toLowerCase() !== 'hadir';
+        if (isNonHadir) nonHadirCount++;
+
+        let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        let ketText = 'Hadir (H)';
+
+        if (ket === 'S' || ket.toLowerCase() === 'sakit') {
+          badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+          ketText = 'Sakit (S)';
+        } else if (ket === 'I' || ket.toLowerCase() === 'izin') {
+          badgeClass = 'bg-blue-50 text-brand-700 border-blue-200';
+          ketText = 'Izin (I)';
+        } else if (ket === 'A' || ket.toLowerCase() === 'alpa') {
+          badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+          ketText = 'Alpa (A)';
+        } else if (ket.toLowerCase().includes('dispen')) {
+          badgeClass = 'bg-purple-50 text-purple-700 border-purple-200';
+          ketText = 'Dispensasi';
+        }
+
+        const isChecked = isNonHadir ? 'checked' : '';
+
+        rowsHtml += `
+          <label class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100/70 transition cursor-pointer border ${isNonHadir ? 'bg-amber-50/50 border-amber-200/80 shadow-xs' : 'bg-white border-slate-200/70'}">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <input type="checkbox" name="absen-siswa-cb" value="${idx}" ${isChecked} onchange="syncTidakHadirFromChecklist()"
+                     class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+              <span class="text-xs font-semibold text-slate-800 truncate">${s.nama}</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass} flex-shrink-0 ml-2">
+              ${ketText}
+            </span>
+          </label>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3 animate-fadeIn">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-clipboard-check"></i>
+              </span>
+              <span class="text-xs font-extrabold text-slate-800">
+                Presensi Kelas: ${students.length} Siswa (${nonHadirCount} Tidak Hadir)
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="selectAllAbsentStudents()" 
+                      class="text-[10px] font-bold text-brand-700 bg-white hover:bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg transition shadow-xs" title="Centang semua siswa yang berstatus Sakit/Izin/Alpa/Dispen">
+                Pilih Yg Tidak Hadir
+              </button>
+              <button type="button" onclick="setNihilAbsentStudents()" 
+                      class="text-[10px] font-bold text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg transition shadow-xs" title="Hilangkan semua centang & set Nihil">
+                Semua Hadir (Nihil)
+              </button>
+              <button type="button" onclick="closeAbsenChecker()" 
+                      class="text-slate-400 hover:text-slate-700 text-xs p-1 ml-1" title="Tutup Panel">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500">
+            Beri centang pada nama siswa untuk dimasukkan otomatis ke kolom <strong>Siswa Tidak Hadir</strong>:
+          </p>
+
+          <div class="max-h-48 overflow-y-auto space-y-1.5 pr-1 border border-slate-200 rounded-xl p-1.5 bg-slate-100/50">
+            ${rowsHtml}
+          </div>
+        </div>
+      `;
+
+      syncTidakHadirFromChecklist();
+    }
+
+    function syncTidakHadirFromChecklist() {
+      const checkboxes = document.querySelectorAll('input[name="absen-siswa-cb"]:checked');
+      const selectedEntries = [];
+
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value);
+        const s = currentAbsenStudents[idx];
+        if (s) {
+          let ket = String(s.keterangan || '').trim();
+          let ketLabel = ket.toUpperCase();
+          if (ketLabel === 'H' || ketLabel === 'HADIR') ketLabel = 'H';
+          else if (ketLabel === 'S' || ketLabel === 'SAKIT') ketLabel = 'S';
+          else if (ketLabel === 'I' || ketLabel === 'IZIN') ketLabel = 'I';
+          else if (ketLabel === 'A' || ketLabel === 'ALPA') ketLabel = 'A';
+          else if (ketLabel.includes('DISPEN')) ketLabel = 'Dispen';
+          selectedEntries.push(`${s.nama} (${ketLabel})`);
+        }
+      });
+
+      const inputTidakHadir = document.getElementById('jurnal-tidak-hadir');
+      if (inputTidakHadir) {
+        if (selectedEntries.length > 0) {
+          inputTidakHadir.value = selectedEntries.join(', ');
+        } else {
+          inputTidakHadir.value = 'Nihil';
+        }
+      }
+    }
+
+    function selectAllAbsentStudents() {
+      const checkboxes = document.querySelectorAll('input[name="absen-siswa-cb"]');
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value);
+        const s = currentAbsenStudents[idx];
+        if (s) {
+          const ket = String(s.keterangan || 'H').trim().toUpperCase();
+          cb.checked = (ket !== 'H' && ket !== 'HADIR');
+        }
+      });
+      syncTidakHadirFromChecklist();
+    }
+
+    function setNihilAbsentStudents() {
+      const checkboxes = document.querySelectorAll('input[name="absen-siswa-cb"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      const inputTidakHadir = document.getElementById('jurnal-tidak-hadir');
+      if (inputTidakHadir) inputTidakHadir.value = 'Nihil';
+    }
+
+    function closeAbsenChecker() {
+      const container = document.getElementById('container-absen-checker');
+      if (container) container.classList.add('hidden');
     }
 
     function toggleBuktiMode() {
