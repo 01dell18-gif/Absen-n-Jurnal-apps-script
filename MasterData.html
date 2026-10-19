@@ -30,30 +30,32 @@
         </div>
 
         <div class="flex flex-wrap gap-2.5 w-full md:w-auto">
-          <!-- Input File Tersembunyi -->
+          <!-- Input Berkas Tersembunyi -->
           <input type="file" id="file-import-excel" accept=".xlsx, .xls" class="hidden"
             onchange="processImportExcel(event)">
 
           <button onclick="document.getElementById('file-import-excel').click()"
-            class="flex-1 md:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            class="flex-1 md:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2"
+            title="Impor Data Murid & Guru dari Excel (.xlsx / .xls)">
             <i class="fa-solid fa-file-import"></i>
-            <span>Unggah</span>
+            <span>Impor Excel</span>
           </button>
 
           <button onclick="exportDataMuridGuruExcel()"
-            class="flex-1 md:flex-none px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-download"></i>
-            <span>Cadangkan</span>
+            class="flex-1 md:flex-none px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2"
+            title="Ekspor Data Murid & Guru ke Excel (.xlsx)">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Ekspor Excel</span>
           </button>
         </div>
       </div>
 
-      <!-- PERINGATAN IMPORT REPLACE -->
+      <!-- PERINGATAN IMPOR REPLACE -->
       <div
         class="bg-amber-50/80 border border-amber-200 text-amber-900 p-4 rounded-2xl text-xs font-medium leading-relaxed flex items-start gap-3">
         <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base mt-0.5 flex-shrink-0"></i>
         <div>
-          <strong class="font-bold">Ketentuan Pengunggahan File:</strong> Proses import file Excel akan menggantikan
+          <strong class="font-bold">Ketentuan Impor & Ekspor Excel:</strong> Proses impor berkas Excel (.xlsx / .xls) akan menggantikan
           (*replace*) seluruh data. Pastikan susunan kolom berkas sesuai format.
         </div>
       </div>
@@ -235,7 +237,7 @@
       const ws = XLSX.utils.aoa_to_sheet(ws_data);
       XLSX.utils.book_append_sheet(wb, ws, "DataMuridGuru");
       XLSX.writeFile(wb, "Backup_Data_Murid_Guru.xlsx");
-      showToast('success', 'Berhasil', 'File backup Excel telah diunduh.');
+      showToast('success', 'Berhasil', 'Berkas ekspor Excel telah diunduh.');
     }
 
     function processImportExcel(event) {
@@ -285,7 +287,7 @@
               Swal.fire({
                 icon: 'error',
                 title: 'Data Kosong',
-                text: 'Tidak ada baris data murid atau guru yang valid di dalam file Excel.'
+                text: 'Tidak ada baris data murid atau guru yang valid di dalam berkas Excel.'
               });
               return;
             }
@@ -298,7 +300,7 @@
                 if (res && res.success) {
                   Swal.fire({
                     icon: 'success',
-                    title: 'Import Selesai',
+                    title: 'Impor Selesai',
                     text: `Berhasil memperbarui ${res.count} baris data murid dan guru.`
                   }).then(() => {
                     refreshAllData();
@@ -325,7 +327,7 @@
             closeLoading();
             Swal.fire({
               icon: 'error',
-              title: 'Format File Tidak Sesuai',
+              title: 'Format Berkas Tidak Sesuai',
               text: 'Gagal membaca isi berkas: ' + err.message
             });
           }

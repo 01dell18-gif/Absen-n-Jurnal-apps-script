@@ -38,33 +38,33 @@
               class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5"
               title="Impor Data Pengguna dari Excel (.xls / .xlsx)">
               <i class="fa-solid fa-file-import"></i>
-              <span>Import</span>
+              <span>Impor Excel</span>
             </button>
 
             <button onclick="exportUserDataExcel('xls')"
               class="flex-1 sm:flex-none px-3.5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-1.5"
-              title="Unduh Data User Guru format Excel (.xls)">
+              title="Ekspor Data Pengguna Guru format Excel (.xls)">
               <i class="fa-solid fa-file-excel"></i>
-              <span>Export</span>
+              <span>Ekspor Excel</span>
             </button>
 
             <button onclick="openModalUser()"
               class="flex-1 sm:flex-none px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-md shadow-slate-900/20 transition flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-user-plus"></i>
-              <span>Tambah User</span>
+              <span>Tambah Pengguna</span>
             </button>
           </div>
         </div>
 
-        <!-- INFO PERINGATAN IMPORT REPLACE -->
+        <!-- INFO PERINGATAN IMPOR REPLACE -->
         <div
           class="bg-blue-50/80 border border-blue-200 text-blue-900 p-4 rounded-2xl text-xs font-medium leading-relaxed flex items-start gap-3">
           <i class="fa-solid fa-shield-halved text-brand-600 text-base mt-0.5 flex-shrink-0"></i>
           <div>
-            <strong class="font-bold">Ketentuan Export & Import Excel:</strong> Proses import berkas Excel (.xls /
+            <strong class="font-bold">Ketentuan Impor & Ekspor Excel:</strong> Proses impor berkas Excel (.xls /
             .xlsx) akan menggantikan (*replace*) seluruh akun Guru lama dengan data baru.
-            Sesuai keamanan sistem, <strong>akun Administrator tidak diexport ke berkas dan tidak dapat ditimpa/dihapus
-              saat proses import</strong>.
+            Sesuai keamanan sistem, <strong>akun Administrator tidak diekspor ke berkas dan tidak dapat ditimpa/dihapus
+              saat proses impor</strong>.
           </div>
         </div>
 
@@ -114,7 +114,7 @@
           <i class="fa-solid fa-user-pen"></i>
         </div>
         <div>
-          <h3 id="user-form-title" class="text-sm font-extrabold text-slate-800">Tambah User Baru</h3>
+          <h3 id="user-form-title" class="text-sm font-extrabold text-slate-800">Tambah Pengguna Baru</h3>
           <p class="text-[11px] text-slate-400">Kelola akun dan hubungkan ke data guru</p>
         </div>
       </div>
@@ -196,7 +196,7 @@
         Swal.fire({
           icon: 'error',
           title: 'Akses Dibatasi',
-          text: 'Menu Manajemen User hanya dapat diakses oleh Administrator.',
+          text: 'Menu Manajemen Pengguna hanya dapat diakses oleh Administrator.',
           confirmButtonColor: '#2563eb'
         }).then(() => {
           navigateTo('dashboard');
@@ -361,7 +361,7 @@
         sel.value = namaGuru || '';
       }
 
-      document.getElementById('user-form-title').innerText = isEdit ? 'Edit Akun Pengguna' : 'Tambah User Baru';
+      document.getElementById('user-form-title').innerText = isEdit ? 'Edit Akun Pengguna' : 'Tambah Pengguna Baru';
       document.getElementById('modal-user-form').classList.remove('hidden');
     }
 
@@ -498,7 +498,7 @@
       const fileName = `Data_User_Guru_${new Date().toISOString().slice(0, 10)}.${ext}`;
       XLSX.writeFile(wb, fileName, { bookType: format === 'xls' ? 'biff8' : 'xlsx' });
 
-      showToast('info', 'Export Berhasil', `Berkas ${fileName} berhasil diunduh. Akun Administrator tidak disertakan.`);
+      showToast('info', 'Ekspor Berhasil', `Berkas ${fileName} berhasil diunduh. Akun Administrator tidak disertakan.`);
     }
 
     /**
@@ -591,7 +591,7 @@
               <div class="text-left text-xs space-y-2 text-slate-600">
                 <p>Ditemukan <strong>${parsedUsers.length}</strong> data akun Guru dalam berkas <strong>${file.name}</strong>.</p>
                 <div class="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl leading-relaxed">
-                  <strong>Peringatan Replace:</strong> Seluruh data akun Guru yang ada di sheet <code>DataUser</code> saat ini akan <u>dihapus</u> dan <u>digantikan</u> dengan data dari file ini.
+                  <strong>Peringatan Replace:</strong> Seluruh data akun Guru yang ada di sheet <code>DataUser</code> saat ini akan <u>dihapus</u> dan <u>digantikan</u> dengan data dari berkas ini.
                 </div>
                 <div class="p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl">
                   <i class="fa-solid fa-shield-halved text-brand-600 mr-1"></i> Akun <strong>Administrator</strong> sekolah tetap dilindungi dan tidak akan hilang atau berubah.
@@ -614,13 +614,13 @@
                   if (resp && resp.success) {
                     Swal.fire({
                       icon: 'success',
-                      title: 'Import Berhasil!',
+                      title: 'Impor Berhasil!',
                       text: resp.message || 'Data pengguna berhasil diperbarui.'
                     });
                     loadUsersTable();
                     refreshAllData();
                   } else {
-                    Swal.fire('Gagal Import', (resp && resp.message) ? resp.message : 'Terjadi kegagalan saat import.', 'error');
+                    Swal.fire('Gagal Impor', (resp && resp.message) ? resp.message : 'Terjadi kegagalan saat impor.', 'error');
                   }
                 })
                 .withFailureHandler(function (err) {
@@ -632,7 +632,7 @@
           });
 
         } catch (err) {
-          Swal.fire('Gagal Membaca File', 'Pastikan berkas adalah file Excel (.xlsx / .xls) yang valid. ' + err.message, 'error');
+          Swal.fire('Gagal Membaca Berkas', 'Pastikan berkas adalah berkas Excel (.xlsx / .xls) yang valid. ' + err.message, 'error');
         }
       };
 

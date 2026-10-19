@@ -31,10 +31,10 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
   - Mengedit dan menghapus data presensi dan jurnal yang diinput sendiri.
 - **Administrator**:
   - Akses penuh (*Full Control*) ke seluruh data siswa, guru, dan log pembelajaran sekolah.
-  - Akses menu **Master Data** untuk import/export data murid dan dewan guru.
+  - Akses menu **Master Data** untuk impor/ekspor data murid dan dewan guru.
   - Akses grup menu khusus **Pengaturan**:
     - **Pengaturan Sistem**: Mengonfigurasi identitas sekolah, logo, kop surat laporan, tautan sumber data, ID folder Google Drive, dan daftar kurikulum (Mapel, Kelas, Tahun Ajaran).
-    - **Manajemen User**: Menambah, mengedit, dan menghapus akun guru/admin, serta fitur import/export massal via Excel (`.xls` / `.xlsx`).
+    - **Manajemen Pengguna**: Menambah, mengedit, dan menghapus akun guru/admin, serta fitur impor/ekspor massal via Excel (`.xls` / `.xlsx`).
 
 ### 2. 🏠 Dashboard Adaptif & Personalisasi Pengguna
 
@@ -98,17 +98,17 @@ Dapat diakses oleh Administrator untuk mengelola parameter operasional langsung 
 - **Sumber Data Hasil Jurnal (Kolom J)**: Tautan atau teks sumber data yang dicantumkan saat Cetak PDF Jurnal KBM.
 - **Parameter Kurikulum**: Pengaturan Mata Pelajaran (Kolom C), Rombel/Kelas (Kolom D), dan Tahun Ajaran (Kolom E) (satu baris per entri dengan auto-counter).
 
-### 7. 👥 Manajemen User & Impor/Ekspor Excel Cepat (Sheet `DataUser`)
+### 7. 👥 Manajemen Pengguna & Impor/Ekspor Excel Cepat (Sheet `DataUser`)
 
 - Dikelola pada sheet `DataUser` dengan skema `[No, Username, Password, Role, Nama Guru, NIP]`.
 - **Kolom Password & Tombol Mata Interaktif (*Show/Hide Password*)**:
   - Tabel pengguna kini menampilkan kolom **Password** yang dilengkapi tombol mata (`fa-eye` / `fa-eye-slash`).
   - Secara bawaan kata sandi disamarkan (`••••••••`) demi keamanan privasi dan dapat diintip/disalin secara langsung hanya dengan menekan ikon mata.
   - Tombol mata interaktif juga disematkan pada form modal Tambah/Edit Pengguna, modal Login Header, dan form Login Portal.
-- **Export Excel (`.xls` / `.xlsx`)**: Mengunduh seluruh data akun guru ke format Excel untuk pembaharuan massal. Akun Administrator sengaja tidak disertakan dalam berkas ekspor demi keamanan.
-- **Import Excel (Replace)**: Menggantikan (*replace*) seluruh akun guru lama dengan data baru dari file Excel secara instan.
+- **Ekspor Excel (`.xls` / `.xlsx`)**: Mengunduh seluruh data akun guru ke format Excel untuk pembaharuan massal. Akun Administrator sengaja tidak disertakan dalam berkas ekspor demi keamanan.
+- **Impor Excel (Replace)**: Menggantikan (*replace*) seluruh akun guru lama dengan data baru dari berkas Excel secara instan.
 - **🛡️ Proteksi Akun Administrator**:
-  - Seluruh akun Administrator di sheet `DataUser` tetap dipertahankan dan dilindungi sistem saat proses import replace.
+  - Seluruh akun Administrator di sheet `DataUser` tetap dipertahankan dan dilindungi sistem saat proses impor replace.
   - Tombol hapus pada akun Admin terkunci (*Dilindungi*) untuk mencegah insiden kehilangan hak akses administrator.
 
 ### 8. 📱 Desain Responsif & Ramah Perangkat Mobile (Mobile-Friendly)
@@ -187,9 +187,9 @@ Buat masing-masing file HTML berikut dan salin kodenya dari repositori:
 7. `FormJurnal.html` — Form pencatatan jurnal KBM dan upload multi-file dokumentasi ke Drive.
 8. `RekapAbsen.html` — Laporan rekapitulasi absensi murid, statistik kehadiran, dan cetak PDF.
 9. `HasilJurnal.html` — Laporan rekapitulasi jurnal guru harian dan cetak PDF landscape.
-10. `MasterData.html` — Pengelolaan data induk siswa dan guru serta import/export Excel.
+10. `MasterData.html` — Pengelolaan data induk siswa dan guru serta impor/ekspor Excel.
 11. `Pengaturan.html` — Halaman pengaturan sistem (Sheet `Pengaturan`).
-12. `UserManagement.html` — Halaman manajemen akun pengguna (Sheet `DataUser`) & import/export Excel.
+12. `UserManagement.html` — Halaman manajemen akun pengguna (Sheet `DataUser`) & impor/ekspor Excel.
 13. `Login.html` — Halaman fallback login mandiri.
 
 ### Langkah 5: Hubungkan ID Spreadsheet
@@ -241,9 +241,9 @@ Simpan perubahan (*Ctrl + S*).
    - Masukkan tautan/teks **Sumber Data Hasil Absen (Kolom I)** dan **Sumber Data Hasil Jurnal (Kolom J)**.
    - Masukkan daftar **Mata Pelajaran**, **Rombel/Kelas**, dan **Tahun Ajaran**.
    - Klik **Simpan Semua Pengaturan**.
-4. Masuk ke menu **Pengaturan > Manajemen User**:
+4. Masuk ke menu **Pengaturan > Manajemen Pengguna**:
    - Tambahkan akun login untuk bapak/ibu guru pengampu.
-   - Anda juga dapat menggunakan tombol **Export Excel (.xls)** untuk mendapatkan template berkas, lalu melengkapi data guru secara massal di komputer dan mengunggahnya kembali melalui tombol **Import Excel (Replace)**.
+   - Anda juga dapat menggunakan tombol **Ekspor Excel (.xls)** untuk mendapatkan template berkas, lalu melengkapi data guru secara massal di komputer dan mengunggahnya kembali melalui tombol **Impor Excel**.
 5. Selesai! Aplikasi kini siap digunakan oleh seluruh dewan guru dan tenaga kependidikan sekolah.
 
 ---
@@ -256,7 +256,7 @@ Saat pertama kali diinisialisasi oleh skrip `setupDatabaseSheets()`, sistem memb
 - **Password**: `admin123`
 - **Hak Akses**: `Admin`
 
-> ⚠️ **Catatan Keamanan**: Segera masuk ke menu **Pengaturan > Manajemen User** setelah instalasi selesai untuk mengubah kata sandi akun admin bawaan atau membuat akun admin baru yang lebih aman.
+> ⚠️ **Catatan Keamanan**: Segera masuk ke menu **Pengaturan > Manajemen Pengguna** setelah instalasi selesai untuk mengubah kata sandi akun admin bawaan atau membuat akun admin baru yang lebih aman.
 
 ---
 
@@ -270,7 +270,7 @@ Google Apps Script berjalan dalam sandbox iframe berdomain `script.googleusercon
 
 Jika Anda menggunakan gambar yang disimpan di Google Drive, pastikan file gambar di Google Drive telah diatur akses berbaginya menjadi **"Siapa saja yang memiliki link (Anyone with the link can view)"**. Sistem SIGURU secara otomatis mengonversi link Google Drive (`file/d/...`) menjadi tautan gambar langsung `https://lh3.googleusercontent.com/d/...` agar dapat dimuat oleh mesin cetak peramban.
 
-### 3. Mengapa saat import file Excel akun admin tidak tertimpa?
+### 3. Mengapa saat impor berkas Excel akun admin tidak tertimpa?
 
 Sistem telah dirancang dengan arsitektur proteksi keamanan data. Fungsi `importUsersFromExcel()` di backend secara otomatis memisahkan dan mempertahankan akun Administrator yang sudah ada di sheet `DataUser`, sehingga Anda dapat mengganti seluruh data guru secara instan kapan saja tanpa khawatir terkunci keluar dari sistem.
 

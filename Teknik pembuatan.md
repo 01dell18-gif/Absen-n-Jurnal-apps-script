@@ -258,11 +258,11 @@ Untuk mencegah manipulasi identitas penginput presensi dan jurnal oleh akun non-
 
 ## ⚡ 7. Integrasi SheetJS & Safe Administrator Preservation Engine
 
-Pengelolaan data user massal pada [UserManagement.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/UserManagement.html) menggunakan pustaka **SheetJS (xlsx.full.min.js)** di sisi klien dan prosedur validasi proteksi di backend [Code.gs](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Code.gs).
+Pengelolaan data pengguna massal pada [UserManagement.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/UserManagement.html) menggunakan pustaka **SheetJS (xlsx.full.min.js)** di sisi klien dan prosedur validasi proteksi di backend [Code.gs](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Code.gs).
 
 ### A. Ekspor Data Excel Cepat (`.xls`)
 
-- Data akun guru diekstrak langsung dari tabel DOM atau cache data user.
+- Data akun guru diekstrak langsung dari tabel DOM atau cache data pengguna.
 - **Isolasi Akun Admin**: Akun dengan role `Admin` secara otomatis difilter keluar dari array ekspor, sehingga file Excel yang diunduh hanya berisi daftar guru:
 
   ```javascript
@@ -271,7 +271,7 @@ Pengelolaan data user massal pada [UserManagement.html](file:///d:/Downloads/Sha
 
 - File ditulis menggunakan format BIFF8 (`bookType: 'biff8'`) dengan ekstensi `.xls` agar kompatibel dengan seluruh versi Microsoft Excel, Google Sheets, dan LibreOffice.
 
-### B. Safe Administrator Preservation Engine (Import Replace)
+### B. Safe Administrator Preservation Engine (Impor & Timpa Replace)
 
 Skenario impor menggantikan (*replace*) seluruh akun lama dengan data baru dari file Excel. Untuk mencegah hilangnya akses admin sekolah, backend menerapkan algoritma preservasi:
 
@@ -380,7 +380,7 @@ Pada modal edit jurnal ([HasilJurnal.html](file:///d:/Downloads/Share-DKV%20F/CO
 Pada menu **Pengaturan Sistem** ([Pengaturan.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Pengaturan.html)), disediakan sistem *Mode Switcher* antara pengisian teks/URL dan unggah berkas fisik:
 
 1. **Mode URL / Teks**: Menerima input URL gambar banner eksternal / Drive atau susunan teks resmi instansi.
-2. **Mode Upload File Gambar**:
+2. **Mode Unggah Berkas Gambar**:
    - Pengguna memilih berkas gambar (PNG, JPG, WEBP).
    - `FileReader` pada klien membaca berkas ke format Base64 Data URL dan langsung merender gambar pada `#preview-kop-container` secara instan (*zero delay feedback*).
    - Saat formulir disimpan via `google.script.run.savePengaturanData(payload)`, backend [Code.gs](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Code.gs) mendekode Base64, mengambil `folderIdDrive` dari Kolom K, membuat berkas via `folder.createFile(blob)`, menetapkan izin visibilitas tautan (`DriveApp.Access.ANYONE_WITH_LINK`), dan menyimpan URL Drive yang dihasilkan ke Kolom F Baris 2 Sheet `Pengaturan`.

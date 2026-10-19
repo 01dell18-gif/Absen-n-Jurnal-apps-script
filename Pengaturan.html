@@ -102,7 +102,7 @@
                 <button type="button" id="btn-switch-file" onclick="switchKopMode('file')"
                   class="px-3 py-1 font-bold rounded-lg transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-800">
                   <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-                  <span>Upload File Kop</span>
+                  <span>Unggah Berkas Kop</span>
                 </button>
               </div>
             </div>
@@ -111,7 +111,7 @@
             <div id="panel-kop-url" class="space-y-2">
               <p class="text-[11px] text-slate-400">
                 Dapat diisi <strong>URL Gambar Banner Kop Surat</strong> (Link Hosting / Google Drive) atau <strong>Teks
-                  Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Export PDF otomatis
+                  Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Cetak / Ekspor PDF otomatis
                 dibuat <strong>rata tengah</strong>.
               </p>
               <textarea id="pengaturan-kop" rows="3" oninput="previewKopSurat()"
@@ -119,10 +119,10 @@
                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700"></textarea>
             </div>
 
-            <!-- Panel Mode 2: Upload File Gambar ke Google Drive -->
+            <!-- Panel Mode 2: Unggah Berkas Gambar ke Google Drive -->
             <div id="panel-kop-file" class="space-y-2 hidden">
               <p class="text-[11px] text-slate-400">
-                Pilih file gambar banner kop surat dari perangkat Anda (PNG, JPG, WEBP). File akan otomatis diunggah dan disimpan ke folder Google Drive (<strong>Kolom K</strong>) saat Anda klik <em>Simpan Pengaturan</em>.
+                Pilih berkas gambar banner kop surat dari perangkat Anda (PNG, JPG, WEBP). Berkas akan otomatis diunggah dan disimpan ke folder Google Drive (<strong>Kolom K</strong>) saat Anda klik <em>Simpan Pengaturan</em>.
               </p>
               <div class="border-2 border-dashed border-slate-200 hover:border-brand-400 bg-slate-50/50 hover:bg-brand-50/20 rounded-2xl p-5 text-center transition cursor-pointer" onclick="document.getElementById('pengaturan-kop-file').click()">
                 <input type="file" id="pengaturan-kop-file" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden" onchange="handleKopFileSelected(event)">
@@ -131,7 +131,7 @@
                     <i class="fa-solid fa-image"></i>
                   </div>
                   <div>
-                    <span class="text-xs font-bold text-slate-700">Klik untuk memilih file gambar kop surat</span>
+                    <span class="text-xs font-bold text-slate-700">Klik untuk memilih berkas gambar kop surat</span>
                     <p class="text-[10px] text-slate-400 mt-0.5">Format: PNG, JPG, JPEG, WEBP (Maksimal 10 MB)</p>
                   </div>
                 </div>
@@ -191,7 +191,7 @@
                 placeholder="https://docs.google.com/... atau Sheet HasilAbsen"
                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
               <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak /
-                Export PDF Rekap Absen.</p>
+                Ekspor PDF Rekap Absen.</p>
             </div>
 
             <div>
@@ -202,7 +202,7 @@
                 placeholder="https://docs.google.com/... atau Sheet DataJurnalGlobal"
                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
               <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak /
-                Export PDF Jurnal KBM.</p>
+                Ekspor PDF Jurnal KBM.</p>
             </div>
           </div>
         </div>
