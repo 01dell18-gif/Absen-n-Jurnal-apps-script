@@ -331,7 +331,8 @@ function applyRoleUI() {
     sidebarUserRole.innerText = 'Hak Akses: ' + role;
   }
 
-  if (role === 'Guest') {
+  const r = (role || 'Guest').trim().toLowerCase();
+  if (r === 'guest') {
     if (groupAuth) groupAuth.classList.add('hidden');
     if (groupAdmin) groupAdmin.classList.add('hidden');
     if (groupPengaturan) groupPengaturan.classList.add('hidden');
@@ -342,7 +343,7 @@ function applyRoleUI() {
     }
     if (labelRole) labelRole.innerText = 'Tamu (Publik)';
     if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-slate-400';
-  } else if (role === 'Guru') {
+  } else if (r === 'guru') {
     if (groupAuth) groupAuth.classList.remove('hidden');
     if (groupAdmin) groupAdmin.classList.add('hidden');
     if (groupPengaturan) groupPengaturan.classList.add('hidden');
@@ -353,7 +354,7 @@ function applyRoleUI() {
     }
     if (labelRole) labelRole.innerText = displayName + ' (Guru)';
     if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-emerald-500';
-  } else if (role === 'Admin') {
+  } else if (r === 'admin') {
     if (groupAuth) groupAuth.classList.remove('hidden');
     if (groupAdmin) groupAdmin.classList.remove('hidden');
     if (groupPengaturan) groupPengaturan.classList.remove('hidden');
