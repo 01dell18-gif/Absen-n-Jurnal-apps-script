@@ -348,8 +348,49 @@ function applyRoleUI() {
       badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
     }
     if (labelRole) labelRole.innerText = (namaGuru || 'Administrator') + ' (Admin)';
-    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-rose-500';
   }
+}
+
+// Clear Cache & Reload Web App
+function clearAppCache() {
+  Swal.fire({
+    title: 'Hapus Cache Web?',
+    text: 'Seluruh data cache dan sesi lokal di browser akan dibersihkan, kemudian halaman dimuat ulang.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d97706',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: '<i class="fa-solid fa-trash-can mr-1.5"></i> Hapus & Muat Ulang',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            names.forEach(function(name) { caches.delete(name); });
+          });
+        }
+      } catch (e) {}
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Cache Dibersihkan!',
+        text: 'Memuat ulang halaman...',
+        timer: 1000,
+        showConfirmButton: false
+      }).then(() => {
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.reload();
+            return;
+          }
+        } catch (e) {}
+        window.location.reload();
+      });
+    }
+  });
 }
 
 // Data Synchronizer

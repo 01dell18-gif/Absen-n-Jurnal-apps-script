@@ -22,30 +22,34 @@
     </div>
   </div>
 
-  <!-- RIGHT ACTION BUTTONS -->
-  <div class="flex items-center space-x-2 sm:space-x-3">
-    <!-- Refresh Button -->
-    <button onclick="refreshAllData()" id="btn-refresh" class="p-2 sm:px-3 sm:py-2 text-slate-600 hover:text-brand-600 hover:bg-brand-50 border border-slate-200 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold" title="Sinkronkan Data">
+  <!-- RIGHT ACTION BUTTONS (Icon-Only Buttons) -->
+  <div class="flex items-center space-x-2">
+    <!-- Tombol 1: Sinkronkan Data Spreadsheet -->
+    <button onclick="refreshAllData()" id="btn-refresh" 
+            class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-slate-600 hover:text-brand-600 hover:bg-brand-50 border border-slate-200 rounded-xl transition-all shadow-sm focus:outline-none" 
+            title="Sinkronkan Data Spreadsheet">
       <i class="fa-solid fa-rotate-right text-sm" id="icon-refresh"></i>
-      <span class="hidden md:inline">Sinkron Data</span>
     </button>
 
-    <!-- Role Badge (Guru / Admin / Tamu) -->
-    <div id="badge-user-role" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-      <span class="w-2 h-2 rounded-full bg-slate-400" id="indicator-role"></span>
-      <span id="label-user-role">Tamu</span>
-    </div>
-
-    <!-- Login Button (Visible when Guest) -->
-    <button id="btn-login-trigger" onclick="openLoginModal()" class="px-3.5 sm:px-4 py-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center gap-2 transition-all">
-      <i class="fa-solid fa-right-to-bracket"></i>
-      <span>Login</span>
+    <!-- Tombol 2: Hapus Cache Web & Refresh -->
+    <button onclick="clearAppCache()" id="btn-clear-cache" 
+            class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all shadow-sm focus:outline-none" 
+            title="Hapus Cache Web & Muat Ulang">
+      <i class="fa-solid fa-trash-can text-sm"></i>
     </button>
 
-    <!-- Logout Button (Visible when logged in) -->
-    <button id="btn-logout" onclick="logoutUser()" class="hidden px-3.5 sm:px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs shadow-sm flex items-center gap-2 transition-all">
-      <i class="fa-solid fa-power-off"></i>
-      <span class="hidden sm:inline">Keluar</span>
+    <!-- Tombol 3: Login (Tampil Saat Guest) -->
+    <button id="btn-login-trigger" onclick="openLoginModal()" 
+            class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-md shadow-brand-600/20 transition-all focus:outline-none" 
+            title="Login Masuk">
+      <i class="fa-solid fa-right-to-bracket text-sm"></i>
+    </button>
+
+    <!-- Tombol 4: Logout (Tampil Saat Login) -->
+    <button id="btn-logout" onclick="logoutUser()" 
+            class="hidden w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl transition-all shadow-sm focus:outline-none" 
+            title="Keluar / Logout">
+      <i class="fa-solid fa-power-off text-sm"></i>
     </button>
   </div>
 </header>

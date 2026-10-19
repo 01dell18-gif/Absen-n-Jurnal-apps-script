@@ -1,41 +1,46 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengaturan Sistem - SIGURU</title>
   <?!= include('StyleCSS'); ?>
 </head>
+
 <body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
-  
+
   <?!= include('Sidebar'); ?>
 
   <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
     <?!= include('Header', { pageTitle: 'Pengaturan Sistem' }); ?>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
-      
+
       <!-- HEADER BANNER PENGATURAN -->
-      <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div
+        class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-200 shadow-sm">
+          <div
+            class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-200 shadow-sm">
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
             <h2 class="text-base font-extrabold text-slate-800">Konfigurasi Database & Sistem</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Kelola parameter instansi, kop surat, tautan Google Drive, dan data kurikulum (Sheet Pengaturan).</p>
+            <p class="text-xs text-slate-400 mt-0.5">Kelola parameter instansi, kop surat, tautan Google Drive, dan data
+              kurikulum.</p>
           </div>
         </div>
 
-        <button onclick="handleSavePengaturan(event)" 
-                class="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
+        <button onclick="handleSavePengaturan(event)"
+          class="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan Perubahan</span>
         </button>
       </div>
 
       <form id="form-pengaturan" onsubmit="handleSavePengaturan(event)" class="space-y-6">
-        
+
         <!-- CARD 1: IDENTITAS SEKOLAH & KOP SURAT -->
         <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
           <div class="border-b border-slate-100 pb-3 flex items-center gap-2.5">
@@ -45,26 +50,32 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Instansi / Sekolah</label>
-              <input type="text" id="pengaturan-sekolah" required placeholder="Cth: SMK NEGERI 1 KOTA" 
-                     class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-800">
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Instansi /
+                Sekolah</label>
+              <input type="text" id="pengaturan-sekolah" required placeholder="Cth: SMK NEGERI 1 KOTA"
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-800">
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">URL Logo Sekolah</label>
-              <input type="url" id="pengaturan-logo" oninput="previewLogoImage()" placeholder="https://... / link gambar logo" 
-                     class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">URL Logo
+                Sekolah</label>
+              <input type="url" id="pengaturan-logo" oninput="previewLogoImage()"
+                placeholder="https://... / link gambar logo"
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
             </div>
           </div>
 
           <!-- Preview Logo -->
           <div class="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200 flex items-center justify-center shadow-sm flex-shrink-0">
-              <img id="preview-logo-img" src="https://via.placeholder.com/60" alt="Logo Preview" class="w-full h-full object-contain rounded-lg">
+            <div
+              class="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200 flex items-center justify-center shadow-sm flex-shrink-0">
+              <img id="preview-logo-img" src="https://via.placeholder.com/60" alt="Logo Preview"
+                class="w-full h-full object-contain rounded-lg">
             </div>
             <div class="text-[11px] text-slate-500">
               <p class="font-bold text-slate-700">Pratinjau Logo Sekolah</p>
-              <p class="text-[10px] text-slate-400">Pastikan tautan logo dapat diakses publik agar muncul di sidebar dan kop cetak.</p>
+              <p class="text-[10px] text-slate-400">Pastikan tautan logo dapat diakses publik agar muncul di sidebar dan
+                kop cetak.</p>
             </div>
           </div>
 
@@ -72,24 +83,29 @@
           <div class="space-y-2 pt-2 border-t border-slate-100">
             <div class="flex items-center justify-between">
               <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                Kop Surat Laporan (Sheet Pengaturan Kolom F)
+                Kop Surat Laporan
               </label>
-              <span class="text-[10px] text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full font-bold border border-brand-200">
+              <span
+                class="text-[10px] text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full font-bold border border-brand-200">
                 Kolom F
               </span>
             </div>
             <p class="text-[11px] text-slate-400">
-              Dapat diisi <strong>URL Gambar Banner Kop Surat</strong> (Link Hosting / Google Drive) atau <strong>Teks Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Export PDF otomatis dibuat <strong>rata tengah</strong>.
+              Dapat diisi <strong>URL Gambar Banner Kop Surat</strong> (Link Hosting / Google Drive) atau <strong>Teks
+                Kop Resmi</strong> (beberapa baris nama instansi & alamat). Tampilan pada saat Export PDF otomatis
+              dibuat <strong>rata tengah</strong>.
             </p>
-            <textarea id="pengaturan-kop" rows="3" oninput="previewKopSurat()" placeholder="Contoh link gambar: https://drive.google.com/file/d/... atau https://domain.com/kop.png&#10;Atau susunan teks kop resmi..." 
-                      class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700"></textarea>
-            
+            <textarea id="pengaturan-kop" rows="3" oninput="previewKopSurat()"
+              placeholder="Contoh link gambar: https://drive.google.com/file/d/... atau https://domain.com/kop.png&#10;Atau susunan teks kop resmi..."
+              class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700"></textarea>
+
             <!-- Live Preview Kop Surat -->
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
               <p class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
                 <i class="fa-solid fa-eye text-brand-600"></i> Pratinjau Posisi Kop Surat:
               </p>
-              <div id="preview-kop-container" class="bg-white p-4 rounded-lg border border-slate-200/80 text-center min-h-[60px] flex items-center justify-center overflow-hidden">
+              <div id="preview-kop-container"
+                class="bg-white p-4 rounded-lg border border-slate-200/80 text-center min-h-[60px] flex items-center justify-center overflow-hidden">
                 <span class="text-xs text-slate-400 italic">Belum ada kop surat yang dimasukkan.</span>
               </div>
             </div>
@@ -108,27 +124,31 @@
               <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
                 Folder ID Google Drive (Bukti Jurnal)
               </label>
-              <input type="text" id="pengaturan-folder-drive" placeholder="Cth: 1A2b3C4d5E6F..." 
-                     class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
+              <input type="text" id="pengaturan-folder-drive" placeholder="Cth: 1A2b3C4d5E6F..."
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
               <p class="text-[10px] text-slate-400 mt-1">ID folder Drive penyimpanan foto dokumentasi KBM.</p>
             </div>
 
             <div>
               <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                Sumber Data Hasil Absen (Kolom I)
+                Sumber Data Hasil Absen
               </label>
-              <input type="text" id="pengaturan-link-absen" placeholder="https://docs.google.com/... atau Sheet HasilAbsen" 
-                     class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
-              <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak / Export PDF Rekap Absen (Sheet Pengaturan Kolom I).</p>
+              <input type="text" id="pengaturan-link-absen"
+                placeholder="https://docs.google.com/... atau Sheet HasilAbsen"
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
+              <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak /
+                Export PDF Rekap Absen.</p>
             </div>
 
             <div>
               <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                Sumber Data Hasil Jurnal (Kolom J)
+                Sumber Data Hasil Jurnal
               </label>
-              <input type="text" id="pengaturan-link-jurnal" placeholder="https://docs.google.com/... atau Sheet DataJurnalGlobal" 
-                     class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
-              <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak / Export PDF Jurnal KBM (Sheet Pengaturan Kolom J).</p>
+              <input type="text" id="pengaturan-link-jurnal"
+                placeholder="https://docs.google.com/... atau Sheet DataJurnalGlobal"
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono text-slate-700">
+              <p class="text-[10px] text-slate-400 mt-1">Tautan atau teks sumber data untuk dicantumkan saat Cetak /
+                Export PDF Jurnal KBM.</p>
             </div>
           </div>
         </div>
@@ -146,43 +166,55 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Mata Pelajaran (Kolom C)</label>
-                <span id="badge-count-mapel" class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">0 Mapel</span>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Mata Pelajaran
+                </label>
+                <span id="badge-count-mapel"
+                  class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">0
+                  Mapel</span>
               </div>
-              <textarea id="pengaturan-mapel" rows="8" oninput="updateItemCounts()" placeholder="Bahasa Indonesia&#10;Matematika&#10;Bahasa Inggris&#10;..." 
-                        class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+              <textarea id="pengaturan-mapel" rows="8" oninput="updateItemCounts()"
+                placeholder="Bahasa Indonesia&#10;Matematika&#10;Bahasa Inggris&#10;..."
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
             </div>
 
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Rombel / Kelas (Kolom D)</label>
-                <span id="badge-count-kelas" class="text-[10px] font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">0 Kelas</span>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Rombel / Kelas
+                </label>
+                <span id="badge-count-kelas"
+                  class="text-[10px] font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">0
+                  Kelas</span>
               </div>
-              <textarea id="pengaturan-kelas" rows="8" oninput="updateItemCounts()" placeholder="X DKV 1&#10;X DKV 2&#10;XI DKV 1&#10;..." 
-                        class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+              <textarea id="pengaturan-kelas" rows="8" oninput="updateItemCounts()"
+                placeholder="X DKV 1&#10;X DKV 2&#10;XI DKV 1&#10;..."
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
             </div>
 
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Tahun Ajaran (Kolom E)</label>
-                <span id="badge-count-ta" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 TA</span>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Tahun Ajaran
+                </label>
+                <span id="badge-count-ta"
+                  class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0
+                  TA</span>
               </div>
-              <textarea id="pengaturan-ta" rows="8" oninput="updateItemCounts()" placeholder="2024/2025&#10;2025/2026&#10;..." 
-                        class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+              <textarea id="pengaturan-ta" rows="8" oninput="updateItemCounts()"
+                placeholder="2024/2025&#10;2025/2026&#10;..."
+                class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
             </div>
           </div>
         </div>
 
         <!-- ACTION BOTTOM BUTTON -->
         <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
-          <button type="button" onclick="loadPengaturanData()" 
-                  class="w-full sm:w-auto px-5 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+          <button type="button" onclick="loadPengaturanData()"
+            class="w-full sm:w-auto px-5 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-arrow-rotate-left"></i>
             <span>Muat Ulang Pengaturan</span>
           </button>
-          
-          <button type="submit" 
-                  class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2">
+
+          <button type="submit"
+            class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Simpan Semua Pengaturan</span>
           </button>
@@ -235,10 +267,10 @@
         return;
       }
 
-      const isImg = /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(kop) || 
-                    kop.includes('drive.google.com') || 
-                    kop.includes('googleusercontent.com') || 
-                    kop.startsWith('data:image/');
+      const isImg = /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(kop) ||
+        kop.includes('drive.google.com') ||
+        kop.includes('googleusercontent.com') ||
+        kop.startsWith('data:image/');
 
       if (isImg) {
         container.innerHTML = `
@@ -363,4 +395,5 @@
     }
   </script>
 </body>
+
 </html>

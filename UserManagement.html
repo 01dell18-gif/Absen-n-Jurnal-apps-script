@@ -1,49 +1,55 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelola Pengguna - SIGURU</title>
   <?!= include('StyleCSS'); ?>
 </head>
+
 <body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
-  
+
   <?!= include('Sidebar'); ?>
 
   <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
     <?!= include('Header', { pageTitle: 'Manajemen Akun Pengguna' }); ?>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
-      
+
       <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm w-full space-y-5">
-        
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 gap-4">
+
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 gap-4">
           <div>
             <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-users-gear text-brand-600"></i>
               <span>Daftar Akun Pengguna Sistem</span>
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Kelola kredensial login akun Guru dan Administrator sekolah (Sheet DataUser).</p>
+            <p class="text-xs text-slate-400 mt-0.5">Kelola kredensial login akun Guru dan Administrator sekolah.</p>
           </div>
-          
+
           <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <!-- Hidden file input for Excel import -->
-            <input type="file" id="file-import-user" accept=".xlsx, .xls" class="hidden" onchange="processImportUserExcel(event)">
+            <input type="file" id="file-import-user" accept=".xlsx, .xls" class="hidden"
+              onchange="processImportUserExcel(event)">
 
-            <button onclick="document.getElementById('file-import-user').click()" 
-                    class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5" title="Impor Data Pengguna dari Excel (.xls / .xlsx)">
+            <button onclick="document.getElementById('file-import-user').click()"
+              class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5"
+              title="Impor Data Pengguna dari Excel (.xls / .xlsx)">
               <i class="fa-solid fa-file-import"></i>
               <span>Import Excel (Replace)</span>
             </button>
 
-            <button onclick="exportUserDataExcel('xls')" 
-                    class="flex-1 sm:flex-none px-3.5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-1.5" title="Unduh Data User Guru format Excel (.xls)">
+            <button onclick="exportUserDataExcel('xls')"
+              class="flex-1 sm:flex-none px-3.5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-1.5"
+              title="Unduh Data User Guru format Excel (.xls)">
               <i class="fa-solid fa-file-excel"></i>
               <span>Export Excel (.xls)</span>
             </button>
 
-            <button onclick="openModalUser()" 
-                    class="flex-1 sm:flex-none px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-md shadow-slate-900/20 transition flex items-center justify-center gap-1.5">
+            <button onclick="openModalUser()"
+              class="flex-1 sm:flex-none px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-md shadow-slate-900/20 transition flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-user-plus"></i>
               <span>Tambah User</span>
             </button>
@@ -51,17 +57,22 @@
         </div>
 
         <!-- INFO PERINGATAN IMPORT REPLACE -->
-        <div class="bg-blue-50/80 border border-blue-200 text-blue-900 p-4 rounded-2xl text-xs font-medium leading-relaxed flex items-start gap-3">
+        <div
+          class="bg-blue-50/80 border border-blue-200 text-blue-900 p-4 rounded-2xl text-xs font-medium leading-relaxed flex items-start gap-3">
           <i class="fa-solid fa-shield-halved text-brand-600 text-base mt-0.5 flex-shrink-0"></i>
           <div>
-            <strong class="font-bold">Ketentuan Export & Import Excel:</strong> Proses import berkas Excel (.xls / .xlsx) akan menggantikan (*replace*) seluruh akun Guru lama dengan data baru di sheet <code>DataUser</code>. Sesuai keamanan sistem, <strong>akun Administrator tidak diexport ke berkas dan tidak dapat ditimpa/dihapus saat proses import</strong>.
+            <strong class="font-bold">Ketentuan Export & Import Excel:</strong> Proses import berkas Excel (.xls /
+            .xlsx) akan menggantikan (*replace*) seluruh akun Guru lama dengan data baru.
+            Sesuai keamanan sistem, <strong>akun Administrator tidak diexport ke berkas dan tidak dapat ditimpa/dihapus
+              saat proses import</strong>.
           </div>
         </div>
-        
+
         <!-- Tabel Pengguna -->
         <div class="overflow-x-auto w-full border border-slate-200 rounded-xl">
           <table class="w-full text-xs text-left whitespace-nowrap">
-            <thead class="bg-slate-50 font-bold border-b border-slate-200 uppercase text-[10px] text-slate-500 tracking-wider">
+            <thead
+              class="bg-slate-50 font-bold border-b border-slate-200 uppercase text-[10px] text-slate-500 tracking-wider">
               <tr>
                 <th class="p-3.5 w-12 text-center">No</th>
                 <th class="p-3.5">Username</th>
@@ -87,14 +98,18 @@
   </div>
 
   <!-- MODAL FORM USER (TAMBAH / EDIT) -->
-  <div id="modal-user-form" class="fixed inset-0 bg-slate-950/70 hidden z-[80] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-7 relative border border-slate-100 max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModalUser()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+  <div id="modal-user-form"
+    class="fixed inset-0 bg-slate-950/70 hidden z-[80] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+    <div
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-7 relative border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModalUser()"
+        class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
       <div class="flex items-center gap-2.5 mb-5 border-b border-slate-100 pb-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-sm border border-blue-100">
+        <div
+          class="w-9 h-9 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-sm border border-blue-100">
           <i class="fa-solid fa-user-pen"></i>
         </div>
         <div>
@@ -105,51 +120,55 @@
 
       <form onsubmit="saveUserData(event)" class="space-y-4">
         <input type="hidden" id="user-old-username">
-        
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Username</label>
-            <input type="text" id="user-username" required placeholder="Cth: guru_ipa" 
-                   class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
+            <input type="text" id="user-username" required placeholder="Cth: guru_ipa"
+              class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Password</label>
-            <input type="text" id="user-password" required placeholder="Ketik kata sandi..." 
-                   class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
+            <input type="text" id="user-password" required placeholder="Ketik kata sandi..."
+              class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
           </div>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Hak Akses (Role)</label>
-          <select id="user-role" class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-700">
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Hak Akses
+            (Role)</label>
+          <select id="user-role"
+            class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-700">
             <option value="Guru">Guru / Staf (Standar)</option>
             <option value="Admin">Administrator (Full Akses)</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Pilih Guru Terkait (Opsional)</label>
-          <select id="user-select-guru" onchange="onUserSelectGuruChange()" 
-                  class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700">
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Pilih Guru Terkait
+            (Opsional)</label>
+          <select id="user-select-guru" onchange="onUserSelectGuruChange()"
+            class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700">
             <option value="">-- Pilih Guru Dari Master Data --</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Guru (Kustom/Tersimpan)</label>
-          <input type="text" id="user-nama-guru" placeholder="Nama Guru Lengkap..." 
-                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Guru
+            (Kustom/Tersimpan)</label>
+          <input type="text" id="user-nama-guru" placeholder="Nama Guru Lengkap..."
+            class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">NIP Guru</label>
-          <input type="text" id="user-nip" placeholder="NIP (bisa dikosongkan)..." 
-                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono">
+          <input type="text" id="user-nip" placeholder="NIP (bisa dikosongkan)..."
+            class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono">
         </div>
 
-        <button type="submit" 
-                class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition mt-2 flex items-center justify-center gap-2">
+        <button type="submit"
+          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition mt-2 flex items-center justify-center gap-2">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan Data Pengguna ke DataUser</span>
         </button>
@@ -209,7 +228,7 @@
       tb.innerHTML = `<tr><td colspan="6" class="text-center p-8"><i class="fa-solid fa-spinner fa-spin text-brand-600 text-xl"></i></td></tr>`;
 
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           tb.innerHTML = "";
           usersList = res || [];
           if (!res || !res.length) {
@@ -255,7 +274,7 @@
             `;
           });
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           tb.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-rose-500">Gagal memuat pengguna: ${err.message}</td></tr>`;
         })
         .getAllUsers();
@@ -294,7 +313,7 @@
 
       showLoading('Menyimpan Data Pengguna...');
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           closeLoading();
           if (res && res.success) {
             showToast('success', 'Berhasil', res.message);
@@ -309,7 +328,7 @@
             });
           }
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           closeLoading();
           Swal.fire({
             icon: 'error',
@@ -334,7 +353,7 @@
         if (res.isConfirmed) {
           showLoading('Menghapus Pengguna...');
           google.script.run
-            .withSuccessHandler(function(resp) {
+            .withSuccessHandler(function (resp) {
               closeLoading();
               if (resp && resp.success) {
                 showToast('success', 'Terhapus', resp.message);
@@ -348,7 +367,7 @@
                 });
               }
             })
-            .withFailureHandler(function(err) {
+            .withFailureHandler(function (err) {
               closeLoading();
               Swal.fire({
                 icon: 'error',
@@ -432,7 +451,7 @@
       }
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
@@ -495,8 +514,8 @@
             return;
           }
 
-          let noteAdmin = skippedAdminCount > 0 
-            ? `<div class="mt-2 text-rose-600 text-xs font-semibold">(${skippedAdminCount} baris akun Admin dalam file diabaikan demi keamanan).</div>` 
+          let noteAdmin = skippedAdminCount > 0
+            ? `<div class="mt-2 text-rose-600 text-xs font-semibold">(${skippedAdminCount} baris akun Admin dalam file diabaikan demi keamanan).</div>`
             : '';
 
           Swal.fire({
@@ -523,7 +542,7 @@
             if (result.isConfirmed) {
               showLoading('Mengimpor & Mengganti Data Pengguna...');
               google.script.run
-                .withSuccessHandler(function(resp) {
+                .withSuccessHandler(function (resp) {
                   closeLoading();
                   if (resp && resp.success) {
                     Swal.fire({
@@ -537,7 +556,7 @@
                     Swal.fire('Gagal Import', (resp && resp.message) ? resp.message : 'Terjadi kegagalan saat import.', 'error');
                   }
                 })
-                .withFailureHandler(function(err) {
+                .withFailureHandler(function (err) {
                   closeLoading();
                   Swal.fire('Kesalahan Sistem', err.message, 'error');
                 })
@@ -554,4 +573,5 @@
     }
   </script>
 </body>
+
 </html>

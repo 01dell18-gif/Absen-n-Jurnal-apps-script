@@ -38,8 +38,8 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
 
 ### 2. 🏠 Dashboard Adaptif & Personalisasi Pengguna
 
-- Ucapan selamat datang pada hero banner utama otomatis menyesuaikan dengan nama guru resmi sesuai hak aksesnya (`Selamat Datang, [Nama Guru]!`).
-- Indikator status login dan peran (*badge user role*) aktif di navbar atas dan sidebar bawah.
+- Indikator status login dan peran aktif di sidebar bawah dan banner dashboard.
+- Navbar atas dilengkapi tombol aksi **Icon-Only** ringkas: Sinkron Data Spreadsheet, Hapus Cache Web & Refresh, serta Login/Keluar.
 - Ringkasan statistik operasional real-time (Total Siswa, Dewan Guru, Rombel/Kelas, dan Mata Pelajaran).
 - Modul pintasan cepat untuk memulai presensi kelas, mencatat jurnal KBM, dan melihat rekap laporan.
 
