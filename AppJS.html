@@ -18,22 +18,39 @@ window.APP_URL = "<?= (typeof appUrl !== 'undefined' && appUrl) ? appUrl : getAp
 if (window.google && google.script && google.script.url) {
   google.script.url.getLocation(function(loc) {
     if (loc && loc.url) {
-      window.APP_URL = loc.url.split('?')[0];
+      const cleanUrl = loc.url.split('?')[0];
+      if (!cleanUrl.includes('googleusercontent.com')) {
+        window.APP_URL = cleanUrl;
+        try {
+          sessionStorage.setItem('siguru_app_url', cleanUrl);
+          localStorage.setItem('siguru_app_url', cleanUrl);
+        } catch(e) {}
+      }
     }
   });
 }
 
 // URL Router & Helper
 function getAppUrl() {
-  if (window.APP_URL && window.APP_URL.length > 5) {
+  if (window.APP_URL && window.APP_URL.length > 5 && !window.APP_URL.includes('googleusercontent.com')) {
     return window.APP_URL;
+  }
+  const cachedUrl = sessionStorage.getItem('siguru_app_url') || localStorage.getItem('siguru_app_url');
+  if (cachedUrl && cachedUrl.length > 5 && !cachedUrl.includes('googleusercontent.com')) {
+    return cachedUrl;
   }
   try {
     if (window.top && window.top.location && window.top.location.href) {
-      return window.top.location.href.split('?')[0];
+      const topHref = window.top.location.href.split('?')[0];
+      if (!topHref.includes('googleusercontent.com')) {
+        return topHref;
+      }
     }
   } catch (e) {}
-  return window.location.href.split('?')[0];
+  if (window.APP_URL && !window.APP_URL.includes('googleusercontent.com')) {
+    return window.APP_URL;
+  }
+  return '';
 }
 
 function goToPage(page, params) {
@@ -69,29 +86,48 @@ function navigateTo(page, params) {
   localStorage.setItem('siguru_active_page', page);
 
   let baseUrl = getAppUrl();
-  let url = baseUrl + '?page=' + encodeURIComponent(page);
+  let query = '?page=' + encodeURIComponent(page);
   if (params && typeof params === 'object') {
     for (let k in params) {
       if (params.hasOwnProperty(k)) {
-        url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+        query += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
       }
     }
   }
 
+  let url = baseUrl ? (baseUrl.split('?')[0] + query) : query;
+
   // Penting: Google Apps Script berjalan di dalam iframe sandbox.
-  // Jika menggunakan window.location.href biasa, iframe mencoba membuka script.googleusercontent.com yang menyebabkan blank putih.
-  // Dengan mengarahkan jendela induk (_top), URL address bar ikut ter-update (?page=...),
-  // sehingga jika browser di-refresh (F5), browser tetap memuat halaman yang sama dan TIDAK mental ke dashboard!
+  // 1. Coba navigasi via anchor _top (cara paling kompatibel dengan iframe sandbox Google Apps Script)
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_top';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      try { document.body.removeChild(a); } catch (e) {}
+    }, 100);
+    return;
+  } catch (e1) {}
+
+  // 2. Coba arahkan window.top.location.href secara langsung
   try {
     if (window.top && window.top !== window) {
       window.top.location.href = url;
       return;
     }
-  } catch (e) {}
+  } catch (e2) {}
 
+  // 3. Coba window.open _top
   try {
     window.open(url, '_top');
-  } catch (e) {
+    return;
+  } catch (e3) {}
+
+  // 4. Fallback akhir jika bukan dalam iframe sandbox
+  if (!url.includes('googleusercontent.com')) {
     window.location.href = url;
   }
 }
@@ -367,19 +403,23 @@ function applyRoleUI() {
   }
 }
 
-// Clear Cache & Reload Web App
+// Hapus Cache Web & Kembali ke Dashboard Utama
 function clearAppCache() {
   Swal.fire({
     title: 'Hapus Cache Web?',
-    text: 'Seluruh data cache dan sesi lokal di browser akan dibersihkan, kemudian halaman dimuat ulang.',
+    html: 'Seluruh data cache dan sesi lokal di peramban akan dibersihkan, kemudian sistem akan kembali ke <strong>Dashboard Utama</strong>.',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d97706',
     cancelButtonColor: '#64748b',
-    confirmButtonText: '<i class="fa-solid fa-trash-can mr-1.5"></i> Hapus & Muat Ulang',
+    confirmButtonText: '<i class="fa-solid fa-trash-can mr-1.5"></i> Hapus & ke Dashboard',
     cancelButtonText: 'Batal'
   }).then((result) => {
     if (result.isConfirmed) {
+      // 1. Simpan URL aplikasi yang valid sebelum storage dibersihkan
+      const appUrl = getAppUrl();
+
+      // 2. Bersihkan seluruh data lokal peramban
       try {
         localStorage.clear();
         sessionStorage.clear();
@@ -390,21 +430,18 @@ function clearAppCache() {
         }
       } catch (e) {}
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Cache Dibersihkan!',
-        text: 'Memuat ulang halaman...',
-        timer: 1000,
-        showConfirmButton: false
-      }).then(() => {
-        try {
-          if (window.top && window.top !== window) {
-            window.top.location.reload();
-            return;
-          }
-        } catch (e) {}
-        window.location.reload();
-      });
+      // 3. Set penanda agar Dashboard menampilkan toast sukses dan restore appUrl
+      try {
+        sessionStorage.setItem('siguru_active_page', 'dashboard');
+        localStorage.setItem('siguru_active_page', 'dashboard');
+        sessionStorage.setItem('siguru_cache_cleared', 'true');
+        if (appUrl) {
+          sessionStorage.setItem('siguru_app_url', appUrl);
+        }
+      } catch (e) {}
+
+      // 4. Langsung arahkan kembali ke menu awal dashboard
+      navigateTo('dashboard');
     }
   });
 }
@@ -483,5 +520,13 @@ document.addEventListener('DOMContentLoaded', function() {
   applyRoleUI();
   updateBrandingUI();
   refreshAllData();
+
+  // Cek apakah baru saja melakukan pembersihan cache
+  if (sessionStorage.getItem('siguru_cache_cleared') === 'true') {
+    sessionStorage.removeItem('siguru_cache_cleared');
+    setTimeout(() => {
+      showToast('success', 'Cache Dibersihkan', 'Cache peramban telah dibersihkan dan sistem kembali ke Dashboard Utama.');
+    }, 600);
+  }
 });
 </script>

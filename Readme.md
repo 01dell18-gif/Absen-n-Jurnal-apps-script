@@ -46,7 +46,7 @@ Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) kar
   - Diikuti nama guru yang sedang login (contoh: *Selamat Siang, Guru Mapel 1!* atau *Selamat Malam, Administrator!*).
 - **Penunjuk Tanggal & Jam Realtime**: Menampilkan hari, tanggal lengkap bahasa Indonesia, dan jam digital yang berdetak setiap detik (*live ticker*) bersumber langsung dari perangkat lokal pengguna (`[Hari], [Tanggal] [Bulan] [Tahun] • [HH:mm:ss]`).
 - Indikator status login dan peran aktif di sidebar bawah dan banner dashboard.
-- Navbar atas dilengkapi tombol aksi **Icon-Only** ringkas: Sinkron Data Spreadsheet, Hapus Cache Web & Refresh, serta Login/Keluar.
+- Navbar atas dilengkapi tombol aksi **Icon-Only** ringkas: Sinkron Data Spreadsheet, Hapus Cache Web & Kembali ke Dashboard, serta Login/Keluar.
 - Ringkasan statistik operasional real-time (Total Siswa, Dewan Guru, Rombel/Kelas, dan Mata Pelajaran).
 - Modul pintasan cepat untuk memulai presensi kelas, mencatat jurnal KBM, dan melihat rekap laporan.
 

@@ -208,10 +208,10 @@ Fungsi `toggleNavGroup(key)` mengubah kelas `hidden` pada submenu, memutar ikon 
 Pada navbar atas ([Header.html](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Header.html)), seluruh tombol aksi dikemas dalam format **Icon-Only** (`w-9 h-9 sm:w-10 sm:h-10 rounded-xl`) dengan tooltip informatif guna mengoptimalkan ruang layar:
 
 1. **Sinkron Data (`#btn-refresh`)**: Memanggil `refreshAllData()` untuk menyinkronkan data Google Sheets secara asinkron tanpa reload halaman.
-2. **Hapus Cache Web & Refresh (`#btn-clear-cache`)**:
+2. **Hapus Cache Web & Kembali ke Dashboard (`#btn-clear-cache`)**:
    - Memanggil `clearAppCache()` dengan modal konfirmasi SweetAlert2.
    - Saat dikonfirmasi, fungsi mengeksekusi `localStorage.clear()`, `sessionStorage.clear()`, serta membersihkan `window.caches` (Cache Storage API).
-   - Melakukan reload penuh pada jendela induk (`window.top.location.reload()`) sehingga seluruh state browser bersih total.
+   - Mengalihkan navigasi jendela induk (`_top`) kembali ke menu awal Dashboard via `navigateTo('dashboard')` menggunakan anchor link aman, mencegah insiden blank putih akibat pemanggilan reload pada domain sandboxed `script.googleusercontent.com`.
 3. **Login / Logout**: Tombol dinamis berbasis sesi untuk autentikasi cepat pengguna.
 
 ---
