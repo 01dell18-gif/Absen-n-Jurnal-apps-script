@@ -1,0 +1,430 @@
+<script>
+/**
+ * APPJS: PUSTAKA LOGIKA CLIENT GLOBAL
+ * Arsitektur RPC (google.script.run), Session Management & Routing
+ */
+
+// Global State
+window.globalData = window.globalData || {
+  pengaturan: { namaSekolah: 'NAMA SEKOLAH', logoUrl: 'https://via.placeholder.com/60', mapelList: [], kelasList: [], taList: [] },
+  muridList: [],
+  guruList: []
+};
+
+// Global App URL definition
+window.APP_URL = "<?= (typeof appUrl !== 'undefined' && appUrl) ? appUrl : getAppUrl() ?>";
+
+// Dapatkan URL Web App resmi secara asinkron jika tersedia
+if (window.google && google.script && google.script.url) {
+  google.script.url.getLocation(function(loc) {
+    if (loc && loc.url) {
+      window.APP_URL = loc.url.split('?')[0];
+    }
+  });
+}
+
+// URL Router & Helper
+function getAppUrl() {
+  if (window.APP_URL && window.APP_URL.length > 5) {
+    return window.APP_URL;
+  }
+  try {
+    if (window.top && window.top.location && window.top.location.href) {
+      return window.top.location.href.split('?')[0];
+    }
+  } catch (e) {}
+  return window.location.href.split('?')[0];
+}
+
+function goToPage(page, params) {
+  const currentRole = getCurrentRole();
+
+  // Role Gatekeeping
+  if ((page === 'form-absen' || page === 'form-jurnal') && currentRole === 'Guest') {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Akses Dibatasi',
+      text: 'Silakan login sebagai Guru atau Admin untuk mengisi absensi & jurnal.',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Login Sekarang',
+      showCancelButton: true,
+      cancelButtonText: 'Batal'
+    }).then(res => {
+      if (res.isConfirmed) openLoginModal();
+    });
+    return;
+  }
+
+  const isAdmin = currentRole && (currentRole.toLowerCase() === 'admin' || currentRole.toLowerCase() === 'administrator');
+  if ((page === 'master-data' || page === 'user-management' || page === 'pengaturan' || page === 'pengaturan-sistem') && !isAdmin) {
+    showToast('error', 'Akses Ditolak', 'Halaman ini khusus untuk Administrator.');
+    return;
+  }
+
+  navigateTo(page, params);
+}
+
+function navigateTo(page, params) {
+  sessionStorage.setItem('siguru_active_page', page);
+  localStorage.setItem('siguru_active_page', page);
+
+  let baseUrl = getAppUrl();
+  let url = baseUrl + '?page=' + encodeURIComponent(page);
+  if (params && typeof params === 'object') {
+    for (let k in params) {
+      if (params.hasOwnProperty(k)) {
+        url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+      }
+    }
+  }
+
+  // Penting: Google Apps Script berjalan di dalam iframe sandbox.
+  // Jika menggunakan window.location.href biasa, iframe mencoba membuka script.googleusercontent.com yang menyebabkan blank putih.
+  // Dengan mengarahkan jendela induk (_top), URL address bar ikut ter-update (?page=...),
+  // sehingga jika browser di-refresh (F5), browser tetap memuat halaman yang sama dan TIDAK mental ke dashboard!
+  try {
+    if (window.top && window.top !== window) {
+      window.top.location.href = url;
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    window.open(url, '_top');
+  } catch (e) {
+    window.location.href = url;
+  }
+}
+
+// User Session Management
+function getCurrentUser() {
+  return localStorage.getItem('siguru_username') || '';
+}
+
+function getCurrentRole() {
+  return localStorage.getItem('siguru_role') || 'Guest';
+}
+
+function getLoggedInNamaGuru() {
+  let ng = localStorage.getItem('siguru_nama_guru') || '';
+  const role = getCurrentRole();
+  const uname = getCurrentUser();
+
+  // Jika nama guru masih kosong atau berisi default placeholder
+  if (!ng || ng.toLowerCase() === 'user' || (role === 'Admin' && ng.toLowerCase() === 'admin')) {
+    if (role === 'Admin') {
+      ng = (ng && ng.toLowerCase() !== 'admin') ? ng : 'Administrator';
+    } else if (uname && window.globalData && window.globalData.guruList && window.globalData.guruList.length > 0) {
+      // Cari nama guru di Master Data yang cocok dengan username atau NIP
+      const match = window.globalData.guruList.find(g => 
+        (g.nama && g.nama.toLowerCase() === uname.toLowerCase()) || 
+        (g.nip && uname && g.nip.toLowerCase() === uname.toLowerCase())
+      );
+      if (match) {
+        ng = match.nama;
+        localStorage.setItem('siguru_nama_guru', ng);
+        if (match.nip) localStorage.setItem('siguru_nip', match.nip);
+      }
+    }
+  }
+  return ng || uname;
+}
+
+function getLoggedInNip() {
+  return localStorage.getItem('siguru_nip') || '';
+}
+
+function setSessionUser(username, role, namaGuru = '', nip = '') {
+  if (role === 'Admin' && !namaGuru) namaGuru = 'Administrator';
+  localStorage.setItem('siguru_username', username);
+  localStorage.setItem('siguru_role', role);
+  localStorage.setItem('siguru_nama_guru', namaGuru);
+  localStorage.setItem('siguru_nip', nip);
+  applyRoleUI();
+}
+
+function clearSession() {
+  localStorage.removeItem('siguru_username');
+  localStorage.removeItem('siguru_role');
+  localStorage.removeItem('siguru_nama_guru');
+  localStorage.removeItem('siguru_nip');
+  applyRoleUI();
+}
+
+// UI & Notifications Helpers
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3500,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
+
+function showToast(icon, title, text = '') {
+  Toast.fire({
+    icon: icon,
+    title: title,
+    text: text
+  });
+}
+
+function showLoading(title = 'Memproses Data...') {
+  Swal.fire({
+    title: title,
+    html: '<div class="py-2 text-xs text-slate-500">Mohon tunggu, menghubungkan ke server Google Cloud...</div>',
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+}
+
+function closeLoading() {
+  Swal.close();
+}
+
+// Sidebar Mobile Toggle
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const headerBrand = document.getElementById('header-brand-info');
+  
+  if (window.innerWidth >= 768) {
+    sidebar.classList.toggle('-ml-64');
+    if (headerBrand) headerBrand.classList.toggle('hidden');
+  } else {
+    sidebar.classList.toggle('-translate-x-full');
+    if (overlay) overlay.classList.toggle('hidden');
+  }
+}
+
+// Modal Login Triggers
+function openLoginModal() {
+  const modal = document.getElementById('modal-login');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeLoginModal() {
+  const modal = document.getElementById('modal-login');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleLoginSubmit(e) {
+  e.preventDefault();
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value.trim();
+  
+  if (!username || !password) {
+    showToast('warning', 'Perhatian', 'Username dan password wajib diisi.');
+    return;
+  }
+
+  showLoading('Verifikasi Akun...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      closeLoading();
+      if (res.success) {
+        setSessionUser(username, res.role, res.namaGuru || '', res.nip || '');
+        closeLoginModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Berhasil',
+          text: `Selamat datang, ${res.namaGuru || username}! Anda masuk sebagai ${res.role}.`,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          // If on login page, go to dashboard
+          const urlParams = new URLSearchParams(window.location.search);
+          const p = urlParams.get('page');
+          if (p === 'login' || !p) {
+            navigateTo('dashboard');
+          } else {
+            navigateTo(p);
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: res.message || 'Username atau password salah!',
+          confirmButtonColor: '#2563eb'
+        });
+      }
+    })
+    .withFailureHandler(function(err) {
+      closeLoading();
+      Swal.fire({
+        icon: 'error',
+        title: 'Koneksi Gagal',
+        text: 'Terjadi kesalahan sistem: ' + err.message,
+        confirmButtonColor: '#2563eb'
+      });
+    })
+    .checkLogin(username, password);
+}
+
+function logoutUser() {
+  Swal.fire({
+    title: 'Konfirmasi Keluar',
+    text: 'Apakah Anda yakin ingin keluar dari sistem?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Ya, Keluar',
+    cancelButtonText: 'Batal'
+  }).then(result => {
+    if (result.isConfirmed) {
+      clearSession();
+      showToast('info', 'Anda telah logout', 'Dialihkan ke tampilan publik.');
+      setTimeout(() => {
+        navigateTo('rekap-absen');
+      }, 700);
+    }
+  });
+}
+
+// Role-Based UI Rendering
+function applyRoleUI() {
+  const role = getCurrentRole();
+  const username = getCurrentUser();
+  const namaGuru = getLoggedInNamaGuru();
+  const displayName = (role === 'Admin') 
+    ? (namaGuru || 'Administrator') 
+    : (namaGuru || username);
+
+  const groupAuth = document.getElementById('nav-group-auth');
+  const groupAdmin = document.getElementById('nav-group-admin');
+  const groupPengaturan = document.getElementById('nav-group-pengaturan');
+  const btnLogin = document.getElementById('btn-login-trigger');
+  const btnLogout = document.getElementById('btn-logout');
+  const badgeRole = document.getElementById('badge-user-role');
+  const labelRole = document.getElementById('label-user-role');
+  const indicatorRole = document.getElementById('indicator-role');
+  const sidebarUserName = document.getElementById('sidebar-user-name');
+  const sidebarUserRole = document.getElementById('sidebar-user-role');
+
+  if (sidebarUserName) {
+    sidebarUserName.innerText = username ? displayName : 'Tamu (Guest)';
+  }
+  if (sidebarUserRole) {
+    sidebarUserRole.innerText = 'Hak Akses: ' + role;
+  }
+
+  if (role === 'Guest') {
+    if (groupAuth) groupAuth.classList.add('hidden');
+    if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupPengaturan) groupPengaturan.classList.add('hidden');
+    if (btnLogin) btnLogin.classList.remove('hidden');
+    if (btnLogout) btnLogout.classList.add('hidden');
+    if (badgeRole) {
+      badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200';
+    }
+    if (labelRole) labelRole.innerText = 'Tamu (Publik)';
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-slate-400';
+  } else if (role === 'Guru') {
+    if (groupAuth) groupAuth.classList.remove('hidden');
+    if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupPengaturan) groupPengaturan.classList.add('hidden');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnLogout) btnLogout.classList.remove('hidden');
+    if (badgeRole) {
+      badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+    }
+    if (labelRole) labelRole.innerText = displayName + ' (Guru)';
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-emerald-500';
+  } else if (role === 'Admin') {
+    if (groupAuth) groupAuth.classList.remove('hidden');
+    if (groupAdmin) groupAdmin.classList.remove('hidden');
+    if (groupPengaturan) groupPengaturan.classList.remove('hidden');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnLogout) btnLogout.classList.remove('hidden');
+    if (badgeRole) {
+      badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
+    }
+    if (labelRole) labelRole.innerText = (namaGuru || 'Administrator') + ' (Admin)';
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-rose-500';
+  }
+}
+
+// Data Synchronizer
+function refreshAllData(onSuccess) {
+  const icon = document.getElementById('icon-refresh');
+  if (icon) icon.classList.add('fa-spin');
+
+  // Check cached data if available
+  const cached = localStorage.getItem('siguru_global_data');
+  if (cached && !window.globalData.pengaturan.mapelList.length) {
+    try {
+      window.globalData = JSON.parse(cached);
+      updateBrandingUI();
+    } catch(e) {}
+  }
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (icon) icon.classList.remove('fa-spin');
+      if (res && res.pengaturan) {
+        window.globalData = res;
+        localStorage.setItem('siguru_global_data', JSON.stringify(res));
+        updateBrandingUI();
+        if (typeof onSuccess === 'function') onSuccess(res);
+        if (typeof onDataLoaded === 'function') onDataLoaded(res);
+      }
+    })
+    .withFailureHandler(function(err) {
+      if (icon) icon.classList.remove('fa-spin');
+      showToast('error', 'Gagal Sinkronisasi', err.message);
+    })
+    .getInitialData();
+}
+
+function updateBrandingUI() {
+  const p = window.globalData.pengaturan;
+  if (!p) return;
+
+  const sidebarLogo = document.getElementById('sidebar-logo');
+  const sidebarSekolah = document.getElementById('sidebar-sekolah');
+  const headerLogo = document.getElementById('header-logo');
+  const headerSekolah = document.getElementById('header-sekolah');
+  const loginLogo = document.getElementById('login-modal-logo');
+
+  if (sidebarLogo && p.logoUrl) sidebarLogo.src = p.logoUrl;
+  if (sidebarSekolah && p.namaSekolah) sidebarSekolah.innerText = p.namaSekolah;
+  if (headerLogo && p.logoUrl) headerLogo.src = p.logoUrl;
+  if (headerSekolah && p.namaSekolah) headerSekolah.innerText = p.namaSekolah;
+  if (loginLogo && p.logoUrl) loginLogo.src = p.logoUrl;
+}
+
+// Dropdown Helper Utility
+function populateSelect(selectId, items, placeholder = '-- Pilih --', selectedVal = '') {
+  const el = document.getElementById(selectId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (placeholder) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = placeholder;
+    el.appendChild(opt);
+  }
+  (items || []).forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item;
+    opt.textContent = item;
+    if (selectedVal && selectedVal === item) opt.selected = true;
+    el.appendChild(opt);
+  });
+}
+
+// Global Document Initializer
+document.addEventListener('DOMContentLoaded', function() {
+  applyRoleUI();
+  updateBrandingUI();
+  refreshAllData();
+});
+</script>

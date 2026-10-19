@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistem Absensi & Jurnal Guru</title>
+  <?!= include('StyleCSS'); ?>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
+  
+  <!-- Injeksi Sidebar Dinamis -->
+  <?!= include('Sidebar'); ?>
+
+  <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
+    <!-- Injeksi Header Navbar Atas -->
+    <?!= include('Header', { pageTitle: 'Dashboard Utama' }); ?>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
+      
+      <!-- HERO WELCOME BANNER -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 p-6 md:p-8 text-white shadow-xl shadow-brand-900/10">
+        <div class="relative z-10 max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="banner-role-text">Portal Operasional Sekolah</span>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2" id="dashboard-welcome-name">
+            Selamat Datang di SIGURU
+          </h2>
+          <p class="text-xs md:text-sm text-brand-100 leading-relaxed font-normal">
+            Sistem Informasi Guru Terpadu untuk pencatatan presensi siswa secara real-time, monitoring jurnal mengajar harian, dan rekapitulasi data KBM sekolah secara akurat.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-5">
+            <button onclick="goToPage('form-absen')" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-user"></i> Mulai Absen Murid
+            </button>
+            <button onclick="goToPage('form-jurnal')" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold backdrop-blur transition flex items-center gap-2">
+              <i class="fa-solid fa-pen-to-square"></i> Input Jurnal KBM
+            </button>
+          </div>
+        </div>
+
+        <!-- Decorative Icons Background -->
+        <i class="fa-solid fa-school absolute -right-6 -bottom-8 text-9xl text-white/10 pointer-events-none"></i>
+        <i class="fa-solid fa-book-open-reader absolute right-40 -top-6 text-7xl text-white/5 pointer-events-none"></i>
+      </div>
+
+      <!-- STATISTIK KARTU UTAMA -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Murid -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Murid</p>
+            <h3 class="text-2xl font-extrabold text-slate-800" id="dash-total-murid">0</h3>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+              <i class="fa-solid fa-user-graduate"></i> Terdaftar aktif
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl border border-blue-100">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+
+        <!-- Card 2: Guru -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Guru & Staf</p>
+            <h3 class="text-2xl font-extrabold text-slate-800" id="dash-total-guru">0</h3>
+            <span class="text-[10px] text-brand-600 font-semibold flex items-center gap-1 mt-1">
+              <i class="fa-solid fa-chalkboard-user"></i> Tenaga pendidik
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl border border-emerald-100">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+        </div>
+
+        <!-- Card 3: Kelas -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rombel / Kelas</p>
+            <h3 class="text-2xl font-extrabold text-slate-800" id="dash-total-kelas">0</h3>
+            <span class="text-[10px] text-purple-600 font-semibold flex items-center gap-1 mt-1">
+              <i class="fa-solid fa-shapes"></i> Rombongan belajar
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl border border-purple-100">
+            <i class="fa-solid fa-door-open"></i>
+          </div>
+        </div>
+
+        <!-- Card 4: Mata Pelajaran -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mata Pelajaran</p>
+            <h3 class="text-2xl font-extrabold text-slate-800" id="dash-total-mapel">0</h3>
+            <span class="text-[10px] text-amber-600 font-semibold flex items-center gap-1 mt-1">
+              <i class="fa-solid fa-book"></i> Kurikulum aktif
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl border border-amber-100">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- MENU CEPAT & PINTASAN APLIKASI -->
+      <div>
+        <h3 class="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-compass text-brand-600"></i> Modul Pintasan Cepat
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Card Modul 1 -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex flex-col justify-between">
+            <div>
+              <div class="w-11 h-11 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-lg mb-4 border border-blue-100">
+                <i class="fa-solid fa-clipboard-user"></i>
+              </div>
+              <h4 class="font-bold text-sm text-slate-800 mb-1.5">Absensi Murid Per Kelas</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Catat presensi kehadiran harian siswa secara cepat (Hadir, Sakit, Izin, Alpa, Dispen) dengan opsi tombol tandai semua hadir sekaligus.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-100">
+              <button onclick="goToPage('form-absen')" class="w-full py-2 bg-slate-50 hover:bg-brand-50 text-brand-700 hover:text-brand-800 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 border border-slate-200">
+                <span>Buka Form Absen</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Modul 2 -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex flex-col justify-between">
+            <div>
+              <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg mb-4 border border-emerald-100">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </div>
+              <h4 class="font-bold text-sm text-slate-800 mb-1.5">Jurnal Mengajar Guru (KBM)</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Laporkan materi pembelajaran, tingkat ketuntasan kompetensi, dan unggah multi-foto bukti kegiatan belajar mengajar langsung ke Google Drive.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-100">
+              <button onclick="goToPage('form-jurnal')" class="w-full py-2 bg-slate-50 hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 border border-slate-200">
+                <span>Buka Form Jurnal</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Modul 3 -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm card-hover flex flex-col justify-between">
+            <div>
+              <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg mb-4 border border-purple-100">
+                <i class="fa-solid fa-file-invoice"></i>
+              </div>
+              <h4 class="font-bold text-sm text-slate-800 mb-1.5">Laporan & Rekapitulasi PDF</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Filter data presensi dan jurnal mengajar berdasarkan semester, tahun ajaran, kelas, atau guru. Siap cetak langsung dengan Kop Surat Resmi Sekolah.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-100">
+              <button onclick="goToPage('rekap-absen')" class="w-full py-2 bg-slate-50 hover:bg-purple-50 text-purple-700 hover:text-purple-800 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 border border-slate-200">
+                <span>Lihat Rekap Absen</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Injeksi Script Global -->
+  <?!= include('AppJS'); ?>
+
+  <script>
+    function updateDashboardWelcome() {
+      const uname = getCurrentUser();
+      const role = getCurrentRole();
+      let namaGuru = getLoggedInNamaGuru();
+
+      if (uname) {
+        const displayName = (role === 'Admin') 
+          ? (namaGuru || 'Administrator') 
+          : (namaGuru || uname);
+
+        const welcomeEl = document.getElementById('dashboard-welcome-name');
+        if (welcomeEl) {
+          welcomeEl.innerText = `Selamat Datang, ${displayName}!`;
+        }
+        const roleEl = document.getElementById('banner-role-text');
+        if (roleEl) {
+          roleEl.innerText = `Masuk Sebagai: ${role}`;
+        }
+      } else {
+        const welcomeEl = document.getElementById('dashboard-welcome-name');
+        if (welcomeEl) {
+          welcomeEl.innerText = `Selamat Datang di SIGURU`;
+        }
+        const roleEl = document.getElementById('banner-role-text');
+        if (roleEl) {
+          roleEl.innerText = `Portal Operasional Sekolah`;
+        }
+      }
+    }
+
+    function onDataLoaded(data) {
+      if (!data) return;
+      document.getElementById('dash-total-murid').innerText = data.muridList ? data.muridList.length : 0;
+      document.getElementById('dash-total-guru').innerText = data.guruList ? data.guruList.length : 0;
+      document.getElementById('dash-total-kelas').innerText = (data.pengaturan && data.pengaturan.kelasList) ? data.pengaturan.kelasList.length : 0;
+      document.getElementById('dash-total-mapel').innerText = (data.pengaturan && data.pengaturan.mapelList) ? data.pengaturan.mapelList.length : 0;
+      
+      updateDashboardWelcome();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      updateDashboardWelcome();
+      if (window.globalData && window.globalData.muridList) {
+        onDataLoaded(window.globalData);
+      }
+    });
+  </script>
+</body>
+</html>

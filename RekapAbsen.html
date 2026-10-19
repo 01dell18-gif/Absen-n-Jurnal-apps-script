@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekap Absen Murid - SIGURU</title>
+  <?!= include('StyleCSS'); ?>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
+  
+  <?!= include('Sidebar'); ?>
+
+  <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
+    <?!= include('Header', { pageTitle: 'Rekapitulasi Presensi Siswa' }); ?>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
+      
+      <!-- CARD FILTER REKAP -->
+      <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-sm border border-blue-100">
+              <i class="fa-solid fa-filter"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Filter Data Presensi</h3>
+              <p class="text-[11px] text-slate-400">Saring riwayat kehadiran berdasarkan kategori spesifik</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Rombel / Kelas</label>
+            <select id="filter-rekap-kelas" onchange="onFilterRekapKelasChange()" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Siswa</label>
+            <select id="filter-rekap-murid" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+              <option value="">-- Semua Siswa --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Guru</label>
+            <select id="filter-rekap-guru" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Mata Pelajaran</label>
+            <select id="filter-rekap-mapel" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Semester</label>
+            <select id="filter-rekap-semester" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+              <option value="">-- Semua Semester --</option>
+              <option value="Ganjil">Ganjil</option>
+              <option value="Genap">Genap</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Tahun Ajaran</label>
+            <select id="filter-rekap-ta" 
+                    class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="applyFilterRekapAbsen()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Terapkan</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- STATISTIK PERSENTASE KEHADIRAN -->
+      <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+            <h3 class="text-sm font-bold text-slate-800">Ringkasan Persentase Kehadiran</h3>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+          <div class="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl">
+            <p class="text-[11px] text-emerald-700 font-bold uppercase tracking-wider">Hadir</p>
+            <p id="pct-hadir" class="text-2xl font-extrabold text-emerald-800 mt-1">0%</p>
+          </div>
+          <div class="p-4 bg-amber-50/70 border border-amber-100 rounded-2xl">
+            <p class="text-[11px] text-amber-700 font-bold uppercase tracking-wider">Sakit</p>
+            <p id="pct-sakit" class="text-2xl font-extrabold text-amber-800 mt-1">0%</p>
+          </div>
+          <div class="p-4 bg-sky-50/70 border border-sky-100 rounded-2xl">
+            <p class="text-[11px] text-sky-700 font-bold uppercase tracking-wider">Izin</p>
+            <p id="pct-izin" class="text-2xl font-extrabold text-sky-800 mt-1">0%</p>
+          </div>
+          <div class="p-4 bg-rose-50/70 border border-rose-100 rounded-2xl">
+            <p class="text-[11px] text-rose-700 font-bold uppercase tracking-wider">Alpa</p>
+            <p id="pct-alpa" class="text-2xl font-extrabold text-rose-800 mt-1">0%</p>
+          </div>
+          <div class="p-4 bg-purple-50/70 border border-purple-100 rounded-2xl col-span-2 sm:col-span-1">
+            <p class="text-[11px] text-purple-700 font-bold uppercase tracking-wider">Dispen</p>
+            <p id="pct-dispen" class="text-2xl font-extrabold text-purple-800 mt-1">0%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABEL REKAPITULASI -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden w-full">
+        <!-- Toolbar Tabel -->
+        <div class="p-4 border-b border-slate-100 bg-slate-50/70 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-500">Tampilkan:</span>
+            <select id="rekap-page-size" onchange="renderRekapAbsenTable(1)" 
+                    class="text-xs p-1.5 border rounded-lg border-slate-200 bg-white outline-none focus:ring-1 focus:ring-brand-500 font-semibold text-slate-700">
+              <option value="50">50 Baris</option>
+              <option value="100">100 Baris</option>
+              <option value="500">500 Baris</option>
+            </select>
+          </div>
+
+          <button onclick="previewPDFRekapAbsen()" 
+                  class="px-4 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Cetak / Export PDF</span>
+          </button>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="overflow-x-auto w-full">
+          <table class="w-full text-xs text-left whitespace-nowrap">
+            <thead class="bg-slate-100/70 font-bold border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="p-3.5 text-center w-12">No</th>
+                <th class="p-3.5 w-28">NISN</th>
+                <th class="p-3.5">Nama Lengkap Siswa</th>
+                <th class="p-3.5 w-24">Kelas</th>
+                <th class="p-3.5 w-28">Tanggal</th>
+                <th class="p-3.5 text-center w-28">Status Kehadiran</th>
+                <th class="p-3.5">Mata Pelajaran</th>
+                <th id="th-aksi-rekap" class="p-3.5 text-center w-28">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-rekap-absen" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="8" class="text-center p-8 text-slate-400">
+                  <i class="fa-solid fa-spinner fa-spin text-brand-600 text-xl mb-2"></i>
+                  <p>Memuat rekap data absensi...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer Pagination -->
+        <div class="p-3.5 border-t border-slate-100 bg-slate-50/60 flex flex-wrap justify-between items-center text-xs text-slate-500 gap-2">
+          <span id="rekap-page-info" class="font-semibold text-slate-600">Halaman 1</span>
+          <div class="flex items-center gap-1.5">
+            <button onclick="changeRekapPage(-1)" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-lg hover:bg-slate-100 transition font-medium">
+              <i class="fa-solid fa-chevron-left text-[10px]"></i> Sebelumnya
+            </button>
+            <button onclick="changeRekapPage(1)" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-lg hover:bg-slate-100 transition font-medium">
+              Berikutnya <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL EDIT REKAP ABSEN -->
+  <div id="modal-edit-rekap" class="fixed inset-0 bg-slate-950/70 hidden z-[80] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-7 relative border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeEditRekapModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 mb-5 border-b border-slate-100 pb-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-sm border border-blue-100">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-800">Edit Data Presensi Siswa</h3>
+          <p class="text-[11px] text-slate-400">Koreksi status atau catatan absensi siswa</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleSaveEditRekap(event)" class="space-y-4">
+        <input type="hidden" id="edit-rekap-row-index">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Siswa</label>
+            <input type="text" id="edit-rekap-nama" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 font-semibold text-slate-800">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">NISN</label>
+            <input type="text" id="edit-rekap-nisn" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 font-mono text-slate-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Jenis Kelamin</label>
+            <select id="edit-rekap-jk" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Rombel / Kelas</label>
+            <select id="edit-rekap-kelas" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Tanggal Absen</label>
+            <input type="date" id="edit-rekap-tanggal" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Status Kehadiran</label>
+            <select id="edit-rekap-ket" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 font-bold">
+              <option value="Hadir">Hadir</option>
+              <option value="Sakit">Sakit</option>
+              <option value="Izin">Izin</option>
+              <option value="Alpa">Alpa</option>
+              <option value="Dispen">Dispen</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Guru Pengajar</label>
+            <select id="edit-rekap-guru" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Mata Pelajaran</label>
+            <select id="edit-rekap-mapel" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Semester</label>
+            <select id="edit-rekap-semester" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="Ganjil">Ganjil</option>
+              <option value="Genap">Genap</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Tahun Ajaran</label>
+            <select id="edit-rekap-ta" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500"></select>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan Perubahan Presensi</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <?!= include('AppJS'); ?>
+
+  <script>
+    let rekapAbsenRaw = [];
+    let rekapAbsenFiltered = [];
+    let rekapPage = 1;
+
+    function onDataLoaded(data) {
+      if (!data) return;
+      const p = data.pengaturan;
+      populateSelect('filter-rekap-kelas', p.kelasList, '-- Semua Kelas --');
+      populateSelect('filter-rekap-mapel', p.mapelList, '-- Semua Mapel --');
+      populateSelect('filter-rekap-ta', p.taList, '-- Semua TA --');
+
+      // Setup ttd guru sesuai hak akses
+      setupGuruFilter();
+
+      loadRekapAbsen();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      setupGuruFilter();
+    });
+
+    function setupGuruFilter() {
+      const role = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const selectGuru = document.getElementById('filter-rekap-guru');
+      if (!selectGuru) return;
+
+      const guruList = (window.globalData && window.globalData.guruList) ? window.globalData.guruList : [];
+      const guruNames = guruList.map(g => g.nama);
+
+      // Isi modal edit select guru
+      populateSelect('edit-rekap-guru', guruNames, '-- Pilih Guru --');
+
+      if (role === 'Guru') {
+        const guruVal = loggedGuru || getCurrentUser();
+        // Otomatis terisi nama guru yang login dan di-kunci
+        selectGuru.innerHTML = `<option value="${guruVal}">${guruVal}</option>`;
+        selectGuru.value = guruVal;
+        selectGuru.disabled = true;
+        selectGuru.classList.add('bg-slate-100', 'cursor-not-allowed', 'font-bold', 'text-slate-700');
+      } else {
+        // Admin & Tamu
+        selectGuru.disabled = false;
+        selectGuru.classList.remove('bg-slate-100', 'cursor-not-allowed');
+        populateSelect('filter-rekap-guru', guruNames, '-- Semua Guru --');
+      }
+    }
+
+    function loadRekapAbsen() {
+      google.script.run
+        .withSuccessHandler(function(d) {
+          rekapAbsenRaw = d || [];
+          applyFilterRekapAbsen();
+        })
+        .withFailureHandler(function(err) {
+          showToast('error', 'Gagal Memuat Data', err.message);
+        })
+        .getRekapAbsenData();
+    }
+
+    function onFilterRekapKelasChange() {
+      const k = document.getElementById('filter-rekap-kelas').value;
+      const el = document.getElementById('filter-rekap-murid');
+      el.innerHTML = '<option value="">-- Semua Siswa --</option>';
+      const list = k ? (window.globalData.muridList || []).filter(m => m.kelas === k) : (window.globalData.muridList || []);
+      [...new Set(list.map(m => m.nama))].sort().forEach(nm => {
+        el.innerHTML += `<option value="${nm}">${nm}</option>`;
+      });
+    }
+
+    function applyFilterRekapAbsen() {
+      const role = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const k = document.getElementById('filter-rekap-kelas').value;
+      const m = document.getElementById('filter-rekap-murid').value;
+      const g = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '');
+      const mp = document.getElementById('filter-rekap-mapel').value;
+      const s = document.getElementById('filter-rekap-semester').value;
+      const t = document.getElementById('filter-rekap-ta').value;
+
+      rekapAbsenFiltered = rekapAbsenRaw.filter(r => 
+        (!k || r.kelas === k) &&
+        (!m || r.nama === m) &&
+        (!g || (r.namaGuru && r.namaGuru.trim().toLowerCase() === g.trim().toLowerCase())) &&
+        (!mp || r.mapel === mp) &&
+        (!s || r.semester === s) &&
+        (!t || r.tahunAjaran === t)
+      );
+
+      calculateAbsenStats();
+      renderRekapAbsenTable(1);
+    }
+
+    function calculateAbsenStats() {
+      const tot = rekapAbsenFiltered.length;
+      if (!tot) {
+        ['hadir', 'sakit', 'izin', 'alpa', 'dispen'].forEach(i => {
+          document.getElementById(`pct-${i}`).innerText = '0%';
+        });
+        return;
+      }
+
+      let c = { Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0, Dispen: 0 };
+      rekapAbsenFiltered.forEach(r => {
+        if (c[r.keterangan] !== undefined) c[r.keterangan]++;
+      });
+
+      Object.keys(c).forEach(k => {
+        document.getElementById(`pct-${k.toLowerCase()}`).innerText = Math.round((c[k] / tot) * 100) + '%';
+      });
+    }
+
+    function renderRekapAbsenTable(page) {
+      rekapPage = page;
+      const size = parseInt(document.getElementById('rekap-page-size').value);
+      const tb = document.getElementById('tbody-rekap-absen');
+      tb.innerHTML = "";
+
+      const currentRole = getCurrentRole();
+      const isGuest = currentRole === 'Guest';
+
+      // Atur visibilitas header kolom aksi
+      const thAksi = document.getElementById('th-aksi-rekap');
+      if (thAksi) {
+        if (isGuest) {
+          thAksi.classList.add('hidden');
+        } else {
+          thAksi.classList.remove('hidden');
+        }
+      }
+
+      const colSpan = isGuest ? 7 : 8;
+      const pgData = rekapAbsenFiltered.slice((page - 1) * size, page * size);
+      if (!pgData.length) {
+        tb.innerHTML = `<tr><td colspan="${colSpan}" class="text-center p-8 text-slate-400">Tidak ada data presensi yang sesuai filter.</td></tr>`;
+        document.getElementById('rekap-page-info').innerText = 'Halaman 0 dari 0';
+        return;
+      }
+
+      pgData.forEach((r, i) => {
+        const badgeClass = `badge-${(r.keterangan || '').toLowerCase()}`;
+        
+        let actionTd = "";
+        if (!isGuest) {
+          actionTd = `
+            <td class="p-3.5 text-center space-x-1.5">
+              <button onclick="openEditRekapAbsenModal(${r.rowIndex})" 
+                      class="p-1.5 px-2.5 bg-blue-50 hover:bg-blue-100 text-brand-700 rounded-lg border border-blue-200 text-xs font-semibold transition" title="Edit Presensi">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+              <button onclick="confirmDeleteRekapAbsen(${r.rowIndex}, '${(r.nama || '').replace(/'/g, "\\'")}', '${r.tanggal}')" 
+                      class="p-1.5 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg border border-rose-200 text-xs font-semibold transition" title="Hapus Presensi">
+                <i class="fa-solid fa-trash-can"></i> Hapus
+              </button>
+            </td>
+          `;
+        }
+
+        tb.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3.5 text-center text-slate-400 font-mono text-[11px]">${(page - 1) * size + i + 1}</td>
+            <td class="p-3.5 font-mono text-slate-500 text-[11px]">${r.nisn}</td>
+            <td class="p-3.5 font-bold text-slate-800">${r.nama}</td>
+            <td class="p-3.5 text-slate-600 font-medium">${r.kelas}</td>
+            <td class="p-3.5 text-slate-600">${r.tanggal}</td>
+            <td class="p-3.5 text-center">
+              <span class="${badgeClass} px-3 py-1 rounded-full font-bold text-[10px] inline-block shadow-sm">
+                ${r.keterangan}
+              </span>
+            </td>
+            <td class="p-3.5 text-slate-700 font-medium">${r.mapel}</td>
+            ${actionTd}
+          </tr>
+        `;
+      });
+
+      const totalPages = Math.ceil(rekapAbsenFiltered.length / size) || 1;
+      document.getElementById('rekap-page-info').innerText = `Halaman ${page} dari ${totalPages} (Total ${rekapAbsenFiltered.length} Data)`;
+    }
+
+    function openEditRekapAbsenModal(rowIndex) {
+      const item = rekapAbsenRaw.find(r => r.rowIndex === rowIndex);
+      if (!item) return showToast('error', 'Data tidak ditemukan');
+
+      const p = window.globalData.pengaturan;
+      populateSelect('edit-rekap-kelas', p.kelasList, '-- Pilih Kelas --', item.kelas);
+      populateSelect('edit-rekap-mapel', p.mapelList, '-- Pilih Mapel --', item.mapel);
+      populateSelect('edit-rekap-ta', p.taList, '-- Pilih TA --', item.tahunAjaran);
+
+      const guruSel = document.getElementById('edit-rekap-guru');
+      if (guruSel) {
+        guruSel.value = item.namaGuru || '';
+        if (getCurrentRole() === 'Guru') {
+          guruSel.disabled = true;
+        } else {
+          guruSel.disabled = false;
+        }
+      }
+
+      document.getElementById('edit-rekap-row-index').value = item.rowIndex;
+      document.getElementById('edit-rekap-nama').value = item.nama;
+      document.getElementById('edit-rekap-nisn').value = item.nisn;
+      document.getElementById('edit-rekap-jk').value = item.jk || 'L';
+      document.getElementById('edit-rekap-tanggal').value = item.tanggal;
+      document.getElementById('edit-rekap-ket').value = item.keterangan || 'Hadir';
+      document.getElementById('edit-rekap-semester').value = item.semester || 'Ganjil';
+
+      document.getElementById('modal-edit-rekap').classList.remove('hidden');
+    }
+
+    function closeEditRekapModal() {
+      document.getElementById('modal-edit-rekap').classList.add('hidden');
+    }
+
+    function handleSaveEditRekap(e) {
+      e.preventDefault();
+      const payload = {
+        rowIndex: document.getElementById('edit-rekap-row-index').value,
+        nama: document.getElementById('edit-rekap-nama').value,
+        nisn: document.getElementById('edit-rekap-nisn').value,
+        jk: document.getElementById('edit-rekap-jk').value,
+        kelas: document.getElementById('edit-rekap-kelas').value,
+        tanggal: document.getElementById('edit-rekap-tanggal').value,
+        keterangan: document.getElementById('edit-rekap-ket').value,
+        mapel: document.getElementById('edit-rekap-mapel').value,
+        semester: document.getElementById('edit-rekap-semester').value,
+        tahunAjaran: document.getElementById('edit-rekap-ta').value,
+        namaGuru: document.getElementById('edit-rekap-guru') ? document.getElementById('edit-rekap-guru').value : ''
+      };
+
+      showLoading('Menyimpan Perubahan Presensi...');
+      google.script.run
+        .withSuccessHandler(function(res) {
+          closeLoading();
+          if (res && res.success) {
+            showToast('success', 'Berhasil', res.message);
+            closeEditRekapModal();
+            loadRekapAbsen();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal Memperbarui',
+              text: (res && res.message) ? res.message : 'Terjadi kegagalan di server.'
+            });
+          }
+        })
+        .withFailureHandler(function(err) {
+          closeLoading();
+          Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan Sistem',
+            text: err.message
+          });
+        })
+        .updateRekapAbsen(payload);
+    }
+
+    function confirmDeleteRekapAbsen(rowIndex, nama, tanggal) {
+      Swal.fire({
+        title: 'Hapus Data Presensi?',
+        html: `Apakah Anda yakin ingin menghapus data presensi <strong>${nama}</strong> tanggal <strong>${tanggal}</strong>?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus Presensi',
+        cancelButtonText: 'Batal'
+      }).then(res => {
+        if (res.isConfirmed) {
+          showLoading('Menghapus Data Presensi...');
+          google.script.run
+            .withSuccessHandler(function(resp) {
+              closeLoading();
+              if (resp && resp.success) {
+                showToast('success', 'Terhapus', resp.message);
+                loadRekapAbsen();
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal',
+                  text: (resp && resp.message) ? resp.message : 'Gagal menghapus presensi.'
+                });
+              }
+            })
+            .withFailureHandler(function(err) {
+              closeLoading();
+              Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Sistem',
+                text: err.message
+              });
+            })
+            .deleteRekapAbsen(rowIndex);
+        }
+      });
+    }
+
+    function changeRekapPage(d) {
+      const size = parseInt(document.getElementById('rekap-page-size').value);
+      const totalPages = Math.ceil(rekapAbsenFiltered.length / size) || 1;
+      if (rekapPage + d >= 1 && rekapPage + d <= totalPages) {
+        renderRekapAbsenTable(rekapPage + d);
+      }
+    }
+
+    function getKopSuratHtml(reportTitle) {
+      const p = (window.globalData && window.globalData.pengaturan) ? window.globalData.pengaturan : {};
+      const kop = (p.kopSurat || '').trim();
+
+      function formatImg(u) {
+        if (!u) return '';
+        const m = u.match(/(?:id=|file\/d\/)([a-zA-Z0-9_-]{25,})/);
+        return m ? ('https://lh3.googleusercontent.com/d/' + m[1]) : u;
+      }
+
+      if (kop) {
+        const isImg = /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(kop) || 
+                      kop.includes('drive.google.com') || 
+                      kop.includes('googleusercontent.com') || 
+                      kop.startsWith('data:image/');
+        
+        if (isImg) {
+          return `
+            <div style="text-align: center; margin-bottom: 12px;">
+              <img src="${formatImg(kop)}" style="max-width: 100%; max-height: 140px; margin: 0 auto; display: block; object-fit: contain;" alt="Kop Surat">
+            </div>
+            ${reportTitle ? `<div style="text-align: center; margin: 8px 0 14px 0;"><h2 style="font-size: 13px; font-weight: bold; margin: 0; text-transform: uppercase; color: #1e293b; letter-spacing: 0.5px;">${reportTitle}</h2></div>` : ''}
+          `;
+        } else if (kop.includes('<') && kop.includes('>')) {
+          return `
+            <div style="text-align: center; margin-bottom: 8px;">
+              ${kop}
+            </div>
+            <div class="kop-divider"></div>
+            ${reportTitle ? `<div style="text-align: center; margin: 8px 0 14px 0;"><h2 style="font-size: 13px; font-weight: bold; margin: 0; text-transform: uppercase; color: #1e293b; letter-spacing: 0.5px;">${reportTitle}</h2></div>` : ''}
+          `;
+        } else {
+          const lines = kop.split('\n').map(l => l.trim()).filter(Boolean);
+          return `
+            <div style="text-align: center; margin-bottom: 8px;">
+              ${lines.map((l, i) => i === 0 
+                ? `<h1 style="font-size: 16px; margin: 0 0 2px 0; color: #1e40af; text-transform: uppercase; font-weight: 800;">${l}</h1>`
+                : `<p style="margin: 2px 0; font-size: 11px; font-weight: 600; color: #475569;">${l}</p>`
+              ).join('')}
+            </div>
+            <div class="kop-divider"></div>
+            ${reportTitle ? `<div style="text-align: center; margin: 8px 0 14px 0;"><h2 style="font-size: 13px; font-weight: bold; margin: 0; text-transform: uppercase; color: #1e293b; letter-spacing: 0.5px;">${reportTitle}</h2></div>` : ''}
+          `;
+        }
+      }
+
+      // Fallback jika Kolom F di sheet Pengaturan belum terisi: Logo & Nama Sekolah Rata Tengah
+      const logo = formatImg(p.logoUrl);
+      return `
+        <div style="text-align: center; padding-bottom: 4px;">
+          ${logo ? `<img src="${logo}" style="width: 55px; height: 55px; margin: 0 auto 6px auto; display: block; object-fit: contain;">` : ''}
+          <h1 style="font-size: 16px; margin: 0; color: #1e40af; text-transform: uppercase; font-weight: 800;">${p.namaSekolah || 'NAMA SEKOLAH'}</h1>
+          ${reportTitle ? `<p style="margin: 3px 0 0 0; font-weight: bold; font-size: 12px; color: #475569; text-transform: uppercase;">${reportTitle}</p>` : ''}
+        </div>
+        <div class="kop-divider"></div>
+      `;
+    }
+
+    function previewPDFRekapAbsen() {
+      const p = window.globalData.pengaturan || {};
+      const role = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const ttdNama = (role === 'Guru' && loggedGuru) ? loggedGuru : ((document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : "") || "-");
+      const guruObj = (window.globalData.guruList || []).find(g => g.nama === ttdNama);
+      const ttdNip = guruObj ? guruObj.nip : ((role === 'Guru' && getLoggedInNip()) ? getLoggedInNip() : "-");
+
+      let muridStats = {};
+      rekapAbsenFiltered.forEach(r => {
+        if (!muridStats[r.nama]) muridStats[r.nama] = { Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0, Dispen: 0, total: 0 };
+        if (muridStats[r.nama][r.keterangan] !== undefined) muridStats[r.nama][r.keterangan]++;
+        muridStats[r.nama].total++;
+      });
+
+      let muridRowsHtml = "";
+      Object.keys(muridStats).sort().forEach((nama, idx) => {
+        const st = muridStats[nama];
+        const pct = st.total > 0 ? Math.round((st.Hadir / st.total) * 100) : 0;
+        muridRowsHtml += `<tr><td style="text-align:center">${idx + 1}</td><td>${nama}</td><td style="text-align:center">${st.Hadir}</td><td style="text-align:center">${st.Sakit}</td><td style="text-align:center">${st.Izin}</td><td style="text-align:center">${st.Alpa}</td><td style="text-align:center">${st.Dispen}</td><td style="text-align:center; font-weight:bold;">${pct}%</td></tr>`;
+      });
+
+      let detailRowsHtml = "";
+      rekapAbsenFiltered.forEach((r, i) => {
+        detailRowsHtml += `<tr><td style="text-align:center">${i + 1}</td><td style="mso-number-format:'\\@';">${r.nisn}</td><td>${r.nama}</td><td style="text-align:center">${r.jk}</td><td style="text-align:center">${r.kelas}</td><td style="text-align:center">${r.tanggal}</td><td style="text-align:center; font-weight:bold;">${r.keterangan}</td><td>${r.mapel}</td><td style="text-align:center">${r.semester}</td><td style="text-align:center">${r.tahunAjaran}</td></tr>`;
+      });
+
+      const filterGuruVal = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '');
+      const sumberData = p.linkHasilAbsen ? String(p.linkHasilAbsen).trim() : '';
+      const sumberDataHtml = sumberData 
+        ? `<div style="font-size: 10px; color: #475569; margin: 4px 0 12px 0; text-align: center;"><strong>Sumber Data:</strong> ${sumberData.startsWith('http') ? `<a href="${sumberData}" target="_blank" style="color: #1e40af; text-decoration: underline;">${sumberData}</a>` : sumberData}</div>` 
+        : '';
+
+      const win = window.open("", "_blank");
+      win.document.write(`
+        <!DOCTYPE html><html><head><title>Laporan Rekapitulasi Presensi Murid</title><style>
+          body { font-family: 'Arial', sans-serif; font-size: 11px; padding: 25px; margin: 0; color: #1e293b; }
+          .header { text-align: center; padding-bottom: 8px; }
+          .kop-divider { border-top: 3px solid #1e40af; border-bottom: 1px solid #1e40af; height: 2px; margin-top: 6px; margin-bottom: 16px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+          th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+          th { background-color: #f8fafc; text-align: center; font-weight: bold; }
+          .ttd-box { margin-top: 35px; float: right; width: 220px; text-align: center; font-size: 11px; }
+          @media print { 
+            @page { size: auto; margin: 10mm; } 
+            body { padding: 0; margin: 0; }
+            .no-print { display: none; } 
+          }
+        </style></head><body>
+          <div class="no-print" style="margin-bottom: 15px; background: #f1f5f9; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="window.print()" style="padding: 9px 18px; background: #1e40af; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;">Cetak Dokumen PDF</button>
+            <span style="font-size: 11px; color: #64748b;">*Gunakan opsi 'Save as PDF' di browser Anda untuk menyimpan berkas.</span>
+          </div>
+          ${getKopSuratHtml('LAPORAN REKAPITULASI KEHADIRAN SISWA')}
+          <p style="font-size: 11px; margin-bottom: 4px; text-align: center;">
+            <strong>Nama Guru:</strong> ${filterGuruVal || 'Semua'} &nbsp;|&nbsp; 
+            <strong>Kelas:</strong> ${document.getElementById('filter-rekap-kelas').value || 'Semua'} &nbsp;|&nbsp; 
+            <strong>Semester:</strong> ${document.getElementById('filter-rekap-semester').value || 'Semua'} &nbsp;|&nbsp; 
+            <strong>Tahun Ajaran:</strong> ${document.getElementById('filter-rekap-ta').value || 'Semua'} &nbsp;|&nbsp;
+            <strong>Mata Pelajaran:</strong> ${document.getElementById('filter-rekap-mapel').value || 'Semua'}
+          </p>
+          ${sumberDataHtml}
+          <h4 style="margin-bottom: 6px; margin-top: 16px; color: #1e40af;">1. Ringkasan Persentase Kehadiran Per Siswa</h4>
+          <table>
+            <thead><tr><th style="width:30px;">No</th><th>Nama Siswa</th><th style="width:50px;">Hadir</th><th style="width:50px;">Sakit</th><th style="width:50px;">Izin</th><th style="width:50px;">Alpa</th><th style="width:50px;">Dispen</th><th style="width:65px;">% Hadir</th></tr></thead>
+            <tbody>${muridRowsHtml || '<tr><td colspan="8" style="text-align:center;">Tidak ada data.</td></tr>'}</tbody>
+          </table>
+
+          <h4 style="margin-bottom: 6px; margin-top: 24px; color: #1e40af;">2. Rincian Histori Presensi Harian</h4>
+          <table>
+            <thead><tr><th>No</th><th>NISN</th><th>Nama Siswa</th><th>L/P</th><th>Kelas</th><th>Tanggal</th><th>Status</th><th>Mata Pelajaran</th><th>Smt</th><th>TA</th></tr></thead>
+            <tbody>${detailRowsHtml || '<tr><td colspan="10" style="text-align:center;">Tidak ada rincian data.</td></tr>'}</tbody>
+          </table>
+
+          <div class="ttd-box">
+            <p>Guru Mata Pelajaran,</p>
+            <br><br><br><br>
+            <p><strong style="text-decoration: underline;">${(ttdNama && ttdNama !== '-') ? ttdNama : '........................................'}</strong><br>NIP. ${(ttdNip && ttdNip !== '-') ? ttdNip : '....................................'}</p>
+          </div>
+
+          <div style="margin-top: 35px; border-top: 1px dashed #cbd5e1; padding-top: 8px; font-size: 9px; color: #64748b; display: flex; justify-content: space-between; clear: both;">
+            <span><strong>Sumber Data:</strong> ${sumberData || 'Sheet Pengaturan Kolom I'}</span>
+            <span>Dicetak via SIGURU &bull; ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          </div>
+        </body></html>
+      `);
+      win.document.close();
+    }
+  </script>
+</body>
+</html>

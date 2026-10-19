@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Jurnal Mengajar Guru - SIGURU</title>
+  <?!= include('StyleCSS'); ?>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
+  
+  <?!= include('Sidebar'); ?>
+
+  <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
+    <?!= include('Header', { pageTitle: 'Jurnal Kegiatan Mengajar (KBM)' }); ?>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
+      
+      <!-- FORM UTAMA JURNAL -->
+      <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-sm max-w-4xl mx-auto space-y-6">
+        
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-100 shadow-sm">
+              <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">Formulir Log Kegiatan Mengajar</h2>
+              <p class="text-xs text-slate-400">Dokumentasikan agenda pembelajaran dan bukti kegiatan harian</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-200">
+            KBM Harian
+          </span>
+        </div>
+
+        <form id="form-jurnal" onsubmit="handleFormJurnalSubmit(event)" class="space-y-6">
+          
+          <!-- BARIS 1: IDENTITAS GURU & WAKTU -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Tanggal Mengajar</label>
+              <input type="date" id="jurnal-tanggal" required 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Nama Guru</label>
+              <select id="jurnal-guru" onchange="autoFillPertemuan()" required 
+                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Semester</label>
+              <select id="jurnal-semester" onchange="autoFillPertemuan()" required 
+                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                <option value="Ganjil">Ganjil</option>
+                <option value="Genap">Genap</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Tahun Ajaran</label>
+              <select id="jurnal-ta" onchange="autoFillPertemuan()" required 
+                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+            </div>
+          </div>
+
+          <!-- BARIS 2: MAPEL, KELAS, JAM & PERTEMUAN KE -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="lg:col-span-2">
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Mata Pelajaran</label>
+              <select id="jurnal-mapel" onchange="autoFillPertemuan()" required 
+                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Rombel / Kelas</label>
+              <select id="jurnal-kelas" onchange="autoFillPertemuan()" required 
+                      class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Jam Ke</label>
+              <input type="text" id="jurnal-jam" required placeholder="Cth: 1-3" 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                <span>Pertemuan Ke</span>
+                <i class="fa-solid fa-magic-wand-sparkles text-brand-500 text-[10px]" title="Otomatis dihitung dari database"></i>
+              </label>
+              <input type="number" id="jurnal-pertemuan" readonly 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-100 border-slate-200 font-extrabold text-brand-700 text-center cursor-not-allowed">
+            </div>
+          </div>
+          
+          <!-- BARIS 3: MODEL PEMBELAJARAN, KETUNTASAN, SISWA TIDAK HADIR -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Model / Metode Pembelajaran</label>
+              <input type="text" id="jurnal-model" placeholder="Cth: PBL, Diskusi, Demonstrasi" 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Siswa Tidak Hadir (Jika Ada)</label>
+              <input type="text" id="jurnal-tidak-hadir" placeholder="Cth: Budi (S), Siti (A)" 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Ketuntasan Materi</label>
+              <input type="text" id="jurnal-ketuntasan" list="list-ketuntasan" placeholder="Pilih atau ketik..." 
+                     class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+              <datalist id="list-ketuntasan">
+                <option value="Tuntas"></option>
+                <option value="Berlanjut"></option>
+                <option value="-"></option>
+              </datalist>
+            </div>
+          </div>
+
+          <!-- BARIS 4: RINCIAN MATERI PEMBELAJARAN -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Rincian Materi Pembelajaran</label>
+            <textarea id="jurnal-materi" required rows="3" placeholder="Tuliskan tujuan pembelajaran, topik bahasan, atau materi yang diajarkan hari ini secara rinci..." 
+                      class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition leading-relaxed"></textarea>
+          </div>
+          
+          <!-- BARIS 5: LAMPIRAN BUKTI KEGIATAN (GOOGLE DRIVE / LINK) -->
+          <div class="p-5 bg-gradient-to-br from-blue-50/60 to-slate-50 border border-blue-100 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-extrabold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-paperclip text-brand-600"></i>
+                <span>Lampiran Bukti Kegiatan Belajar Mengajar</span>
+              </label>
+              <span class="text-[10px] text-slate-500">*Mendukung upload ke Google Drive</span>
+            </div>
+
+            <!-- Radio Mode Pemilihan -->
+            <div class="flex gap-6 py-1">
+              <label class="text-xs flex items-center cursor-pointer font-semibold text-slate-700">
+                <input type="radio" name="mode-bukti" value="file" class="mr-2 accent-brand-600" onchange="toggleBuktiMode()" checked>
+                <span>Upload Foto / Berkas (Drive)</span>
+              </label>
+              <label class="text-xs flex items-center cursor-pointer font-semibold text-slate-700">
+                <input type="radio" name="mode-bukti" value="link" class="mr-2 accent-brand-600" onchange="toggleBuktiMode()">
+                <span>Tautan / Link Eksternal</span>
+              </label>
+            </div>
+
+            <!-- Container File Upload -->
+            <div id="container-bukti-file" class="bg-white p-3 rounded-xl border border-dashed border-blue-300">
+              <input type="file" id="jurnal-bukti-file" multiple accept="image/*,application/pdf" 
+                     class="w-full text-xs file:mr-3 file:border-0 file:bg-blue-50 hover:file:bg-blue-100 file:text-brand-700 file:px-4 file:py-2 file:rounded-xl file:font-bold file:cursor-pointer transition cursor-pointer text-slate-500">
+              <p class="text-[10px] text-slate-400 mt-2 ml-1 flex items-center gap-1">
+                <i class="fa-solid fa-circle-info text-brand-500"></i>
+                <span>Anda dapat memilih lebih dari 1 file foto dokumentasi KBM secara bersamaan.</span>
+              </p>
+            </div>
+
+            <!-- Container Link Eksternal -->
+            <div id="container-bukti-link" class="hidden">
+              <input type="url" id="jurnal-bukti-link" placeholder="https://drive.google.com/... atau tautan dokumentasi" 
+                     class="w-full text-xs p-3 border rounded-xl bg-white border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 transition">
+            </div>
+          </div>
+          
+          <!-- TOMBOL SUBMIT -->
+          <div class="flex flex-col sm:flex-row justify-end pt-3 border-t border-slate-100 gap-3">
+            <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-600/25 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Simpan & Laporkan Jurnal</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+    </main>
+  </div>
+
+  <?!= include('AppJS'); ?>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById('jurnal-tanggal').valueAsDate = new Date();
+      setupGuruField();
+    });
+
+    function setupGuruField() {
+      const userRole = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const selGuru = document.getElementById('jurnal-guru');
+      if (!selGuru) return;
+
+      const guruList = (window.globalData && window.globalData.guruList) ? window.globalData.guruList : [];
+      const guruNames = guruList.map(g => g.nama);
+
+      if (userRole === 'Guru') {
+        const guruVal = loggedGuru || getCurrentUser();
+        selGuru.innerHTML = `<option value="${guruVal}">${guruVal}</option>`;
+        selGuru.value = guruVal;
+        selGuru.disabled = true;
+        selGuru.classList.add('bg-slate-100', 'cursor-not-allowed', 'font-bold', 'text-slate-700');
+      } else {
+        selGuru.disabled = false;
+        selGuru.classList.remove('bg-slate-100', 'cursor-not-allowed', 'font-bold');
+        populateSelect('jurnal-guru', guruNames, '-- Pilih Nama Guru --', loggedGuru);
+      }
+    }
+
+    function onDataLoaded(data) {
+      if (!data) return;
+      const p = data.pengaturan;
+      setupGuruField();
+
+      populateSelect('jurnal-mapel', p.mapelList, '-- Pilih Mapel --');
+      populateSelect('jurnal-kelas', p.kelasList, '-- Pilih Kelas --');
+      populateSelect('jurnal-ta', p.taList, '-- Pilih TA --');
+
+      autoFillPertemuan();
+    }
+
+    function autoFillPertemuan() {
+      const g = document.getElementById('jurnal-guru').value;
+      const sem = document.getElementById('jurnal-semester').value;
+      const ta = document.getElementById('jurnal-ta').value;
+      const m = document.getElementById('jurnal-mapel').value;
+      const k = document.getElementById('jurnal-kelas').value;
+
+      if (g && sem && ta && m && k) {
+        google.script.run
+          .withSuccessHandler(val => {
+            document.getElementById('jurnal-pertemuan').value = val || 1;
+          })
+          .getAutoPertemuan(g, sem, ta, m, k);
+      }
+    }
+
+    function toggleBuktiMode() {
+      const mode = document.querySelector('input[name="mode-bukti"]:checked').value;
+      document.getElementById('container-bukti-file').style.display = mode === 'file' ? 'block' : 'none';
+      document.getElementById('container-bukti-link').style.display = mode === 'link' ? 'block' : 'none';
+    }
+
+    const readFileBase64 = file => new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve({ base64: r.result, name: file.name, mimeType: file.type });
+      r.onerror = e => reject(e);
+      r.readAsDataURL(file);
+    });
+
+    async function handleFormJurnalSubmit(e) {
+      e.preventDefault();
+
+      const mode = document.querySelector('input[name="mode-bukti"]:checked').value;
+      let files = [];
+      let link = "";
+
+      if (mode === 'link') {
+        link = document.getElementById('jurnal-bukti-link').value.trim();
+      } else {
+        const fi = document.getElementById('jurnal-bukti-file');
+        if (fi.files.length > 0) {
+          showLoading('Mempersiapkan Berkas Unggahan...');
+          for (let i = 0; i < fi.files.length; i++) {
+            files.push(await readFileBase64(fi.files[i]));
+          }
+        }
+      }
+
+      const userRole = getCurrentRole();
+      const loggedGuru = getLoggedInNamaGuru();
+      const guruName = (userRole === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('jurnal-guru').value || loggedGuru || getCurrentUser());
+
+      const payload = {
+        tanggal: document.getElementById('jurnal-tanggal').value,
+        namaGuru: guruName,
+        semester: document.getElementById('jurnal-semester').value,
+        tahunAjaran: document.getElementById('jurnal-ta').value,
+        mapel: document.getElementById('jurnal-mapel').value,
+        jamKe: document.getElementById('jurnal-jam').value,
+        kelas: document.getElementById('jurnal-kelas').value,
+        pertemuanKe: document.getElementById('jurnal-pertemuan').value,
+        modelPembelajaran: document.getElementById('jurnal-model').value,
+        materiPembelajaran: document.getElementById('jurnal-materi').value,
+        muridTidakHadir: document.getElementById('jurnal-tidak-hadir').value,
+        ketuntasanMateri: document.getElementById('jurnal-ketuntasan').value,
+        buktiKegiatan: link,
+        fileDataArray: files
+      };
+
+      showLoading('Menyimpan Jurnal & Mengunggah File ke Drive...');
+      google.script.run
+        .withSuccessHandler(function(res) {
+          closeLoading();
+          if (res && res.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Jurnal Berhasil Disimpan!',
+              text: 'Data jurnal KBM Anda telah tercatat dengan aman di spreadsheet.',
+              confirmButtonColor: '#2563eb',
+              confirmButtonText: 'Lihat Hasil Jurnal',
+              showCancelButton: true,
+              cancelButtonText: 'Input Lagi'
+            }).then(result => {
+              if (result.isConfirmed) {
+                navigateTo('hasil-jurnal');
+              } else {
+                document.getElementById('form-jurnal').reset();
+                document.getElementById('jurnal-tanggal').valueAsDate = new Date();
+                toggleBuktiMode();
+                autoFillPertemuan();
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal Menyimpan Jurnal',
+              text: (res && res.message) ? res.message : 'Terjadi kegagalan saat menyimpan data.'
+            });
+          }
+        })
+        .withFailureHandler(function(err) {
+          closeLoading();
+          Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan Sistem',
+            text: err.message
+          });
+        })
+        .submitJurnal(payload);
+    }
+  </script>
+</body>
+</html>

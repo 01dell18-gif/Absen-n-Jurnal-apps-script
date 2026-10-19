@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Masuk - SIGURU</title>
+  <?!= include('StyleCSS'); ?>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-brand-950 to-slate-950 min-h-screen flex items-center justify-center p-4 antialiased">
+
+  <div class="w-full max-w-md">
+    <!-- Card Utama Login -->
+    <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/10 relative overflow-hidden">
+      
+      <!-- Akses Grafis Dekoratif -->
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Header Logo & Branding -->
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 mx-auto bg-slate-50 rounded-2xl border border-slate-200 p-2.5 mb-3 flex items-center justify-center shadow-inner">
+          <img id="login-portal-logo" src="https://via.placeholder.com/60" alt="Logo Sekolah" class="w-full h-full object-contain">
+        </div>
+        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight" id="login-portal-sekolah">
+          SISTEM INFORMASI GURU
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">Absensi Murid & Jurnal KBM Guru Online</p>
+      </div>
+
+      <!-- Form Login -->
+      <form onsubmit="handleDirectLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Username Pengguna</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-sm">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input type="text" id="direct-user" required placeholder="Ketik username Anda..." 
+                   class="w-full text-xs p-3.5 pl-10 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Kata Sandi (Password)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-sm">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="direct-pass" required placeholder="••••••••" 
+                   class="w-full text-xs p-3.5 pl-10 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
+          </div>
+        </div>
+
+        <button type="submit" 
+                class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-600/30 transition mt-3 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Masuk ke Sistem</span>
+        </button>
+      </form>
+
+      <!-- Akses Publik Divider -->
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <p class="text-xs text-slate-500 mb-3">Tidak memiliki akun login?</p>
+        <button onclick="goToPage('rekap-absen')" 
+                class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-eye text-emerald-600"></i>
+          <span>Masuk Mode Publik (Lihat Laporan)</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Footer Copyright -->
+    <p class="text-center text-slate-400 text-xs mt-6">
+      &copy; Google Apps Script Cloud Solution • SIGURU v3.0
+    </p>
+  </div>
+
+  <?!= include('AppJS'); ?>
+
+  <script>
+    function onDataLoaded(data) {
+      if (!data || !data.pengaturan) return;
+      const p = data.pengaturan;
+      if (p.logoUrl) document.getElementById('login-portal-logo').src = p.logoUrl;
+      if (p.namaSekolah) document.getElementById('login-portal-sekolah').innerText = p.namaSekolah;
+    }
+
+    function handleDirectLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('direct-user').value.trim();
+      const p = document.getElementById('direct-pass').value.trim();
+
+      if (!u || !p) {
+        showToast('warning', 'Perhatian', 'Username dan password wajib diisi.');
+        return;
+      }
+
+      showLoading('Mengecek Kredensial Pengguna...');
+      google.script.run
+        .withSuccessHandler(function(res) {
+          closeLoading();
+          if (res && res.success) {
+            setSessionUser(u, res.role, res.namaGuru || '', res.nip || '');
+            Swal.fire({
+              icon: 'success',
+              title: 'Login Berhasil',
+              text: `Selamat datang, ${res.namaGuru || u}! Anda masuk sebagai ${res.role}.`,
+              timer: 1800,
+              showConfirmButton: false
+            }).then(() => {
+              navigateTo('dashboard');
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Login Gagal',
+              text: (res && res.message) ? res.message : 'Username atau password salah!'
+            });
+          }
+        })
+        .withFailureHandler(function(err) {
+          closeLoading();
+          Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan Sistem',
+            text: err.message
+          });
+        })
+        .checkLogin(u, p);
+    }
+  </script>
+</body>
+</html>

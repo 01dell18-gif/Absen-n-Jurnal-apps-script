@@ -1,0 +1,95 @@
+<!-- TOP HEADER NAVBAR COMPONENT -->
+<header class="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 shadow-sm z-30 flex-shrink-0 w-full sticky top-0">
+  
+  <div class="flex items-center space-x-3">
+    <!-- Hamburger Button -->
+    <button onclick="toggleSidebar()" class="text-slate-600 hover:text-brand-600 p-2 rounded-xl hover:bg-slate-100 transition-all focus:outline-none ring-1 ring-slate-200" title="Buka/Tutup Navigasi">
+      <i class="fa-solid fa-bars text-lg"></i>
+    </button>
+    
+    <!-- BRAND SEKOLAH (Tampil jika sidebar tertutup di mobile) -->
+    <div id="header-brand-info" class="hidden sm:flex items-center space-x-2.5 border-l border-slate-300 pl-3">
+      <img id="header-logo" src="https://via.placeholder.com/60" alt="Logo" class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain border border-slate-200 shadow-sm">
+      <span id="header-sekolah" class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-tight truncate max-w-[180px] lg:max-w-xs">NAMA SEKOLAH</span>
+    </div>
+
+    <!-- Page Title Badge -->
+    <div class="flex items-center gap-2">
+      <span class="text-slate-300 hidden sm:inline">•</span>
+      <h1 id="page-title" class="text-sm sm:text-base font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+        <?= (typeof pageTitle !== 'undefined') ? pageTitle : 'Sistem Informasi Guru' ?>
+      </h1>
+    </div>
+  </div>
+
+  <!-- RIGHT ACTION BUTTONS -->
+  <div class="flex items-center space-x-2 sm:space-x-3">
+    <!-- Refresh Button -->
+    <button onclick="refreshAllData()" id="btn-refresh" class="p-2 sm:px-3 sm:py-2 text-slate-600 hover:text-brand-600 hover:bg-brand-50 border border-slate-200 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold" title="Sinkronkan Data">
+      <i class="fa-solid fa-rotate-right text-sm" id="icon-refresh"></i>
+      <span class="hidden md:inline">Sinkron Data</span>
+    </button>
+
+    <!-- Role Badge (Guru / Admin / Tamu) -->
+    <div id="badge-user-role" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+      <span class="w-2 h-2 rounded-full bg-slate-400" id="indicator-role"></span>
+      <span id="label-user-role">Tamu</span>
+    </div>
+
+    <!-- Login Button (Visible when Guest) -->
+    <button id="btn-login-trigger" onclick="openLoginModal()" class="px-3.5 sm:px-4 py-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center gap-2 transition-all">
+      <i class="fa-solid fa-right-to-bracket"></i>
+      <span>Login</span>
+    </button>
+
+    <!-- Logout Button (Visible when logged in) -->
+    <button id="btn-logout" onclick="logoutUser()" class="hidden px-3.5 sm:px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs shadow-sm flex items-center gap-2 transition-all">
+      <i class="fa-solid fa-power-off"></i>
+      <span class="hidden sm:inline">Keluar</span>
+    </button>
+  </div>
+</header>
+
+<!-- UNIVERSAL LOGIN MODAL -->
+<div id="modal-login" class="fixed inset-0 bg-slate-950/70 hidden z-[70] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-7 sm:p-8 relative border border-slate-100 transform transition-all">
+    <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto bg-brand-50 rounded-2xl border border-brand-100 p-2 mb-3 flex items-center justify-center shadow-inner">
+        <img id="login-modal-logo" src="https://via.placeholder.com/60" alt="Logo" class="w-full h-full object-contain">
+      </div>
+      <h2 class="text-base font-extrabold text-slate-900">Portal Masuk Sistem</h2>
+      <p class="text-xs text-slate-500 mt-1">Silakan masukkan username dan password Anda</p>
+    </div>
+
+    <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Username</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">
+            <i class="fa-solid fa-user"></i>
+          </span>
+          <input type="text" id="login-user" required placeholder="Cth: admin / guru1" 
+                 class="w-full text-xs p-3 pl-9 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Password</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">
+            <i class="fa-solid fa-lock"></i>
+          </span>
+          <input type="password" id="login-pass" required placeholder="••••••••" 
+                 class="w-full text-xs p-3 pl-9 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+        </div>
+      </div>
+      <button type="submit" id="btn-submit-login" 
+              class="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/25 transition mt-3 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Masuk ke Akun</span>
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Data Murid & Guru - SIGURU</title>
+  <?!= include('StyleCSS'); ?>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
+  
+  <?!= include('Sidebar'); ?>
+
+  <div class="flex-1 flex flex-col h-screen overflow-hidden w-full">
+    <?!= include('Header', { pageTitle: 'Manajemen Master Data Sekolah' }); ?>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 w-full bg-slate-50 space-y-6">
+      
+      <!-- TOOLBAR ATAS: IMPORT & EXPORT EXCEL -->
+      <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <span>Sinkronisasi Data Excel</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Kelola data induk siswa dan dewan guru secara massal via spreadsheet.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5 w-full md:w-auto">
+          <!-- Input File Tersembunyi -->
+          <input type="file" id="file-import-excel" accept=".xlsx, .xls" class="hidden" onchange="processImportExcel(event)">
+          
+          <button onclick="document.getElementById('file-import-excel').click()" 
+                  class="flex-1 md:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-import"></i>
+            <span>Unggah Excel (Replace)</span>
+          </button>
+          
+          <button onclick="exportDataMuridGuruExcel()" 
+                  class="flex-1 md:flex-none px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Cadangkan Excel (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PERINGATAN IMPORT REPLACE -->
+      <div class="bg-amber-50/80 border border-amber-200 text-amber-900 p-4 rounded-2xl text-xs font-medium leading-relaxed flex items-start gap-3">
+        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base mt-0.5 flex-shrink-0"></i>
+        <div>
+          <strong class="font-bold">Ketentuan Pengunggahan File:</strong> Proses import file Excel akan menggantikan (*replace*) seluruh data di sheet <code>DataMuridGuru</code>. Pastikan susunan kolom berkas sesuai format: Kolom A (NISN), B (Nama Murid), C (Jenis Kelamin), D (Kelas), F (Nama Guru), dan G (NIP).
+        </div>
+      </div>
+      
+      <!-- TABEL DATA MURID & DATA GURU -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+        
+        <!-- CARD DATA MURID -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-user-graduate text-brand-600"></i>
+              <h3 class="font-bold text-sm text-slate-800">Data Induk Murid</h3>
+            </div>
+            <span id="count-data-murid" class="text-brand-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full text-[11px] font-bold">
+              0 Siswa
+            </span>
+          </div>
+
+          <div>
+            <input type="text" id="search-murid" placeholder="Cari nama atau NISN murid..." oninput="filterMuridTable()" 
+                   class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition mb-2">
+          </div>
+
+          <div class="overflow-x-auto max-h-[460px] border border-slate-200 rounded-xl">
+            <table class="w-full text-xs text-left whitespace-nowrap">
+              <thead class="bg-slate-50 font-bold sticky top-0 border-b border-slate-200 text-[10px] uppercase text-slate-500">
+                <tr>
+                  <th class="p-3 w-28">NISN</th>
+                  <th class="p-3">Nama Lengkap Siswa</th>
+                  <th class="p-3 w-16 text-center">L/P</th>
+                  <th class="p-3 w-24">Kelas</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-murid-all" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CARD DATA GURU -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-chalkboard-user text-emerald-600"></i>
+              <h3 class="font-bold text-sm text-slate-800">Data Dewan Guru</h3>
+            </div>
+            <span id="count-data-guru" class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-[11px] font-bold">
+              0 Guru
+            </span>
+          </div>
+
+          <div>
+            <input type="text" id="search-guru" placeholder="Cari nama atau NIP guru..." oninput="filterGuruTable()" 
+                   class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition mb-2">
+          </div>
+
+          <div class="overflow-x-auto max-h-[460px] border border-slate-200 rounded-xl">
+            <table class="w-full text-xs text-left whitespace-nowrap">
+              <thead class="bg-slate-50 font-bold sticky top-0 border-b border-slate-200 text-[10px] uppercase text-slate-500">
+                <tr>
+                  <th class="p-3 w-12 text-center">No</th>
+                  <th class="p-3">Nama Lengkap Guru</th>
+                  <th class="p-3 w-36">NIP</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-guru-all" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <?!= include('AppJS'); ?>
+
+  <script>
+    function onDataLoaded(data) {
+      renderMuridTable();
+      renderGuruTable();
+    }
+
+    function renderMuridTable(filterText = '') {
+      const tbody = document.getElementById('tbody-murid-all');
+      tbody.innerHTML = "";
+      
+      const list = window.globalData.muridList || [];
+      document.getElementById('count-data-murid').innerText = list.length + ' Siswa';
+
+      const filtered = list.filter(m => 
+        !filterText || 
+        (m.nama && m.nama.toLowerCase().includes(filterText.toLowerCase())) ||
+        (m.nisn && m.nisn.includes(filterText)) ||
+        (m.kelas && m.kelas.toLowerCase().includes(filterText.toLowerCase()))
+      );
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center p-6 text-slate-400">Tidak ada data murid ditemukan.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(m => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 font-mono text-slate-500 text-[11px]">${m.nisn}</td>
+            <td class="p-3 font-semibold text-slate-800">${m.nama}</td>
+            <td class="p-3 text-center text-slate-500">${m.jk || '-'}</td>
+            <td class="p-3 text-slate-600 font-medium">${m.kelas}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterMuridTable() {
+      const q = document.getElementById('search-murid').value.trim();
+      renderMuridTable(q);
+    }
+
+    function renderGuruTable(filterText = '') {
+      const tbody = document.getElementById('tbody-guru-all');
+      tbody.innerHTML = "";
+      
+      const list = window.globalData.guruList || [];
+      document.getElementById('count-data-guru').innerText = list.length + ' Guru';
+
+      const filtered = list.filter(g => 
+        !filterText || 
+        (g.nama && g.nama.toLowerCase().includes(filterText.toLowerCase())) ||
+        (g.nip && g.nip.includes(filterText))
+      );
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-6 text-slate-400">Tidak ada data guru ditemukan.</td></tr>';
+        return;
+      }
+
+      filtered.forEach((g, i) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${i + 1}</td>
+            <td class="p-3 font-semibold text-slate-800">${g.nama}</td>
+            <td class="p-3 font-mono text-slate-500 text-[11px]">${g.nip || '-'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterGuruTable() {
+      const q = document.getElementById('search-guru').value.trim();
+      renderGuruTable(q);
+    }
+
+    function exportDataMuridGuruExcel() {
+      const ws_data = [["NISN", "Nama Murid", "Jenis Kelamin", "Kelas", "", "Nama Guru", "NIP"]];
+      const mList = window.globalData.muridList || [];
+      const gList = window.globalData.guruList || [];
+      const maxRows = Math.max(mList.length, gList.length);
+
+      for (let i = 0; i < maxRows; i++) {
+        const m = mList[i] || {};
+        const g = gList[i] || {};
+        ws_data.push([
+          m.nisn ? "'" + m.nisn : "",
+          m.nama || "",
+          m.jk || "",
+          m.kelas || "",
+          "",
+          g.nama || "",
+          g.nip ? "'" + g.nip : ""
+        ]);
+      }
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, "DataMuridGuru");
+      XLSX.writeFile(wb, "Backup_Data_Murid_Guru.xlsx");
+      showToast('success', 'Berhasil', 'File backup Excel telah diunduh.');
+    }
+
+    function processImportExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      Swal.fire({
+        title: 'Konfirmasi Timpa Data',
+        html: `Apakah Anda yakin ingin mengimpor berkas <strong>${file.name}</strong>?<br><span class="text-xs text-rose-600 font-semibold">Seluruh data murid & guru lama akan digantikan dengan isi berkas ini.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Timpa & Simpan',
+        cancelButtonText: 'Batal'
+      }).then(res => {
+        if (!res.isConfirmed) {
+          document.getElementById('file-import-excel').value = "";
+          return;
+        }
+
+        showLoading('Mengekstrak Dokumen Excel...');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            const payload = [];
+            for (let i = 1; i < json.length; i++) {
+              if (json[i] && (json[i][1] || json[i][5])) {
+                payload.push({
+                  nisn: json[i][0] || "",
+                  namaMurid: json[i][1] || "",
+                  jk: json[i][2] || "",
+                  kelas: json[i][3] || "",
+                  namaGuru: json[i][5] || "",
+                  nip: json[i][6] || ""
+                });
+              }
+            }
+
+            if (payload.length === 0) {
+              closeLoading();
+              Swal.fire({
+                icon: 'error',
+                title: 'Data Kosong',
+                text: 'Tidak ada baris data murid atau guru yang valid di dalam file Excel.'
+              });
+              return;
+            }
+
+            showLoading(`Mengunggah & Menyimpan ${payload.length} Baris Data ke Spreadsheet...`);
+            google.script.run
+              .withSuccessHandler(function(res) {
+                closeLoading();
+                document.getElementById('file-import-excel').value = "";
+                if (res && res.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Import Selesai',
+                    text: `Berhasil memperbarui ${res.count} baris data murid dan guru.`
+                  }).then(() => {
+                    refreshAllData();
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Memproses Data',
+                    text: (res && res.message) ? res.message : 'Terjadi kegagalan di server Apps Script.'
+                  });
+                }
+              })
+              .withFailureHandler(function(err) {
+                closeLoading();
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Kesalahan Sistem',
+                  text: err.message
+                });
+              })
+              .importDataMuridGuru(payload);
+
+          } catch (err) {
+            closeLoading();
+            Swal.fire({
+              icon: 'error',
+              title: 'Format File Tidak Sesuai',
+              text: 'Gagal membaca isi berkas: ' + err.message
+            });
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+  </script>
+</body>
+</html>

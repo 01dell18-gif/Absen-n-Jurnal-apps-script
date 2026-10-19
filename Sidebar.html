@@ -1,0 +1,195 @@
+<!-- SIDEBAR NAVIGATION COMPONENT -->
+<aside id="sidebar" class="bg-gradient-to-b from-slate-900 via-brand-950 to-slate-950 text-white w-64 flex-shrink-0 flex flex-col fixed md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out z-50 shadow-2xl md:shadow-none border-r border-slate-800/60">
+  
+  <!-- Tombol Close Sidebar (Hanya Muncul di Mobile) -->
+  <button onclick="toggleSidebar()" class="absolute top-3 right-4 text-slate-400 hover:text-white md:hidden z-50 bg-slate-800/70 p-2 rounded-lg backdrop-blur">
+    <i class="fa-solid fa-xmark text-lg"></i>
+  </button>
+
+  <!-- BRAND HEADER: Logo & Identitas Sekolah -->
+  <div class="p-5 border-b border-white/10 flex flex-col items-center text-center pt-8 md:pt-6 relative">
+    <div class="relative mb-2.5">
+      <div class="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg shadow-black/30 flex items-center justify-center ring-2 ring-brand-500/30">
+        <img id="sidebar-logo" src="https://via.placeholder.com/60" alt="Logo Sekolah" class="w-full h-full object-contain rounded-xl">
+      </div>
+    </div>
+    <span id="sidebar-sekolah" class="font-extrabold text-xs sm:text-sm uppercase tracking-wider text-white line-clamp-2 px-1">
+      NAMA SEKOLAH
+    </span>
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-full bg-brand-500/20 border border-brand-500/30 text-[10px] font-semibold text-brand-200">
+      <i class="fa-solid fa-graduation-cap text-emerald-400"></i> Absensi & Jurnal v3.0
+    </div>
+  </div>
+  
+  <!-- MENU NAVIGASI -->
+  <!-- MENU NAVIGASI -->
+  <nav class="flex-1 overflow-y-auto py-4 px-3 text-xs font-medium space-y-4">
+    
+    <!-- GROUP 1: MENU UTAMA (Guru & Admin) -->
+    <div id="nav-group-auth" class="space-y-1">
+      <button type="button" onclick="toggleNavGroup('utama')" 
+              class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition rounded-lg hover:bg-white/5 focus:outline-none">
+        <span class="flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group text-[9px] text-brand-400"></i>
+          <span>Menu Utama</span>
+        </span>
+        <i id="chevron-utama" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+      </button>
+      
+      <div id="submenu-utama" class="space-y-1 transition-all duration-200 pt-1">
+        <a href="javascript:void(0)" onclick="goToPage('dashboard')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'dashboard') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-house-chimney"></i></div>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="goToPage('form-absen')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'form-absen') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-clipboard-user text-emerald-400"></i></div>
+          <span>Absen Murid</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="goToPage('form-jurnal')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'form-jurnal') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-pen-to-square text-amber-400"></i></div>
+          <span>Input Jurnal KBM</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- GROUP 2: MASTER DATA (Admin Only) -->
+    <div id="nav-group-admin" class="space-y-1">
+      <button type="button" onclick="toggleNavGroup('master')" 
+              class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition rounded-lg hover:bg-white/5 focus:outline-none">
+        <span class="flex items-center gap-1.5">
+          <i class="fa-solid fa-database text-[9px] text-purple-400"></i>
+          <span>Master Data</span>
+        </span>
+        <i id="chevron-master" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+      </button>
+
+      <div id="submenu-master" class="space-y-1 transition-all duration-200 pt-1">
+        <a href="javascript:void(0)" onclick="goToPage('master-data')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'master-data') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-file-excel text-emerald-400"></i></div>
+          <span>Master Murid & Guru</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- GROUP 3: LAPORAN & REKAP (Guest, Guru, Admin) -->
+    <div id="nav-group-rekap" class="space-y-1">
+      <button type="button" onclick="toggleNavGroup('rekap')" 
+              class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition rounded-lg hover:bg-white/5 focus:outline-none">
+        <span class="flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-pie text-[9px] text-emerald-400"></i>
+          <span>Laporan & Rekap</span>
+        </span>
+        <i id="chevron-rekap" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+      </button>
+
+      <div id="submenu-rekap" class="space-y-1 transition-all duration-200 pt-1">
+        <a href="javascript:void(0)" onclick="goToPage('rekap-absen')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'rekap-absen') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-chart-column text-emerald-400"></i></div>
+          <span>Rekap Absen Murid</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="goToPage('hasil-jurnal')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'hasil-jurnal') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-book-bookmark text-sky-400"></i></div>
+          <span>Hasil Jurnal Guru</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- GROUP 4: PENGATURAN (Hanya Tampil Jika Hak Akses Admin) -->
+    <div id="nav-group-pengaturan" class="space-y-1 hidden">
+      <button type="button" onclick="toggleNavGroup('pengaturan')" 
+              class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition rounded-lg hover:bg-white/5 focus:outline-none">
+        <span class="flex items-center gap-1.5">
+          <i class="fa-solid fa-gears text-[9px] text-amber-400"></i>
+          <span>Pengaturan</span>
+        </span>
+        <i id="chevron-pengaturan" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+      </button>
+
+      <div id="submenu-pengaturan" class="space-y-1 transition-all duration-200 pt-1">
+        <a href="javascript:void(0)" onclick="goToPage('pengaturan')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'pengaturan') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-sliders text-amber-400"></i></div>
+          <span>Pengaturan Sistem</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="goToPage('user-management')" 
+           class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'user-management') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
+          <div class="w-6 text-center text-base"><i class="fa-solid fa-users-gear text-cyan-400"></i></div>
+          <span>Manajemen User</span>
+        </a>
+      </div>
+    </div>
+
+  </nav>
+
+  <script>
+    function toggleNavGroup(groupKey) {
+      const submenu = document.getElementById('submenu-' + groupKey);
+      const chevron = document.getElementById('chevron-' + groupKey);
+      if (!submenu) return;
+      const isHidden = submenu.classList.contains('hidden');
+      if (isHidden) {
+        submenu.classList.remove('hidden');
+        if (chevron) chevron.classList.remove('-rotate-90');
+        sessionStorage.setItem('siguru_nav_' + groupKey, 'open');
+      } else {
+        submenu.classList.add('hidden');
+        if (chevron) chevron.classList.add('-rotate-90');
+        sessionStorage.setItem('siguru_nav_' + groupKey, 'closed');
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Inisialisasi buka-tutup grup menu sesuai preferensi atau active page
+      const current = "<?= (typeof currentPage !== 'undefined') ? currentPage : '' ?>";
+      const groupMap = {
+        'utama': ['dashboard', 'form-absen', 'form-jurnal'],
+        'master': ['master-data'],
+        'rekap': ['rekap-absen', 'hasil-jurnal'],
+        'pengaturan': ['pengaturan', 'user-management']
+      };
+
+      Object.keys(groupMap).forEach(key => {
+        const submenu = document.getElementById('submenu-' + key);
+        const chevron = document.getElementById('chevron-' + key);
+        if (!submenu) return;
+        const saved = sessionStorage.getItem('siguru_nav_' + key);
+        const isCurrentInGroup = groupMap[key].includes(current);
+
+        if (isCurrentInGroup || saved === 'open' || saved === null) {
+          submenu.classList.remove('hidden');
+          if (chevron) chevron.classList.remove('-rotate-90');
+        } else if (saved === 'closed') {
+          submenu.classList.add('hidden');
+          if (chevron) chevron.classList.add('-rotate-90');
+        }
+      });
+    });
+  </script>
+
+  <!-- FOOTER SIDEBAR: Status User Aktif -->
+  <div class="p-3 border-t border-white/10 bg-black/20">
+    <div class="flex items-center gap-3 px-2 py-1.5 rounded-xl bg-white/5">
+      <div id="user-avatar-badge" class="w-8 h-8 rounded-lg bg-brand-500/30 text-brand-300 flex items-center justify-center font-bold text-xs border border-brand-500/40">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="sidebar-user-name" class="text-xs font-semibold text-white truncate">Tamu (Guest)</p>
+        <p id="sidebar-user-role" class="text-[10px] text-slate-400 truncate">Hak Akses: Publik</p>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<!-- BACKDROP OVERLAY FOR MOBILE -->
+<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/70 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
