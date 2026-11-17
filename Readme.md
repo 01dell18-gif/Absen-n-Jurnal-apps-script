@@ -5,287 +5,341 @@
 [![Platform](https://img.shields.io/badge/Platform-Google%20Apps%20Script-4285F4?logo=google)](https://script.google.com/)
 [![Database](https://img.shields.io/badge/Database-Google%20Sheets-34A853?logo=googlesheets)](https://sheets.google.com/)
 [![Storage](https://img.shields.io/badge/Storage-Google%20Drive-FBBC05?logo=googledrive)](https://drive.google.com/)
+[![Deploy](https://img.shields.io/badge/Deploy-Google%20Clasp%20CLI-black?logo=npm)](https://github.com/google/clasp)
 [![Responsive](https://img.shields.io/badge/Design-Mobile%20Responsive-0284c7)](https://github.com/)
 
 ---
 
 ## 📖 Tentang Aplikasi
 
-**SIGURU v3.0** adalah aplikasi web modern berbasis cloud (*Serverless Google Workspace*) yang dirancang khusus untuk mempermudah bapak/ibu guru dan manajemen sekolah dalam mencatat presensi harian siswa, menyusun jurnal mengajar KBM, mengarsipkan dokumentasi kegiatan ke Google Drive, serta merekap dan mencetak laporan resmi ber-kop surat.
+**SIGURU v3.0** adalah aplikasi web modern berbasis cloud (*Serverless Google Workspace*) yang dirancang khusus untuk mendigitalisasi administrasi kegiatan belajar mengajar (KBM) di sekolah. Aplikasi ini mempermudah pencatatan presensi harian siswa (baik oleh guru maupun perwakilan murid), penyusunan jurnal mengajar KBM harian, pengarsipan dokumentasi kegiatan ke Google Drive, serta rekapitulasi dan pencetakan laporan resmi ber-kop surat.
 
-Aplikasi ini berjalan 100% tanpa biaya server (tanpa sewa VPS maupun cPanel) karena seluruh backend dieksekusi oleh **Google Apps Script**, datanya tersimpan aman di **Google Spreadsheet**, dan foto bukti pembelajaran otomatis terorganisasi di **Google Drive**.
+Aplikasi ini berjalan 100% tanpa biaya server (*zero hosting cost* / tanpa sewa VPS maupun cPanel) karena seluruh backend dieksekusi oleh **Google Apps Script**, datanya tersimpan aman di **Google Spreadsheet**, dan bukti pembelajaran multi-foto otomatis tersimpan di **Google Drive**.
 
 ---
 
-## ✨ Fitur-Fitur Utama
+## ✨ Fitur-Fitur Unggulan
 
 ### 1. 🛡️ Multi-Role & Kontrol Hak Akses (RBAC)
 
 - **Tamu / Publik (Guest)**:
   - Mengakses halaman publik seperti **Laporan Rekap Absen** dan **Log Hasil Jurnal**.
   - Bersifat hanya-baca (*read-only*), tidak dapat mengedit atau menghapus data.
-- **Guru**:
+- **Murid (Perwakilan Kelas / Siswa)**:
+  - Dirancang khusus untuk perwakilan kelas (misal: sekretaris atau ketua kelas) yang bertugas mencatat presensi harian teman sekelasnya.
+  - Tampilan formulir presensi otomatis disederhanakan: kolom **Nama Guru** dan **Mata Pelajaran** disembunyikan.
+  - Pilihan rombel/kelas otomatis terkunci (*read-only*) sesuai kelas asal siswa.
+  - Presensi otomatis tersimpan dengan label `Mata Pelajaran: "Presensi Harian"` dan nama pencatat tertera rapi.
+- **Guru Pengampu**:
   - Mengisi absensi siswa per jam pelajaran atau mata pelajaran.
+  - **Sinkronisasi Presensi Otomatis**: Jika murid sudah mencatat absen di hari yang sama, sistem secara otomatis menarik data kehadiran tersebut ke formulir guru sehingga guru tidak perlu mengabsen ulang dari nol.
   - Mengisi jurnal KBM lengkap dengan upload bukti kegiatan multi-foto ke Google Drive.
-  - Membuka Rekap Absen & Hasil Jurnal dengan filter yang otomatis terkunci pada nama guru yang sedang login.
-  - Mengedit dan menghapus data presensi dan jurnal yang diinput sendiri.
+  - **Sinkronisasi Otomatis Siswa Tidak Hadir di Jurnal**: Daftar murid yang sakit/izin/alpa otomatis tercentang dan terisi langsung ke kolom jurnal KBM.
+  - Filter Rekap Absen & Hasil Jurnal otomatis terkunci pada nama guru yang sedang login.
+  - Hak mengedit dan menghapus data presensi dan jurnal yang diinput sendiri.
 - **Administrator**:
-  - Akses penuh (*Full Control*) ke seluruh data siswa, guru, dan log pembelajaran sekolah.
-  - Akses menu **Master Data** untuk impor/ekspor data murid dan dewan guru.
-  - Akses grup menu khusus **Pengaturan**:
-    - **Pengaturan Sistem**: Mengonfigurasi identitas sekolah, logo, kop surat laporan, tautan sumber data, ID folder Google Drive, dan daftar kurikulum (Mapel, Kelas, Tahun Ajaran).
-    - **Manajemen Pengguna**: Menambah, mengedit, dan menghapus akun guru/admin, serta fitur impor/ekspor massal via Excel (`.xls` / `.xlsx`).
+  - Akses penuh (*Full Control*) ke seluruh data siswa, guru, jurnal, dan log pembelajaran sekolah.
+  - Akses menu **Master Data** untuk impor/ekspor data murid dan dewan guru via Excel.
+  - Akses grup menu **Pengaturan**:
+    - **Pengaturan Sistem**: Mengonfigurasi identitas sekolah, logo, kop surat, tautan sumber data, ID folder Google Drive, parameter kurikulum (Mapel, Kelas, Tahun Ajaran), dan **Tahun Ajaran Aktif**.
+    - **Manajemen Pengguna**: Menambah, mengedit, dan menghapus akun (Admin, Guru, Murid) serta fitur impor/ekspor massal via Excel (`.xls` / `.xlsx`).
 
-### 2. 🏠 Dashboard Adaptif & Personalisasi Pengguna
+---
 
-- **Salam Waktu Dinamis (*Time-Based Greeting*)**: Ucapan selamat datang otomatis berganti sesuai waktu lokal perangkat pengguna:
-  - `Selamat Pagi` (04:00 - 10:59)
-  - `Selamat Siang` (11:00 - 14:59)
-  - `Selamat Sore` (15:00 - 17:59)
-  - `Selamat Malam` (18:00 - 03:59)
-  - Diikuti nama guru yang sedang login (contoh: *Selamat Siang, Guru Mapel 1!* atau *Selamat Malam, Administrator!*).
-- **Penunjuk Tanggal & Jam Realtime**: Menampilkan hari, tanggal lengkap bahasa Indonesia, dan jam digital yang berdetak setiap detik (*live ticker*) bersumber langsung dari perangkat lokal pengguna (`[Hari], [Tanggal] [Bulan] [Tahun] • [HH:mm:ss]`).
-- Indikator status login dan peran aktif di sidebar bawah dan banner dashboard.
-- **Logo & Identitas Sekolah Interaktif (*Direct Home Navigation*)**: Logo dan nama sekolah baik pada Sidebar maupun Navbar atas (Header) kini dirancang sebagai tautan interaktif yang mengarahkan pengguna kembali ke Beranda / Dashboard Utama saat diklik.
-- Navbar atas dilengkapi tombol aksi **Icon-Only** ringkas: Sinkron Data Spreadsheet, Hapus Cache Web & Kembali ke Dashboard, serta Login/Keluar.
-- Ringkasan statistik operasional real-time (Total Siswa, Dewan Guru, Rombel/Kelas, dan Mata Pelajaran).
-- Modul pintasan cepat untuk memulai presensi kelas, mencatat jurnal KBM, dan melihat rekap laporan.
+### 2. ⚡ Otomatisasi Cerdas (*Smart Automation*)
+
+- **Deteksi Semester Otomatis**:
+  - Seluruh formulir (Form Absensi, Form Jurnal, Rekap Absen, Hasil Jurnal) mendeteksi dan mengisi pilihan **Semester** secara otomatis berdasarkan tanggal sistem:
+    - **Ganjil**: Berjalan pada bulan **Juli s.d. Desember** (bulan 7 - 12).
+    - **Genap**: Berjalan pada bulan **Januari s.d. Juni** (bulan 1 - 6).
+- **Tahun Ajaran Aktif Terpusat**:
+  - Administrator dapat menentukan **Tahun Ajaran Aktif** pada menu Pengaturan (tersimpan di Database).
+  - Ketika dipilih, seluruh formulir dan filter laporan di SIGURU akan otomatis terisi dengan Tahun Ajaran yang sedang aktif tersebut.
+- **Salam Waktu Dinamis (*Time-Based Greeting*)**:
+  - Ucapan selamat datang otomatis berganti sesuai waktu lokal perangkat pengguna:
+    - `Selamat Pagi` (04:00 - 10:59)
+    - `Selamat Siang` (11:00 - 14:59)
+    - `Selamat Sore` (15:00 - 17:59)
+    - `Selamat Malam` (18:00 - 03:59)
+- **Jam & Tanggal Digital Real-Time**: Ticker waktu detik berjalan langsung dari perangkat lokal pengguna dalam format bahasa Indonesia resmi.
+
+---
 
 ### 3. 📝 Presensi Murid & Jurnal KBM Terintegrasi
 
-- **Input Absensi**:
-  - Pilihan parameter kelas, mata pelajaran, semester, tanggal pertemuan, dan tahun ajaran.
-  - **Pencarian Cepat (*Searchable Combobox*)**: Seluruh field **Mata Pelajaran** dan **Rombel / Kelas** di semua form dan filter (Formulir Absensi, Formulir Jurnal, Rekap Absen, dan Hasil Jurnal termasuk modal edit) kini dapat diketik secara langsung untuk mencari opsi dengan cepat tanpa harus scrolling panjang.
-  - Kolom nama guru otomatis terkunci pada guru yang sedang login (untuk hak akses Guru), sedangkan Admin dapat memilih nama guru.
-  - Status presensi lengkap: Hadir (H), Sakit (S), Izin (I), Alpa (A), dan Dispensasi (Dispen).
-  - Tombol aksi instan *Set Semua Hadir* dan *Reset* untuk pengisian cepat.
+- **Input Presensi Kelas**:
+  - Searchable Combobox untuk pemilihan cepat Mata Pelajaran dan Rombel/Kelas.
+  - Opsi status lengkap: **Hadir (H)**, **Sakit (S)**, **Izin (I)**, **Alpa (A)**, dan **Dispensasi (Dispen)**.
+  - Tombol aksi instan *Set Semua Hadir* dan *Reset* untuk efisiensi pengisian.
 - **Input Jurnal KBM**:
-  - Pencatatan jam pelajaran, pertemuan ke-, model pembelajaran, rincian materi, murid tidak hadir, dan status ketuntasan materi.
-  - Pengunggahan berkas bukti kegiatan (*multi-file upload*) yang otomatis dikonversi dan disimpan ke Google Drive.
-  - Kolom nama guru otomatis terkunci sesuai akun guru yang sedang aktif.
-  - **Pengecekan Presensi Otomatis & Checklist Siswa Tidak Hadir**:
-    - Sebelum mengisi murid tidak hadir, sistem menyediakan verifikasi presensi berdasarkan 6 parameter KBM yang telah diisi: **Tanggal**, **Nama Guru**, **Semester**, **Tahun Ajaran**, **Mata Pelajaran**, dan **Kelas**.
-    - Jika absensi untuk sesi KBM terkait **belum diisi**, sistem menampilkan kotak peringatan interaktif dan modal dialog yang mengarahkan guru untuk mengisi absensi terlebih dahulu dengan tombol langsung ke halaman Form Absensi Murid.
-    - Jika absensi **sudah dicatat**, sistem menampilkan daftar murid kelas tersebut lengkap dengan status kehadiran masing-masing (Hadir, Sakit, Izin, Alpa, Dispensasi).
-    - Murid yang berstatus tidak hadir (Sakit, Izin, Alpa, Dispensasi) otomatis tercentang secara bawaan dan rincian namanya langsung mengisi kolom input *Siswa Tidak Hadir* (contoh: `Budi Santoso (S), Siti Aisyah (A)`). Guru juga dapat mencentang atau menghapus centang murid secara manual dengan sinkronisasi teks otomatis.
-  - **Status Ketuntasan Materi Fleksibel (Datalist Bebas Ketik)**:
-    - Field ketuntasan materi dilengkapi fitur rekomendasi cepat (`Tuntas`, `Belum Tuntas`, `Berlanjut`, `-`) sekaligus dapat diketik bebas sesuai deskripsi perkembangan pencapaian materi pembelajaran.
+  - Jam pelajaran, pertemuan ke-, model pembelajaran, rincian materi, murid tidak hadir, dan status ketuntasan materi.
+  - Upload multi-foto bukti dokumentasi KBM langsung ke folder Google Drive.
+  - Pengecekan otomatis status presensi kelas sebelum pengisian jurnal.
+  - Kotak rekomendasi ketuntasan materi yang fleksibel (*editable datalist*): `Tuntas`, `Belum Tuntas`, `Berlanjut`, atau deskripsi bebas.
 
-### 4. 📊 Laporan Rekapitulasi & Log Jurnal Mengajar
+---
 
-- **Rekap Absen Siswa**:
-  - Filter berdasarkan kelas, siswa, guru, mata pelajaran, semester, dan tahun ajaran.
-  - Perhitungan otomatis persentase kehadiran per siswa (`% Hadir`).
-  - Untuk hak akses Guru, filter otomatis terkunci pada nama guru yang login dan hanya menampilkan riwayat presensi yang diajarnya.
-- **Hasil Jurnal Guru**:
-  - Rekapitulasi materi pembelajaran, persentase ketercapaian target hari efektif mengajar, dan pratinjau tautan bukti dokumentasi Drive.
-  - Untuk hak akses Guru, riwayat jurnal otomatis terisolasi untuk guru yang bersangkutan.
-  - **Edit & Penggantian Berkas Drive Otomatis**: Formulir edit jurnal tetap menyertakan kolom tautan URL Drive sekaligus input upload file pengganti. Saat berkas baru diunggah, berkas/folder lama di Google Drive secara otomatis dihapus (dengan proteksi folder utama) dan digantikan berkas baru tanpa merusak tautan spreadsheet.
-  - **Ketuntasan Materi yang Dapat Diketik Saat Edit**: Modal edit catatan jurnal kini mengizinkan guru untuk memilih dari daftar opsi rekomendasi atau mengetik langsung teks ketuntasan secara fleksibel (*editable datalist*), selaras dengan formulir input log jurnal KBM.
+### 4. 📊 Laporan Rekapitulasi & Cetak PDF Resmi
 
-### 5. 🖨️ Cetak & Ekspor Dokumen PDF Berstandar Resmi
-
-- **Kop Surat Dinamis & Rata Tengah**:
-  - Mengambil data dari Sheet `Pengaturan` Kolom F (mendukung URL gambar banner atau teks alamat instansi).
-  - Pada kop surat berbentuk gambar, garis pembatas biru ganda (*divider line*) otomatis **dihilangkan** dan jarak disesuaikan agar rapi tanpa garis bertumpuk.
-- **Pencantuman Sumber Data**:
-  - **Laporan Rekap Absen**: Secara otomatis mencantumkan keterangan **Sumber Data** yang bersumber dari Sheet `Pengaturan` Kolom I.
-  - **Laporan Jurnal KBM**: Secara otomatis mencantumkan keterangan **Sumber Data** yang bersumber dari Sheet `Pengaturan` Kolom J.
-  - Tampil rapi pada metadata header laporan dan footer dokumen cetak.
-- **Legalisasi Tanda Tangan**:
-  - Kolom tanda tangan otomatis memuat nama guru pengampu dan NIP resmi sesuai data yang difilter.
-
-### 6. ⚙️ Pengaturan Sistem Terpadu (Sheet `Pengaturan`)
-
-Dapat diakses oleh Administrator untuk mengelola parameter operasional langsung dari web tanpa menyentuh spreadsheet:
-
-- **Identitas Sekolah & Logo**: Nama instansi dan URL logo untuk kop, header, dan sidebar.
-- **Kop Surat Laporan (Kolom F) dengan Switch Mode**:
-  - **Mode Link URL / Teks**: Mendukung tautan URL hosting luar atau Google Drive, serta format teks resmi instansi multi-baris.
-  - **Mode Upload File Kop Surat**: Pengguna dapat mengunggah file banner kop langsung dari komputer/HP (PNG, JPG, WEBP). Berkas otomatis diunggah dan disimpan ke Folder Google Drive yang ditentukan pada **Kolom K**, menghasilkan tautan publik siap pakai yang otomatis disimpan ke Kolom F Sheet `Pengaturan` beserta pratinjau langsung (*live preview*).
-- **Integrasi Google Drive (Kolom K)**: Folder ID Google Drive untuk penyimpanan foto dokumentasi KBM dan berkas kop surat laporan.
-- **Sumber Data Hasil Absen (Kolom I)**: Tautan atau teks sumber data yang dicantumkan saat Cetak PDF Rekap Absen.
-- **Sumber Data Hasil Jurnal (Kolom J)**: Tautan atau teks sumber data yang dicantumkan saat Cetak PDF Jurnal KBM.
-- **Parameter Kurikulum**: Pengaturan Mata Pelajaran (Kolom C), Rombel/Kelas (Kolom D), dan Tahun Ajaran (Kolom E) (satu baris per entri dengan auto-counter).
-
-### 7. 👥 Manajemen Pengguna & Impor/Ekspor Excel Cepat (Sheet `DataUser`)
-
-- Dikelola pada sheet `DataUser` dengan skema `[No, Username, Password, Role, Nama Guru, NIP]`.
-- **Kolom Password & Tombol Mata Interaktif (*Show/Hide Password*)**:
-  - Tabel pengguna kini menampilkan kolom **Password** yang dilengkapi tombol mata (`fa-eye` / `fa-eye-slash`).
-  - Secara bawaan kata sandi disamarkan (`••••••••`) demi keamanan privasi dan dapat diintip/disalin secara langsung hanya dengan menekan ikon mata.
-  - Tombol mata interaktif juga disematkan pada form modal Tambah/Edit Pengguna, modal Login Header, dan form Login Portal.
-- **Ekspor Excel (`.xls` / `.xlsx`)**: Mengunduh seluruh data akun guru ke format Excel untuk pembaharuan massal. Akun Administrator sengaja tidak disertakan dalam berkas ekspor demi keamanan.
-- **Impor Excel (Replace)**: Menggantikan (*replace*) seluruh akun guru lama dengan data baru dari berkas Excel secara instan.
-- **🛡️ Proteksi Akun Administrator**:
-  - Seluruh akun Administrator di sheet `DataUser` tetap dipertahankan dan dilindungi sistem saat proses impor replace.
-  - Tombol hapus pada akun Admin terkunci (*Dilindungi*) untuk mencegah insiden kehilangan hak akses administrator.
-
-### 8. 📱 Desain Responsif & Ramah Perangkat Mobile (Mobile-Friendly)
-
-- **Grup Menu Tertutup Bawaan (*Closed-by-Default Accordion*)**:
-  - Seluruh grup menu navigasi di sidebar (*Menu Utama*, *Master Data*, *Laporan & Rekap*, dan *Pengaturan*) secara bawaan berada dalam keadaan tertutup (*collapsed*).
-  - Menu baru menampilkan daftar halamannya saat grup tersebut diklik oleh pengguna, menciptakan tampilan navigasi yang rapi, ringkas, dan fokus.
-- **Off-Canvas Drawer Navigation**: Di perangkat smartphone/tablet, sidebar tersembunyi rapi dan dapat dibuka via tombol hamburger navbar atas dengan backdrop overlay blur.
-- **Tabel Horisontal Geser**: Seluruh tabel dibungkus `overflow-x-auto` agar nyaman digeser pada layar sentuh.
-- **Desain Modern**: Memanfaatkan Tailwind CSS, palet warna elegan, FontAwesome 6, dan modal interaktif SweetAlert2.
+- **Rekap Absen Adaptif**:
+  - Jika data presensi berasal dari inputan mandiri murid, sistem secara cerdas menyesuaikan tampilan pada Rekap Absen dan Cetak PDF agar tetap menampilkan presensi tersebut sesuai mata pelajaran dan nama guru yang dipilih saat difilter.
+  - Perhitungan persentase kehadiran per siswa (`% Hadir`) dan ringkasan persentase global (Hadir, Sakit, Izin, Alpa, Dispen).
+- **Hasil Jurnal Mengajar Guru**:
+  - Rekap materi KBM, hari efektif, pratinjau tautan Google Drive, serta fitur edit catatan jurnal dan ganti foto bukti kegiatan.
+- **Cetak Dokumen PDF Ber-Kop Surat**:
+  - Kop surat dinamis (mendukung gambar banner langsung dari Google Drive/Hosting luar maupun teks resmi multi-baris).
+  - Pencantuman legalitas tanda tangan guru pengampu beserta NIP resmi.
+  - Pencantuman keterangan **Sumber Data** pada header dan footer dokumen.
 
 ---
 
 ## 🗄️ Struktur Database Google Spreadsheet
 
-Aplikasi menggunakan 1 Google Spreadsheet dengan **5 Sheet Utama**:
+Aplikasi menggunakan **1 Google Spreadsheet** yang memuat **5 Sheet Utama**:
 
 | Nama Sheet | Fungsi / Kegunaan | Skema Kolom (Header) |
 | :--- | :--- | :--- |
 | **`DataMuridGuru`** | Data induk siswa dan dewan guru | `A: NISN`, `B: Nama Murid`, `C: Jenis Kelamin`, `D: Kelas`, `E: (Pemisah)`, `F: Nama Guru`, `G: NIP` |
 | **`HasilAbsen`** | Riwayat log presensi harian murid | `A: NISN`, `B: Nama Murid`, `C: Jenis Kelamin`, `D: Kelas`, `E: Tanggal`, `F: Keterangan`, `G: Mata Pelajaran`, `H: Semester`, `I: Tahun Ajaran`, `J: Nama Guru` |
-| **`DataJurnalGlobal`** | Riwayat log pelaksanaan jurnal mengajar KBM | `A: Tanggal`, `B: Nama Guru`, `C: Semester`, `D: Tahun Ajaran`, `E: Mata Pelajaran`, `F: Jam Ke`, `G: Kelas`, `H: Pertemuan Ke`, `I: Model Pembelajaran`, `J: Materi Pembelajaran`, `K: Murid Tidak Hadir`, `L: Ketuntasan Materi`, `M: Bukti Kegiatan` |
-| **`Pengaturan`** | Parameter konfigurasi sistem & kurikulum | `A: Nama Sekolah`, `B: URL Logo`, `C: Mata Pelajaran`, `D: Kelas`, `E: Tahun Ajaran`, `F: Kop Surat`, `G-H: (Kosong)`, `I: Link Hasil Absen`, `J: Link Hasil Jurnal`, `K: Folder ID Drive` |
-| **`DataUser`** | Akun kredensial login & hak akses | `A: No`, `B: Username`, `C: Password`, `D: Role`, `E: Nama Guru`, `F: NIP` |
+| **`DataJurnalGlobal`** | Riwayat log jurnal mengajar KBM | `A: Tanggal`, `B: Nama Guru`, `C: Semester`, `D: Tahun Ajaran`, `E: Mata Pelajaran`, `F: Jam Ke`, `G: Kelas`, `H: Pertemuan Ke`, `I: Model Pembelajaran`, `J: Materi Pembelajaran`, `K: Murid Tidak Hadir`, `L: Ketuntasan Materi`, `M: Bukti Kegiatan` |
+| **`Pengaturan`** | Konfigurasi sistem, kurikulum & TA aktif | `A: Nama Sekolah`, `B: URL Logo`, `C: Mata Pelajaran`, `D: Kelas`, `E: Tahun Ajaran`, `F: Kop Surat`, `G: Tahun Ajaran Aktif`, `H: (Reserved)`, `I: Link Hasil Absen`, `J: Link Hasil Jurnal`, `K: Folder ID Drive` |
+| **`DataUser`** | Akun pengguna (Admin, Guru, Murid) | `A: No`, `B: Username`, `C: Password`, `D: Role`, `E: Kelas Khusus / Nama Guru`, `F: Nama Lengkap / NIP`, `G: NISN` |
 
 ---
 
-## 🚀 Panduan Penerapan di Sheet Baru (Step-by-Step)
+## 🛠️ Apa Saja yang Perlu Diedit untuk Menggunakan Database Baru?
 
-Ikuti panduan lengkap ini untuk memasang dan menjalankan aplikasi SIGURU pada akun Google atau Spreadsheet baru Anda dari nol:
+Jika Anda ingin menduplikasi atau memasang kode ini ke Google Spreadsheet / Database baru, **hanya ada 2 file utama** yang perlu Anda sesuaikan nilainya:
+
+| No | Nama File | Baris / Properti | Apa yang Harus Diubah? | Cara Mendapatkannya |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | `Code.gs` | **Baris 9**:<br>`const SPREADSHEET_ID = "..."` | Ganti dengan **Spreadsheet ID** dari Google Spreadsheet baru Anda. | Salin dari URL Spreadsheet:<br>`https://docs.google.com/spreadsheets/d/`**`[ID_DI_SINI]`**`/edit` |
+| **2** | `.clasp.json` | **Baris 2**:<br>`"scriptId": "..."` | Ganti dengan **Script ID** dari proyek Apps Script baru Anda. | Di Apps Script baru: klik **Project Settings (⚙️)** > salin nilai pada baris **Script ID**. |
+| **3** | `appsscript.json`<br>*(Opsional)* | `"timeZone": "Asia/Makassar"` | Sesuaikan zona waktu sekolah Anda jika diperlukan (contoh: `"Asia/Jakarta"`, `"Asia/Makassar"`, atau `"Asia/Jayapura"`). | Ketik zona waktu standar Olson/IANA. |
+
+---
+
+## 🚀 Panduan Penerapan ke Database Baru & Push via Clasp CLI (Direkomendasikan)
+
+Menggunakan **Google Clasp CLI** (*Command Line Apps Script Projects*) adalah metode paling cepat, modern, dan profesional karena seluruh 14 file kode akan terunggah ke Google Apps Script secara instan dalam 2-3 detik tanpa perlu copy-paste manual satu per satu.
+
+### 📌 Prasyarat (Sebelum Memulai)
+
+1. **Komputer sudah terpasang Node.js** (Versi 16, 18, 20, atau lebih baru).
+   - Cek di terminal Anda: `node -v`
+2. **Aktifkan Google Apps Script API pada akun Google Anda**:
+   - Buka browser dan login ke akun Google Anda, lalu buka tautan: [https://script.google.com/home/usersettings](https://script.google.com/home/usersettings).
+   - Ubah toggle **Google Apps Script API** dari posisi *OFF* ke **ON**.
+   > ⚠️ **PENTING**: Jika toggle ini belum aktif, perintah `clasp push` akan ditolak oleh Google dengan pesan error *"Google Apps Script API has not been used in project ... or it is disabled"*.
+
+---
 
 ### Langkah 1: Buat Google Spreadsheet Baru
 
 1. Buka [Google Sheets](https://sheets.new) di browser Anda.
-2. Beri nama spreadsheet Anda, misalnya: `DATABASE_SIGURU_SEKOLAH`.
-3. Salin **ID Spreadsheet** dari URL browser Anda:
-
+2. Beri nama file, misalnya: `DATABASE_SIGURU_2026`.
+3. Salin **Spreadsheet ID** dari tautan peramban Anda:
    ```text
-   https://docs.google.com/spreadsheets/d/ [SALIN_KODE_ID_DI_BAGIAN_INI] /edit
+   https://docs.google.com/spreadsheets/d/165WqO4JjK832W2kC1bY8K5m3bTjM3bXYZ12345/edit
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                  (Ini SPREADSHEET_ID Anda)
    ```
 
-### Langkah 2: Buat Folder Google Drive untuk Foto Bukti KBM
+### Langkah 2: Buat Folder Google Drive untuk Dokumentasi KBM
 
 1. Buka [Google Drive](https://drive.google.com/).
-2. Buat satu folder baru (contoh nama: `DOKUMENTASI_KBM_SIGURU`).
-3. Klik kanan folder tersebut > **Bagikan (Share)** > ubah Akses Umum menjadi **"Siapa saja yang memiliki link dapat melihat (Viewer)"** *(agar foto bukti KBM dapat dibuka oleh guru dan pengawas)*.
-4. Salin **Folder ID** dari URL folder tersebut:
-
+2. Buat folder baru dengan nama: `DOKUMENTASI_KBM_SIGURU`.
+3. Klik kanan folder tersebut > **Bagikan (Share)** > ubah Akses Umum menjadi **"Siapa saja yang memiliki link dapat melihat (Viewer)"** *(agar foto bukti KBM dapat diakses oleh guru)*.
+4. Salin **Folder ID** dari tautan folder Drive:
    ```text
-   https://drive.google.com/drive/folders/ [SALIN_FOLDER_ID_INI]
+   https://drive.google.com/drive/folders/1w1bZ2f1rJ8Gk_ABCD98765XYZ
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                            (Ini FOLDER_ID_DRIVE Anda)
    ```
 
-### Langkah 3: Buka Editor Google Apps Script
+### Langkah 3: Buat Proyek Apps Script & Dapatkan Script ID
 
-1. Pada Google Spreadsheet baru yang telah Anda buat di Langkah 1, klik menu **Ekstensi (Extensions)** > **Apps Script**.
-2. Beri nama proyek skrip Anda, misalnya: `SIGURU Web App v3.0`.
+1. Pada Google Spreadsheet baru yang telah dibuat (Langkah 1), klik menu:
+   **Ekstensi (Extensions)** > **Apps Script**.
+2. Beri nama proyek skrip, misalnya: `SIGURU Web App Production`.
+3. Di panel sebelah kiri, klik ikon **Project Settings (Ikon Gerigi ⚙️)**.
+4. Pada bagian **IDs**, cari baris **Script ID**, lalu klik tombol **Salin (Copy)**:
+   ```text
+   Contoh Script ID: 1hAQqMJGIp0DtRxrC01WIzPcxTPZp13iYZatSDJDh0Gua2chIpnyNYosq
+   ```
 
-### Langkah 4: Buat File Kode Proyek
+### Langkah 4: Sesuaikan File Konfigurasi di Folder Proyek Lokal
 
-Buat berkas-berkas kode di dalam editor Apps Script sesuai struktur berikut (gunakan tombol **+** di sebelah panel *Files*):
+Buka folder repositori proyek ini di komputer Anda menggunakan VS Code atau editor teks:
 
-#### A. File Skrip (.gs)
+1. **Buka file `Code.gs`**:
+   - Temukan baris ke-9:
+     ```javascript
+     const SPREADSHEET_ID = "MASUKKAN_SPREADSHEET_ID_BARU_ANDA";
+     ```
+   - Tempelkan **Spreadsheet ID** yang Anda dapatkan dari Langkah 1.
+   - Simpan file (`Ctrl + S`).
 
-1. `Code.gs` — Salin seluruh isi file [Code.gs](file:///d:/Downloads/Share-DKV%20F/COBA/Absen&Jurnal%20Apps%20Script/Code.gs).
+2. **Buka file `.clasp.json`**:
+   - Ubah nilainya menjadi:
+     ```json
+     {
+       "scriptId": "MASUKKAN_SCRIPT_ID_BARU_ANDA",
+       "rootDir": "."
+     }
+     ```
+   - Tempelkan **Script ID** yang Anda dapatkan dari Langkah 3.
+   - Simpan file (`Ctrl + S`).
 
-#### B. File HTML (.html)
+### Langkah 5: Login Clasp & Push Kode ke Apps Script
 
-Buat masing-masing file HTML berikut dan salin kodenya dari repositori:
+Buka Terminal / PowerShell / Command Prompt tepat di dalam direktori folder proyek ini, lalu jalankan perintah berikut:
 
-1. `StyleCSS.html` — Styling global & pustaka Tailwind CSS, FontAwesome 6, SweetAlert2, SheetJS.
-2. `Sidebar.html` — Navigasi sidebar akordion responsif dengan pembagian 4 grup menu.
-3. `Header.html` — Navbar atas, tombol hamburger, sinkronisasi data, profil login, dan modal login.
-4. `AppJS.html` — Arsitektur RPC client, session management, navigasi URL iframe-safe, dan role gatekeeping.
-5. `Dashboard.html` — Tampilan dashboard utama, kartu statistik, dan modul pintasan.
-6. `FormAbsen.html` — Form pencatatan presensi siswa per kelas dengan auto-lock nama guru.
-7. `FormJurnal.html` — Form pencatatan jurnal KBM dan upload multi-file dokumentasi ke Drive.
-8. `RekapAbsen.html` — Laporan rekapitulasi absensi murid, statistik kehadiran, dan cetak PDF.
-9. `HasilJurnal.html` — Laporan rekapitulasi jurnal guru harian dan cetak PDF landscape.
-10. `MasterData.html` — Pengelolaan data induk siswa dan guru serta impor/ekspor Excel.
-11. `Pengaturan.html` — Halaman pengaturan sistem (Sheet `Pengaturan`).
-12. `UserManagement.html` — Halaman manajemen akun pengguna (Sheet `DataUser`) & impor/ekspor Excel.
-13. `Login.html` — Halaman fallback login mandiri.
+1. **Login ke Akun Google Anda**:
+   ```bash
+   npx @google/clasp login
+   ```
+   - Browser akan otomatis terbuka meminta izin login.
+   - Pilih akun Google pemilik Spreadsheet & Apps Script Anda, lalu klik **Izinkan (Allow)**.
+   - Terminal akan menampilkan pesan: `Logged in! You may close this page.`
 
-### Langkah 5: Hubungkan ID Spreadsheet
+2. **Push Seluruh File Kode ke Google Apps Script**:
+   ```bash
+   npx @google/clasp push
+   ```
+   *(Atau gunakan flag force jika diminta konfirmasi: `npx @google/clasp push --force`)*.
+   
+   - Clasp akan membaca `.clasp.json` dan secara otomatis mengunggah seluruh berkas (`Code.js`, `StyleCSS.html`, `Sidebar.html`, `Header.html`, `AppJS.html`, `Dashboard.html`, `FormAbsen.html`, `FormJurnal.html`, `RekapAbsen.html`, `HasilJurnal.html`, `MasterData.html`, `Pengaturan.html`, `UserManagement.html`, `Login.html`, dan `appsscript.json`).
+   - Terminal akan menampilkan konfirmasi:
+     ```text
+     └─ appsscript.json
+     └─ Code.js
+     └─ AppJS.html
+     └─ Dashboard.html
+     ...
+     Pushed 16 files.
+     ```
 
-Buka file `Code.gs` di editor Apps Script, lalu ubah baris ke-9 dengan ID Spreadsheet Anda dari Langkah 1:
+3. **Verifikasi**: Buka kembali tab Google Apps Script di peramban Anda, lalu tekan tombol muat ulang (*Refresh / F5*). Seluruh file kode kini telah berada di dalam editor Apps Script Anda!
 
-```javascript
-const SPREADSHEET_ID = "MASUKKAN_ID_SPREADSHEET_ANDA_DI_SINI";
-```
+### Langkah 6: Inisialisasi Database Otomatis (`setupDatabaseSheets`)
 
-Simpan perubahan (*Ctrl + S*).
+Sebelum aplikasi web dipublikasikan, jalankan skrip inisialisasi untuk membuat seluruh tabel dan header:
 
-### Langkah 6: Inisialisasi Database Otomatis
-
-1. Pada dropdown daftar fungsi di toolbar atas editor Apps Script, pilih fungsi **`setupDatabaseSheets`**.
-2. Klik tombol **Jalankan (Run)**.
-3. Dialog otorisasi akan muncul:
+1. Di editor Google Apps Script, buka file `Code.gs`.
+2. Pada dropdown pilihan fungsi di toolbar atas (di sebelah tombol *Debug*), pilih fungsi: **`setupDatabaseSheets`**.
+3. Klik tombol **Jalankan (Run)**.
+4. Kotak dialog otorisasi izin pertama kali akan muncul:
    - Klik **Tinjau Izin (Review Permissions)**.
    - Pilih akun Google Anda.
-   - Klik **Lanjutan (Advanced)** > klik **Buka SIGURU (tidak aman) / Go to project (unsafe)**.
+   - Klik **Lanjutan (Advanced)** > klik tautan paling bawah: **Buka SIGURU Web App (tidak aman) / Go to project (unsafe)**.
    - Klik **Izinkan (Allow)**.
-4. Fungsi ini akan secara otomatis:
-   - Membuat ke-5 sheet yang diperlukan: `DataMuridGuru`, `HasilAbsen`, `DataJurnalGlobal`, `Pengaturan`, dan `DataUser`.
-   - Mengisi baris judul (header) standar pada masing-masing sheet.
-   - Membuat akun Administrator default jika sheet `DataUser` masih kosong.
+5. Tunggu 5 detik hingga log eksekusi selesai.
+6. **Cek Spreadsheet Anda**: Secara otomatis ke-5 Sheet (`DataMuridGuru`, `HasilAbsen`, `DataJurnalGlobal`, `Pengaturan`, dan `DataUser`) sudah terbuat rapi lengkap beserta header kolom dan satu akun Administrator pertama!
 
-### Langkah 7: Publikasikan Web App (Deploy as Web App)
+### Langkah 7: Publikasikan Web App (Deploy)
 
-1. Klik tombol biru **Terapkan (Deploy)** di pojok kanan atas editor > pilih **Penerapan baru (New deployment)**.
-2. Klik ikon gerigi di sebelah kiri (*Select type*) > pilih **Aplikasi web (Web app)**.
-3. Isi konfigurasi deployment:
+1. Di pojok kanan atas editor Apps Script, klik tombol biru **Terapkan (Deploy)** > pilih **Penerapan baru (New deployment)**.
+2. Klik ikon gerigi (*Select type*) di sisi kiri > pilih **Aplikasi web (Web app)**.
+3. Konfigurasikan parameter penerapan berikut:
    - **Deskripsi**: `SIGURU v3.0 Production`
-   - **Jalankan sebagai (Execute as)**: **Saya (email Anda)** *(Sangat penting: agar fungsi upload ke Drive dan penulisan sheet menggunakan izin akun pemilik).*
-   - **Siapa yang memiliki akses (Who has access)**: **Siapa saja (Anyone)** *(Penting: agar bapak/ibu guru dapat membuka aplikasi secara instan tanpa hambatan login akun Google).*
+   - **Jalankan sebagai (Execute as)**: **Saya (email Anda)**
+     *(Wajib dipilih agar akses upload foto KBM ke Drive dan manipulasi Sheet memakai izin akun pemilik).*
+   - **Siapa yang memiliki akses (Who has access)**: **Siapa saja (Anyone)**
+     *(Wajib dipilih agar bapak/ibu guru dan murid dapat membuka web tanpa kendala izin login Google).*
 4. Klik **Terapkan (Deploy)**.
-5. Salin tautan **URL Aplikasi Web (Web App URL)** yang dihasilkan. Tautan ini adalah alamat web resmi aplikasi SIGURU sekolah Anda!
+5. Salin tautan **URL Aplikasi Web (Web App URL)** yang berakhiran `/exec`. Tautan ini adalah link resmi SIGURU sekolah Anda!
 
-### Langkah 8: Konfigurasi Awal Sistem
+### Langkah 8: Konfigurasi Awal di Web SIGURU
 
-1. Buka Web App URL di browser Anda.
-2. Klik tombol **Login** di pojok kanan atas, lalu masuk menggunakan akun administrator bawaan:
+1. Buka tautan **Web App URL** di peramban Anda.
+2. Masuk menggunakan akun admin default:
    - **Username**: `admin`
    - **Password**: `admin123`
-3. Masuk ke grup menu **Pengaturan > Pengaturan Sistem**:
+3. Buka menu **Pengaturan > Pengaturan Sistem**:
    - Masukkan **Nama Sekolah**.
-   - Masukkan tautan **URL Logo Sekolah**.
-   - Masukkan tautan banner atau teks **Kop Surat (Kolom F)**.
-   - Masukkan **Folder ID Google Drive** yang disalin di Langkah 2 (ke kolom K).
-   - Masukkan tautan/teks **Sumber Data Hasil Absen (Kolom I)** dan **Sumber Data Hasil Jurnal (Kolom J)**.
+   - Masukkan tautan **URL Logo**.
+   - Masukkan banner atau teks **Kop Surat (Kolom F)**.
+   - Masukkan **Folder ID Google Drive** (dari Langkah 2) ke kolom penyimpanan dokumentasi.
    - Masukkan daftar **Mata Pelajaran**, **Rombel/Kelas**, dan **Tahun Ajaran**.
+   - Pilih **Tahun Ajaran Aktif** yang berlaku saat ini.
    - Klik **Simpan Semua Pengaturan**.
-4. Masuk ke menu **Pengaturan > Manajemen Pengguna**:
-   - Tambahkan akun login untuk bapak/ibu guru pengampu.
-   - Anda juga dapat menggunakan tombol **Ekspor Excel (.xls)** untuk mendapatkan template berkas, lalu melengkapi data guru secara massal di komputer dan mengunggahnya kembali melalui tombol **Impor Excel**.
-5. Selesai! Aplikasi kini siap digunakan oleh seluruh dewan guru dan tenaga kependidikan sekolah.
+4. Buka menu **Pengaturan > Manajemen Pengguna**:
+   - Ubah password akun `admin` bawaan demi keamanan.
+   - Tambahkan akun login untuk bapak/ibu guru dan perwakilan kelas (murid).
+   - Atau unduh format template via **Ekspor Excel**, lengkapi data pengguna, lalu unggah kembali via **Impor Excel**.
+
+---
+
+## 🔄 Cara Push Pembaruan Kode Selanjutnya (Update Workflow)
+
+Jika di kemudian hari Anda melakukan perubahan atau perbaikan kode di komputer lokal Anda, Anda **tidak perlu mengulang pembuatan spreadsheet**:
+
+1. Lakukan pengeditan file di komputer lokal.
+2. Buka terminal di folder proyek, lalu push kode terbaru:
+   ```bash
+   npx @google/clasp push
+   ```
+3. Buka editor Google Apps Script di peramban:
+   - Klik tombol **Terapkan (Deploy)** > **Kelola penerapan (Manage deployments)**.
+   - Klik ikon **Edit (Pensil)** pada penerapan aktif Anda.
+   - Pada dropdown **Versi (Version)**, pilih **Versi baru (New version)**.
+   - Klik **Terapkan (Deploy)**.
+4. **Selesai!** Seluruh perubahan langsung aktif pada Web App tanpa mengubah tautan URL yang sudah dibagikan ke guru dan murid.
+
+---
+
+## 📋 Alternatif: Penerapan Manual via Web Editor (Tanpa Node.js/CLI)
+
+Bagi Anda yang tidak memiliki akses Node.js atau terminal di komputer, Anda tetap dapat memasang SIGURU secara manual:
+
+1. Ikuti **Langkah 1** (Buat Spreadsheet) dan **Langkah 2** (Buat Folder Drive) di atas.
+2. Buka **Ekstensi > Apps Script** di spreadsheet baru.
+3. Buat file satu per satu di editor Apps Script dengan menekan ikon **+**:
+   - Buat file Skrip: `Code.gs` (salin seluruh kode dari file `Code.gs`).
+   - Ubah `const SPREADSHEET_ID = "..."` pada baris ke-9 dengan ID spreadsheet baru Anda.
+   - Buat 13 file HTML dengan nama yang persis sama: `StyleCSS`, `Sidebar`, `Header`, `AppJS`, `Dashboard`, `FormAbsen`, `FormJurnal`, `RekapAbsen`, `HasilJurnal`, `MasterData`, `Pengaturan`, `UserManagement`, dan `Login` (lalu salin masing-masing kodenya).
+4. Jalankan fungsi `setupDatabaseSheets` dan lakukan otorisasi akun.
+5. Klik **Deploy > New deployment > Web App** (*Execute as: Me*, *Who has access: Anyone*).
+6. Konfigurasi identitas sekolah melalui menu Pengaturan di web.
 
 ---
 
 ## 🔑 Kredensial Login Bawaan
 
-Saat pertama kali diinisialisasi oleh skrip `setupDatabaseSheets()`, sistem membuat satu akun administrator bawaan:
+Saat fungsi `setupDatabaseSheets()` pertama kali dijalankan, sistem secara otomatis mendaftarkan akun administrator awal:
 
 - **Username**: `admin`
 - **Password**: `admin123`
 - **Hak Akses**: `Admin`
 
-> ⚠️ **Catatan Keamanan**: Segera masuk ke menu **Pengaturan > Manajemen Pengguna** setelah instalasi selesai untuk mengubah kata sandi akun admin bawaan atau membuat akun admin baru yang lebih aman.
+> ⚠️ **Peringatan Keamanan**: Harap segera perbarui kata sandi akun administrator bawaan setelah proses instalasi selesai melalui menu **Pengaturan > Manajemen Pengguna**.
 
 ---
 
 ## 💡 Troubleshooting & Pertanyaan Umum (FAQ)
 
-### 1. Mengapa navigasi menggunakan query parameter `?page=...`?
+### 1. Muncul error saat push: *"Google Apps Script API has not been used in project ... or it is disabled"*?
+- **Penyebab**: Google Apps Script API pada akun Google Anda masih berstatus nonaktif.
+- **Solusi**: Buka tautan [https://script.google.com/home/usersettings](https://script.google.com/home/usersettings), ubah toggle **Google Apps Script API** menjadi **ON**, tunggu 30 detik, lalu jalankan kembali `npx @google/clasp push`.
 
-Google Apps Script berjalan dalam sandbox iframe berdomain `script.googleusercontent.com`. Sistem SIGURU menggunakan navigasi induk (`window.top.location.href`) untuk memperbarui URL pada address bar peramban. Dengan teknik ini, ketika pengguna menekan tombol muat ulang (*refresh / F5*), peramban **tetap berada di halaman yang aktif** dan tidak mental kembali ke Dashboard.
+### 2. Muncul error saat push: *"Could not find scriptId in .clasp.json"*?
+- **Solusi**: Pastikan berkas `.clasp.json` berada di root folder proyek dan berisi Script ID yang benar:
+  ```json
+  {"scriptId": "SCRIPT_ID_APPS_SCRIPT_ANDA", "rootDir": "."}
+  ```
 
-### 2. Gambar logo atau banner kop surat tidak muncul saat dibuka atau dicetak PDF?
+### 3. Mengapa navigasi halaman menggunakan URL parameter `?page=...`?
+- Google Apps Script berjalan di dalam sandbox `<iframe>`. SIGURU memanfaatkan manipulasi URL induk (`window.top.location.href`) sehingga jika pengguna me-refresh halaman (*F5*), peramban tetap berada di halaman yang sedang dibuka dan tidak kembali ke halaman Dashboard.
 
-Jika Anda menggunakan gambar yang disimpan di Google Drive, pastikan file gambar di Google Drive telah diatur akses berbaginya menjadi **"Siapa saja yang memiliki link (Anyone with the link can view)"**. Sistem SIGURU secara otomatis mengonversi link Google Drive (`file/d/...`) menjadi tautan gambar langsung `https://lh3.googleusercontent.com/d/...` agar dapat dimuat oleh mesin cetak peramban.
+### 4. Foto bukti kegiatan atau logo kop surat tidak tampil saat dicetak PDF?
+- Pastikan folder Google Drive tempat penyimpanan foto atau banner kop surat telah diatur izin berbaginya menjadi **"Siapa saja yang memiliki link dapat melihat (Viewer)"**.
 
-### 3. Mengapa saat impor berkas Excel akun admin tidak tertimpa?
-
-Sistem telah dirancang dengan arsitektur proteksi keamanan data. Fungsi `importUsersFromExcel()` di backend secara otomatis memisahkan dan mempertahankan akun Administrator yang sudah ada di sheet `DataUser`, sehingga Anda dapat mengganti seluruh data guru secara instan kapan saja tanpa khawatir terkunci keluar dari sistem.
+### 5. Mengapa akun Admin tidak terhapus saat melakukan Impor Excel Pengguna?
+- Sistem dilengkapi fitur proteksi akun administrator (`importUsersFromExcel()` di backend). Akun dengan role `Admin` akan selalu dipertahankan secara otomatis agar pengelola sekolah tidak pernah terkunci keluar dari sistem.
 
 ---
 
 ## 📄 Lisensi & Hak Penggunaan
 
-Dikembangkan untuk mendukung percepatan digitalisasi administrasi pembelajaran sekolah di seluruh Indonesia. Bebas disesuaikan dan dikembangkan lebih lanjut sesuai kebutuhan unit pendidikan masing-masing.
+Dikembangkan untuk mendukung percepatan digitalisasi administrasi pendidikan dan pembelajaran sekolah di Indonesia. Bebas dimodifikasi, disesuaikan, dan didistribusikan sesuai kebutuhan unit pendidikan masing-masing.
