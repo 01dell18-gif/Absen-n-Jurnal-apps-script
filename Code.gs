@@ -116,6 +116,10 @@ function getAppUrl() {
 }
 
 function getSpreadsheet() {
+  try {
+    const active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
+  } catch (e) {}
   return SpreadsheetApp.openById(SPREADSHEET_ID);
 }
 
@@ -848,10 +852,15 @@ function getAllUsers() {
   const lr = sheet.getLastRow();
   if (lr <= 1) return [];
 
-  // Pastikan kolom 7 ada header "Kelas" jika belum ada
-  if (sheet.getLastColumn() < 7 || !sheet.getRange(1, 7).getValue()) {
-    sheet.getRange(1, 7).setValue("Kelas");
-  }
+  try {
+    if (sheet.getMaxColumns() < 7) {
+      sheet.insertColumnAfter(sheet.getMaxColumns());
+    }
+    const h7 = sheet.getRange(1, 7).getValue();
+    if (!h7) {
+      sheet.getRange(1, 7).setValue("Kelas");
+    }
+  } catch (e) {}
 
   const maxCol = Math.max(sheet.getLastColumn(), 7);
   const data = sheet.getRange(2, 1, lr - 1, maxCol).getValues();
