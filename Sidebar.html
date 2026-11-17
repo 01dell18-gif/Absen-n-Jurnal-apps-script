@@ -136,16 +136,33 @@
   </nav>
 
   <script>
+    // Daftar Kunci Grup Menu Navigasi
+    const NAV_GROUP_KEYS = ['utama', 'master', 'rekap', 'pengaturan'];
+
     function toggleNavGroup(groupKey) {
       const submenu = document.getElementById('submenu-' + groupKey);
       const chevron = document.getElementById('chevron-' + groupKey);
       if (!submenu) return;
-      const isHidden = submenu.classList.contains('hidden');
-      if (isHidden) {
+      const willOpen = submenu.classList.contains('hidden');
+
+      if (willOpen) {
+        // 1. Tutup otomatis semua grup menu lainnya (Single-Open Accordion)
+        NAV_GROUP_KEYS.forEach(key => {
+          if (key !== groupKey) {
+            const otherSub = document.getElementById('submenu-' + key);
+            const otherChev = document.getElementById('chevron-' + key);
+            if (otherSub) otherSub.classList.add('hidden');
+            if (otherChev) otherChev.classList.add('-rotate-90');
+            sessionStorage.setItem('siguru_nav_' + key, 'closed');
+          }
+        });
+
+        // 2. Buka grup menu yang diklik
         submenu.classList.remove('hidden');
         if (chevron) chevron.classList.remove('-rotate-90');
         sessionStorage.setItem('siguru_nav_' + groupKey, 'open');
       } else {
+        // Jika grup yang sama diklik lagi saat terbuka, tutup grup tersebut
         submenu.classList.add('hidden');
         if (chevron) chevron.classList.add('-rotate-90');
         sessionStorage.setItem('siguru_nav_' + groupKey, 'closed');
@@ -154,20 +171,24 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       // Inisialisasi: Semua grup menu tertutup dulu secara bawaan
-      // Hanya dibuka jika pengguna telah membukanya pada sesi aktif (sessionStorage === 'open')
-      const groupKeys = ['utama', 'master', 'rekap', 'pengaturan'];
-      groupKeys.forEach(key => {
+      // Hanya 1 grup yang diizinkan terbuka sesuai session aktif
+      let hasOpenedGroup = false;
+      NAV_GROUP_KEYS.forEach(key => {
         const submenu = document.getElementById('submenu-' + key);
         const chevron = document.getElementById('chevron-' + key);
         if (!submenu) return;
         const saved = sessionStorage.getItem('siguru_nav_' + key);
 
-        if (saved === 'open') {
+        if (saved === 'open' && !hasOpenedGroup) {
           submenu.classList.remove('hidden');
           if (chevron) chevron.classList.remove('-rotate-90');
+          hasOpenedGroup = true;
         } else {
           submenu.classList.add('hidden');
           if (chevron) chevron.classList.add('-rotate-90');
+          if (saved === 'open') {
+            sessionStorage.setItem('siguru_nav_' + key, 'closed');
+          }
         }
       });
     });

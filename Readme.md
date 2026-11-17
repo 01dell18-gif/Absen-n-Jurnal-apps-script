@@ -55,6 +55,10 @@ Aplikasi ini berjalan 100% tanpa biaya server (*zero hosting cost* / tanpa sewa 
 - **Tahun Ajaran Aktif Terpusat**:
   - Administrator dapat menentukan **Tahun Ajaran Aktif** pada menu Pengaturan (tersimpan di Database).
   - Ketika dipilih, seluruh formulir dan filter laporan di SIGURU akan otomatis terisi dengan Tahun Ajaran yang sedang aktif tersebut.
+- **Navigasi Akordion Tunggal (*Single-Open Accordion*)**:
+  - Sidebar navigasi didesain fokus dan ringkas, di mana membuka salah satu grup menu (*Menu Utama*, *Master Data*, *Laporan & Rekap*, *Pengaturan*) secara otomatis melipat/menutup grup menu lainnya.
+- **Badge Versi & Log Pembaruan Interaktif**:
+  - Badge versi aplikasi pada sidebar dapat diklik secara interaktif untuk menampilkan popup riwayat pembaruan sistem (*changelog modal*) dari versi ke versi.
 - **Salam Waktu Dinamis (*Time-Based Greeting*)**:
   - Ucapan selamat datang otomatis berganti sesuai waktu lokal perangkat pengguna:
     - `Selamat Pagi` (04:00 - 10:59)
