@@ -252,9 +252,24 @@
                   class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0
                   TA</span>
               </div>
-              <textarea id="pengaturan-ta" rows="8" oninput="updateItemCounts()"
+              <textarea id="pengaturan-ta" rows="4" oninput="updateItemCounts()"
                 placeholder="2024/2025&#10;2025/2026&#10;..."
                 class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+
+              <!-- PILIH TAHUN AJARAN AKTIF -->
+              <div class="mt-2.5 p-3 bg-amber-50/80 border border-amber-200/90 rounded-xl space-y-1.5 shadow-xs">
+                <div class="flex justify-between items-center">
+                  <label class="block text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-check text-amber-600"></i>
+                    <span>Tahun Ajaran Aktif</span>
+                  </label>
+                  <span id="badge-ta-aktif" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">Aktif</span>
+                </div>
+                <select id="pengaturan-ta-aktif" onchange="onTaAktifChange()" class="w-full text-xs p-2.5 border rounded-xl bg-white border-amber-300 outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-800 transition">
+                  <option value="">-- Pilih TA Aktif --</option>
+                </select>
+                <p class="text-[10px] text-amber-700 leading-relaxed">Tahun Ajaran yang dipilih di sini akan otomatis terpilih di semua menu Absen, Jurnal, dan Rekapitulasi.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -435,6 +450,36 @@
       document.getElementById('badge-count-mapel').innerText = mapels.length + ' Mapel';
       document.getElementById('badge-count-kelas').innerText = kelass.length + ' Kelas';
       document.getElementById('badge-count-ta').innerText = tas.length + ' TA';
+
+      // Update opsi pada dropdown Tahun Ajaran Aktif
+      const selTaAktif = document.getElementById('pengaturan-ta-aktif');
+      if (selTaAktif) {
+        const currentSelected = selTaAktif.value;
+        selTaAktif.innerHTML = '<option value="">-- Pilih TA Aktif --</option>';
+        tas.forEach(ta => {
+          const opt = document.createElement('option');
+          opt.value = ta;
+          opt.textContent = ta;
+          if (ta === currentSelected) opt.selected = true;
+          selTaAktif.appendChild(opt);
+        });
+        if (!selTaAktif.value && tas.length > 0) {
+          selTaAktif.value = currentSelected || tas[0];
+        }
+        updateBadgeTaAktif();
+      }
+    }
+
+    function updateBadgeTaAktif() {
+      const selTaAktif = document.getElementById('pengaturan-ta-aktif');
+      const badge = document.getElementById('badge-ta-aktif');
+      if (selTaAktif && badge) {
+        badge.innerText = selTaAktif.value ? ('Aktif: ' + selTaAktif.value) : 'Belum Ditentukan';
+      }
+    }
+
+    function onTaAktifChange() {
+      updateBadgeTaAktif();
     }
 
     function loadPengaturanData() {
@@ -458,6 +503,14 @@
           previewLogoImage();
           previewKopSurat();
           updateItemCounts();
+
+          if (p.tahunAjaranAktif) {
+            const selTaAktif = document.getElementById('pengaturan-ta-aktif');
+            if (selTaAktif) {
+              selTaAktif.value = p.tahunAjaranAktif;
+              updateBadgeTaAktif();
+            }
+          }
         })
         .withFailureHandler(function (err) {
           closeLoading();
@@ -475,6 +528,7 @@
       const folderIdDrive = document.getElementById('pengaturan-folder-drive').value.trim();
       const linkHasilAbsen = document.getElementById('pengaturan-link-absen').value.trim();
       const linkHasilJurnal = document.getElementById('pengaturan-link-jurnal').value.trim();
+      const tahunAjaranAktif = document.getElementById('pengaturan-ta-aktif') ? document.getElementById('pengaturan-ta-aktif').value.trim() : '';
 
       const mapelList = document.getElementById('pengaturan-mapel').value.split('\n').map(s => s.trim()).filter(Boolean);
       const kelasList = document.getElementById('pengaturan-kelas').value.split('\n').map(s => s.trim()).filter(Boolean);
@@ -502,6 +556,7 @@
         mapelList,
         kelasList,
         taList,
+        tahunAjaranAktif,
         kopFile: (currentKopMode === 'file' && pendingKopFile) ? pendingKopFile : null
       };
 

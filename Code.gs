@@ -143,7 +143,7 @@ function setupDatabaseSheets() {
     { name: "DataMuridGuru", headers: ["NISN", "Nama Murid", "Jenis Kelamin", "Kelas", "", "Nama Guru", "NIP"] },
     { name: "HasilAbsen", headers: ["NISN", "Nama Murid", "Jenis Kelamin", "Kelas", "Tanggal", "Keterangan", "Mata Pelajaran", "Semester", "Tahun Ajaran", "Nama Guru"] },
     { name: "DataJurnalGlobal", headers: ["Tanggal", "Nama Guru", "Semester", "Tahun Ajaran", "Mata Pelajaran", "Jam Ke", "Kelas", "Pertemuan Ke", "Model Pembelajaran", "Materi Pembelajaran", "Murid Tidak Hadir", "Ketuntasan Materi", "Bukti Kegiatan"] },
-    { name: "Pengaturan", headers: ["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "", "", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"] },
+    { name: "Pengaturan", headers: ["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "Tahun Ajaran Aktif", "Semester Aktif", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"] },
     { name: "DataUser", headers: ["No", "Username", "Password", "Roll", "Nama Guru", "NIP", "Kelas"] }
   ];
 
@@ -201,8 +201,10 @@ function getInitialData() {
   let taList = [];
   let linkHasilAbsen = "";
   let linkHasilJurnal = "";
+  let tahunAjaranAktif = "";
 
   if (dataPengaturan.length > 1) {
+    if (dataPengaturan[1][6]) tahunAjaranAktif = String(dataPengaturan[1][6]).trim();
     for (let i = 1; i < dataPengaturan.length; i++) {
       if (dataPengaturan[i][0] && (!namaSekolah || namaSekolah === "NAMA SEKOLAH")) namaSekolah = String(dataPengaturan[i][0]).trim();
       if (dataPengaturan[i][1] && (!logoUrl || logoUrl.includes("via.placeholder"))) logoUrl = String(dataPengaturan[i][1]).trim();
@@ -216,6 +218,11 @@ function getInitialData() {
       // Kolom J (index 9) = Sumber Data Hasil Jurnal
       if (dataPengaturan[i][9] && !linkHasilJurnal) linkHasilJurnal = String(dataPengaturan[i][9]).trim();
     }
+  }
+
+  const uniqueTaList = [...new Set(taList)].filter(Boolean);
+  if (!tahunAjaranAktif && uniqueTaList.length > 0) {
+    tahunAjaranAktif = uniqueTaList[0];
   }
 
   // 2. Sheet DataMuridGuru
@@ -280,9 +287,10 @@ function getInitialData() {
       kopSurat,
       linkHasilAbsen,
       linkHasilJurnal,
+      tahunAjaranAktif,
       mapelList: [...new Set(mapelList)].filter(Boolean),
       kelasList: [...new Set([...kelasListPengaturan, ...kelasListMurid])].filter(Boolean),
-      taList: [...new Set(taList)].filter(Boolean)
+      taList: uniqueTaList
     },
     muridList,
     guruList
@@ -1207,8 +1215,10 @@ function getPengaturanData() {
   let linkHasilAbsen = "";
   let linkHasilJurnal = "";
   let folderIdDrive = "";
+  let tahunAjaranAktif = "";
 
   if (data.length > 1) {
+    if (data[1][6]) tahunAjaranAktif = String(data[1][6]).trim();
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] && !namaSekolah) namaSekolah = String(data[i][0]).trim();
       if (data[i][1] && !logoUrl) logoUrl = String(data[i][1]).trim();
@@ -1222,6 +1232,11 @@ function getPengaturanData() {
     }
   }
 
+  const uniqueTaList = [...new Set(taList)].filter(Boolean);
+  if (!tahunAjaranAktif && uniqueTaList.length > 0) {
+    tahunAjaranAktif = uniqueTaList[0];
+  }
+
   return {
     namaSekolah,
     logoUrl,
@@ -1229,9 +1244,10 @@ function getPengaturanData() {
     linkHasilAbsen,
     linkHasilJurnal,
     folderIdDrive,
+    tahunAjaranAktif,
     mapelList: [...new Set(mapelList)].filter(Boolean),
     kelasList: [...new Set(kelasList)].filter(Boolean),
-    taList: [...new Set(taList)].filter(Boolean)
+    taList: uniqueTaList
   };
 }
 
@@ -1243,7 +1259,7 @@ function savePengaturanData(payload) {
   let sheet = ss.getSheetByName("Pengaturan");
   if (!sheet) {
     sheet = ss.insertSheet("Pengaturan");
-    sheet.appendRow(["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "", "", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"]);
+    sheet.appendRow(["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "Tahun Ajaran Aktif", "Semester Aktif", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"]);
   }
 
   // Jika ada file kop surat baru yang diunggah ke Google Drive
@@ -1299,7 +1315,7 @@ function savePengaturanData(payload) {
       kelass[i] ? String(kelass[i]).trim() : '',
       tas[i] ? String(tas[i]).trim() : '',
       i === 0 ? String(payload.kopSurat || '').trim() : '',
-      '',
+      i === 0 ? String(payload.tahunAjaranAktif || '').trim() : '',
       '',
       i === 0 ? String(payload.linkHasilAbsen || '').trim() : '',
       i === 0 ? String(payload.linkHasilJurnal || '').trim() : '',

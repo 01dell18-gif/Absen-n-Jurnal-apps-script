@@ -587,10 +587,43 @@ function updateBrandingUI() {
   if (loginLogo && p.logoUrl) loginLogo.src = p.logoUrl;
 }
 
+// Helper Akademik: Otomatisasi Semester & Tahun Ajaran
+function getAutoSemester(dateInput) {
+  let m;
+  if (dateInput) {
+    if (typeof dateInput === 'string' && dateInput.includes('-')) {
+      const parts = dateInput.split('-');
+      if (parts.length >= 2) m = parseInt(parts[1], 10);
+    } else if (dateInput instanceof Date && !isNaN(dateInput)) {
+      m = dateInput.getMonth() + 1;
+    }
+  }
+  if (!m) {
+    m = new Date().getMonth() + 1;
+  }
+  // Ganjil: Juli - Desember (7 - 12), Genap: Januari - Juni (1 - 6)
+  return (m >= 7 && m <= 12) ? 'Ganjil' : 'Genap';
+}
+
+function getActiveTahunAjaran() {
+  const p = (window.globalData && window.globalData.pengaturan) ? window.globalData.pengaturan : null;
+  if (p && p.tahunAjaranAktif) return p.tahunAjaranAktif;
+  if (p && p.taList && p.taList.length > 0) return p.taList[0];
+  return '';
+}
+
 // Dropdown & Searchable Combobox Helper Utility
 function populateSelect(selectId, items, placeholder = '-- Pilih --', selectedVal = '') {
   const el = document.getElementById(selectId);
   if (!el) return;
+
+  // Jika kolom Tahun Ajaran dan selectedVal belum ditentukan, otomatis pilih Tahun Ajaran Aktif
+  if (!selectedVal && selectId.toLowerCase().includes('-ta') && typeof getActiveTahunAjaran === 'function') {
+    const activeTa = getActiveTahunAjaran();
+    if (activeTa && (items || []).includes(activeTa)) {
+      selectedVal = activeTa;
+    }
+  }
 
   // Kasus 1: Elemen adalah INPUT teks ber-datalist
   if (el.tagName === 'INPUT' && el.getAttribute('list')) {

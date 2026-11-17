@@ -309,7 +309,11 @@
       const p = data.pengaturan;
       populateSelect('filter-rekap-kelas', p.kelasList, '-- Semua Kelas --');
       populateSelect('filter-rekap-mapel', p.mapelList, '-- Semua Mapel --');
-      populateSelect('filter-rekap-ta', p.taList, '-- Semua TA --');
+      populateSelect('filter-rekap-ta', p.taList, '-- Semua TA --', p.tahunAjaranAktif);
+
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('filter-rekap-semester').value = getAutoSemester();
+      }
 
       // Setup ttd guru sesuai hak akses
       setupGuruFilter();
@@ -318,6 +322,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('filter-rekap-semester').value = getAutoSemester();
+      }
       setupGuruFilter();
     });
 

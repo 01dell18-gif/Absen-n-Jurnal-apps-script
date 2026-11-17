@@ -341,8 +341,12 @@
       if (!data) return;
       const p = data.pengaturan;
       populateSelect('filter-jurnal-kelas', p.kelasList, '-- Semua Kelas --');
-      populateSelect('filter-jurnal-ta', p.taList, '-- Semua TA --');
+      populateSelect('filter-jurnal-ta', p.taList, '-- Semua TA --', p.tahunAjaranAktif);
       populateSelect('filter-jurnal-mapel', p.mapelList, '-- Semua Mapel --');
+
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('filter-jurnal-semester').value = getAutoSemester();
+      }
 
       // Setup filter guru sesuai hak akses
       setupGuruFilter();
@@ -351,6 +355,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('filter-jurnal-semester').value = getAutoSemester();
+      }
       setupGuruFilter();
     });
 

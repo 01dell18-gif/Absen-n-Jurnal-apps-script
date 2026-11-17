@@ -70,7 +70,7 @@
           </div>
           <div id="container-field-tanggal">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Tanggal Pertemuan</label>
-            <input type="date" id="form-absen-tanggal" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+            <input type="date" id="form-absen-tanggal" onchange="onFormAbsenTanggalChange()" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
           </div>
           <div id="container-field-ta">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Tahun Ajaran</label>
@@ -148,10 +148,20 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('form-absen-tanggal').valueAsDate = new Date();
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('form-absen-semester').value = getAutoSemester(document.getElementById('form-absen-tanggal').value);
+      }
       adjustFormForRole();
       setupGuruField();
       setupKelasField();
     });
+
+    function onFormAbsenTanggalChange() {
+      const tgl = document.getElementById('form-absen-tanggal').value;
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('form-absen-semester').value = getAutoSemester(tgl);
+      }
+    }
 
     function adjustFormForRole() {
       const role = getCurrentRole();
@@ -195,7 +205,11 @@
       const p = data.pengaturan;
       populateSelect('form-absen-mapel', p.mapelList, '-- Pilih Mapel --');
       populateSelect('form-absen-kelas', p.kelasList, '-- Pilih Kelas --');
-      populateSelect('form-absen-ta', p.taList, '-- Pilih TA --');
+      populateSelect('form-absen-ta', p.taList, '-- Pilih TA --', p.tahunAjaranAktif);
+
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('form-absen-semester').value = getAutoSemester(document.getElementById('form-absen-tanggal').value);
+      }
 
       adjustFormForRole();
       setupGuruField();

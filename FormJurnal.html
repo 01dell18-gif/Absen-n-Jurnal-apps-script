@@ -218,6 +218,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('jurnal-tanggal').valueAsDate = new Date();
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('jurnal-semester').value = getAutoSemester(document.getElementById('jurnal-tanggal').value);
+      }
       setupGuruField();
     });
 
@@ -250,12 +253,21 @@
 
       populateSelect('jurnal-mapel', p.mapelList, '-- Pilih Mapel --');
       populateSelect('jurnal-kelas', p.kelasList, '-- Pilih Kelas --');
-      populateSelect('jurnal-ta', p.taList, '-- Pilih TA --');
+      populateSelect('jurnal-ta', p.taList, '-- Pilih TA --', p.tahunAjaranAktif);
+
+      if (typeof getAutoSemester === 'function') {
+        document.getElementById('jurnal-semester').value = getAutoSemester(document.getElementById('jurnal-tanggal').value);
+      }
 
       autoFillPertemuan();
     }
 
     function autoFillPertemuan() {
+      const tglVal = document.getElementById('jurnal-tanggal').value;
+      if (tglVal && typeof getAutoSemester === 'function') {
+        document.getElementById('jurnal-semester').value = getAutoSemester(tglVal);
+      }
+
       const g = document.getElementById('jurnal-guru').value;
       const sem = document.getElementById('jurnal-semester').value;
       const ta = document.getElementById('jurnal-ta').value;
