@@ -6,7 +6,7 @@
  * ==============================================================================
  */
 
-const SPREADSHEET_ID = "1OJIrzmrwMTrRkxeI28jdmbt_HKOW1Jc5-aP47zu4nq4";
+const SPREADSHEET_ID = "1LBiOAmcCUHeB6I0Aja9Yz8ij0blskVQ3lo6AH_p9JYc";
 
 // Variabel Global Runtime untuk Request State
 var _activePage = 'dashboard';
