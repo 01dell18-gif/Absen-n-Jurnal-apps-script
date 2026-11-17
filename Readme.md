@@ -1,4 +1,4 @@
-# SIGURU v3.0 - Sistem Informasi Guru Terpadu
+# SIGURU v3.2 - Sistem Informasi Guru Terpadu
 
 ## Absensi Siswa & Jurnal Mengajar KBM Berbasis Google Apps Script & Google Sheets
 
@@ -242,7 +242,7 @@ Sebelum aplikasi web dipublikasikan, jalankan skrip inisialisasi untuk membuat s
 1. Di pojok kanan atas editor Apps Script, klik tombol biru **Terapkan (Deploy)** > pilih **Penerapan baru (New deployment)**.
 2. Klik ikon gerigi (*Select type*) di sisi kiri > pilih **Aplikasi web (Web app)**.
 3. Konfigurasikan parameter penerapan berikut:
-   - **Deskripsi**: `SIGURU v3.0 Production`
+   - **Deskripsi**: `SIGURU v3.2 Production`
    - **Jalankan sebagai (Execute as)**: **Saya (email Anda)**
      *(Wajib dipilih agar akses upload foto KBM ke Drive dan manipulasi Sheet memakai izin akun pemilik).*
    - **Siapa yang memiliki akses (Who has access)**: **Siapa saja (Anyone)**

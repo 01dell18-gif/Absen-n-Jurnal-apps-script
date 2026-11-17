@@ -18,8 +18,11 @@
     <span id="sidebar-sekolah" class="font-extrabold text-xs sm:text-sm uppercase tracking-wider text-white line-clamp-2 px-1 group-hover:text-brand-300 transition-colors">
       NAMA SEKOLAH
     </span>
-    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-full bg-brand-500/20 border border-brand-500/30 text-[10px] font-semibold text-brand-200 group-hover:bg-brand-500/30 transition-colors">
-      <i class="fa-solid fa-graduation-cap text-emerald-400"></i> Absensi & Jurnal v3.0
+    <div onclick="showVersionInfoModal(event)" onkeydown="if(event.key==='Enter'||event.key===' '){showVersionInfoModal(event);}" role="button" tabindex="0" title="Klik untuk melihat catatan pembaruan sistem"
+         class="inline-flex items-center gap-1.5 px-2.5 py-1 mt-2 rounded-full bg-brand-500/20 hover:bg-brand-500/40 border border-brand-400/40 hover:border-brand-300 text-[10px] font-semibold text-brand-200 hover:text-white transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 group/btn">
+      <i class="fa-solid fa-sparkles text-amber-300 animate-pulse"></i>
+      <span>Absensi & Jurnal v3.2.0</span>
+      <span class="px-1.5 py-0.2 bg-emerald-500/80 text-white text-[8px] font-bold rounded-full">Baru</span>
     </div>
   </a>
   

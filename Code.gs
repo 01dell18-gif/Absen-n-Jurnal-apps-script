@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * SISTEM INFORMASI GURU TERPADU (SIGURU) - ABSENSI & JURNAL KBM v3.0
+ * SISTEM INFORMASI GURU TERPADU (SIGURU) - ABSENSI & JURNAL KBM v3.2.0
  * Arsitektur: Server-Side Template Inclusion (Scriptlet Pattern) & Query Parameter Routing
  * Sesuai Standar: "Teknik Pembuatan.md"
  * ==============================================================================
@@ -73,7 +73,7 @@ function renderTemplate(pageFile, data) {
     }
   }
   return t.evaluate()
-    .setTitle('SIGURU - Sistem Absensi & Jurnal Guru v3.0')
+    .setTitle('SIGURU - Sistem Absensi & Jurnal Guru v3.2.0')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

@@ -685,6 +685,111 @@ function populateSelect(selectId, items, placeholder = '-- Pilih --', selectedVa
   });
 }
 
+// Modal Popup Catatan Pembaruan Sistem (Changelog Versi)
+function showVersionInfoModal(event) {
+  if (event) {
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
+
+  const changelogHtml = `
+    <div class="text-left text-slate-700 text-xs sm:text-sm space-y-4 max-h-[70vh] overflow-y-auto px-1 pr-2">
+      <!-- Banner Status Header -->
+      <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-brand-50 via-blue-50 to-indigo-50 border border-brand-200/80 shadow-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-lg shadow-md shadow-brand-600/30 flex-shrink-0">
+            <i class="fa-solid fa-rocket"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-extrabold text-sm sm:text-base text-slate-900">SIGURU v3.2.0</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-xs">Build 12 (Terbaru)</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Sistem Informasi Guru Terpadu • Google Cloud Solution</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMELINE LOG PEMBARUAN -->
+      <div class="space-y-4 pt-1">
+        <!-- Versi 3.2.0 -->
+        <div class="relative pl-5 border-l-2 border-emerald-500 space-y-1.5">
+          <span class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow flex items-center justify-center text-[8px] text-white">
+            <i class="fa-solid fa-check"></i>
+          </span>
+          <div class="flex items-center justify-between flex-wrap gap-1">
+            <span class="font-bold text-slate-900 text-xs sm:text-sm">
+              <span class="text-emerald-600">v3.2.0</span> — Otomatisasi Akademik & Deployment
+            </span>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Versi Aktif</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px] sm:text-xs leading-relaxed">
+            <li><strong>Deteksi Semester Otomatis</strong>: Seluruh formulir (Absensi, Jurnal, Rekap & Hasil) otomatis mengisi Semester <em>Ganjil</em> (Juli–Desember) atau <em>Genap</em> (Januari–Juni).</li>
+            <li><strong>Tahun Ajaran Aktif Terpusat</strong>: Administrator dapat menetapkan Tahun Ajaran Aktif di Pengaturan yang otomatis menjadi default di seluruh menu.</li>
+            <li><strong>Dukungan Google Clasp CLI</strong>: Kemudahan sinkronisasi kode ke Google Apps Script dan migrasi ke database baru dalam hitungan detik via command line.</li>
+            <li><strong>Badge Versi Interaktif</strong>: Fitur popup changelog informasi versi sistem langsung dari navigasi sidebar.</li>
+          </ul>
+        </div>
+
+        <!-- Versi 3.1.0 -->
+        <div class="relative pl-5 border-l-2 border-brand-400 space-y-1.5">
+          <span class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-brand-500 border-2 border-white shadow"></span>
+          <div class="flex items-center justify-between flex-wrap gap-1">
+            <span class="font-bold text-slate-900 text-xs sm:text-sm">
+              <span class="text-brand-600">v3.1.0</span> — Role Murid & Sinkronisasi Cerdas
+            </span>
+            <span class="text-[10px] bg-brand-50 text-brand-700 font-semibold px-2 py-0.5 rounded-full border border-brand-200">Pembaruan Inti</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px] sm:text-xs leading-relaxed">
+            <li><strong>Hak Akses Murid</strong>: Perwakilan kelas dapat mencatat presensi harian teman sekelasnya tanpa opsi nama guru & mapel, terkunci ke kelas masing-masing.</li>
+            <li><strong>Auto-Sync Presensi Guru</strong>: Guru/Admin otomatis mendeteksi dan mengambil data presensi murid hari itu tanpa perlu input ulang dari nol.</li>
+            <li><strong>Checklist Otomatis Siswa Absen di Jurnal</strong>: Formulir Jurnal KBM otomatis menarik nama siswa yang sakit/izin/alpa dari absensi harian.</li>
+            <li><strong>Rekap Absen Adaptif & Smart PDF</strong>: Laporan rekap presensi murid tetap tampil dan menyesuaikan mapel/guru saat difilter maupun dicetak PDF resmi.</li>
+          </ul>
+        </div>
+
+        <!-- Versi 3.0.0 -->
+        <div class="relative pl-5 border-l-2 border-slate-300 space-y-1.5">
+          <span class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-400 border-2 border-white shadow"></span>
+          <div class="flex items-center justify-between flex-wrap gap-1">
+            <span class="font-bold text-slate-800 text-xs sm:text-sm">
+              <span class="text-slate-500">v3.0.0</span> — Rilis Pondasi Awal (Base Release)
+            </span>
+            <span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">Rilis Awal</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px] sm:text-xs leading-relaxed">
+            <li>Sistem Informasi Guru Terpadu berbasis Google Apps Script & Google Spreadsheet.</li>
+            <li>Pencatatan Presensi Kelas & Log Jurnal Mengajar KBM harian.</li>
+            <li>Upload multi-foto bukti kegiatan pembelajaran terintegrasi ke Google Drive.</li>
+            <li>Cetak PDF resmi ber-kop surat dinamis dan tanda tangan legalitas guru/NIP.</li>
+            <li>Master Data Induk & Manajemen Pengguna dengan fitur Impor/Ekspor Excel.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: '<span class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-code-branch text-brand-600"></i> Catatan Pembaruan Sistem</span>',
+      html: changelogHtml,
+      width: '640px',
+      padding: '1.5rem',
+      showCloseButton: true,
+      showConfirmButton: true,
+      confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> Mengerti & Tutup',
+      confirmButtonColor: '#2563eb',
+      customClass: {
+        popup: 'rounded-3xl shadow-2xl border border-slate-200/80',
+        title: 'pt-2 pb-0',
+        confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs sm:text-sm shadow-md shadow-brand-600/30'
+      }
+    });
+  } else {
+    alert('SIGURU v3.2.0 (Build 12) - Pembaruan: Deteksi Semester Otomatis, Pengaturan Tahun Ajaran Aktif, Sinkronisasi Absensi & Role Murid.');
+  }
+}
+
 // Global Document Initializer
 document.addEventListener('DOMContentLoaded', function() {
   applyRoleUI();
