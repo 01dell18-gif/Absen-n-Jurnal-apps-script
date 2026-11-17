@@ -37,6 +37,10 @@ Aplikasi ini berjalan 100% tanpa biaya server (*zero hosting cost* / tanpa sewa 
   - **Sinkronisasi Otomatis Siswa Tidak Hadir di Jurnal**: Daftar murid yang sakit/izin/alpa otomatis tercentang dan terisi langsung ke kolom jurnal KBM.
   - Filter Rekap Absen & Hasil Jurnal otomatis terkunci pada nama guru yang sedang login.
   - Hak mengedit dan menghapus data presensi dan jurnal yang diinput sendiri.
+- **Guru Mapel (Guru Mata Pelajaran)**:
+  - Mengakses **Menu Utama** (Absen Murid & Input Jurnal KBM) dan **Laporan & Rekap** (Rekap Absen & Hasil Jurnal).
+  - Kolom **Nama Guru** di semua formulir dan filter dapat dipilih secara bebas dari seluruh daftar dewan guru (tidak terkunci).
+  - **Proteksi & Pengalihan Presensi Cerdas**: Jika kelas dan tanggal yang dipilih sudah dicatat oleh murid, sistem menampilkan pemberitahuan dan tombol pintas yang mengarahkan langsung ke halaman **Input Jurnal KBM** (parameter kelas & tanggal otomatis terisi). Jika belum diabsen, Guru Mapel dapat mengisi absensi dari awal secara normal.
 - **Administrator**:
   - Akses penuh (*Full Control*) ke seluruh data siswa, guru, jurnal, dan log pembelajaran sekolah.
   - Akses menu **Master Data** untuk impor/ekspor data murid dan dewan guru via Excel.

@@ -150,6 +150,7 @@
           <select id="user-role" onchange="onUserRoleChange()"
             class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-700">
             <option value="Guru">Guru / Staf (Standar KBM)</option>
+            <option value="Guru Mapel">Guru Mapel (Semua Guru & Jurnal KBM)</option>
             <option value="Admin">Administrator (Full Akses)</option>
             <option value="Murid">Murid (Presensi Kelas Khusus)</option>
           </select>
@@ -285,6 +286,13 @@
         if (inputNama) inputNama.placeholder = 'Cth: Budi Pratama (Sekretaris Kelas)';
         if (inputNip) inputNip.placeholder = 'NISN murid...';
         populateKelasDropdown();
+      } else if (role === 'Guru Mapel') {
+        if (contKelas) contKelas.classList.add('hidden');
+        if (contGuru) contGuru.classList.remove('hidden');
+        if (lblNama) lblNama.innerText = 'Nama Guru Mapel / Kustom';
+        if (lblNip) lblNip.innerText = 'NIP Guru (Opsional)';
+        if (inputNama) inputNama.placeholder = 'Cth: Guru Mapel 1 / Nama Guru...';
+        if (inputNip) inputNip.placeholder = 'NIP (bisa dikosongkan)...';
       } else {
         if (contKelas) contKelas.classList.add('hidden');
         if (contGuru) contGuru.classList.remove('hidden');
@@ -375,6 +383,10 @@
               userIcon = 'fa-user-graduate';
               iconBg = 'bg-amber-50 text-amber-700 border-amber-200';
               kelasBadge = u.kelas ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">${u.kelas}</span>` : '<span class="text-rose-500 italic text-[11px]">Belum diatur</span>';
+            } else if (u.role === 'Guru Mapel') {
+              roleBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-50 border border-sky-200 text-sky-700"><i class="fa-solid fa-book-open-reader mr-1"></i>Guru Mapel</span>';
+              userIcon = 'fa-book-open-reader';
+              iconBg = 'bg-sky-50 text-sky-700 border-sky-200';
             } else {
               roleBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 border border-blue-200 text-brand-700">Guru</span>';
               userIcon = 'fa-chalkboard-user';
@@ -675,6 +687,8 @@
             let roleFormatted = 'Guru';
             if (roleRaw.toLowerCase() === 'murid') {
               roleFormatted = 'Murid';
+            } else if (roleRaw.toLowerCase().includes('mapel')) {
+              roleFormatted = 'Guru Mapel';
             } else if (roleRaw.toLowerCase() === 'admin' || username.toLowerCase() === 'admin') {
               skippedAdminCount++;
               continue;

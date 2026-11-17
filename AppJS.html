@@ -452,6 +452,27 @@ function applyRoleUI() {
       userAvatarBadge.innerHTML = '<i class="fa-solid fa-user-graduate"></i>';
       userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-500/40';
     }
+  } else if (r === 'guru mapel') {
+    // KHUSUS HAK AKSES GURU MAPEL: Akses Menu Utama & Rekap, Pilihan Nama Guru Bebas
+    if (groupAuth) groupAuth.classList.remove('hidden');
+    if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupRekap) groupRekap.classList.remove('hidden');
+    if (groupPengaturan) groupPengaturan.classList.add('hidden');
+    if (linkDash) linkDash.classList.remove('hidden');
+    if (linkAbsen) linkAbsen.classList.remove('hidden');
+    if (linkJurnal) linkJurnal.classList.remove('hidden');
+    if (labelMenuUtama) labelMenuUtama.innerText = 'Menu Utama';
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnLogout) btnLogout.classList.remove('hidden');
+    if (badgeRole) {
+      badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200';
+    }
+    if (labelRole) labelRole.innerText = displayName + ' (Guru Mapel)';
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-sky-500';
+    if (userAvatarBadge) {
+      userAvatarBadge.innerHTML = '<i class="fa-solid fa-book-open-reader"></i>';
+      userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-sky-500/30 text-sky-300 flex items-center justify-center font-bold text-xs border border-sky-500/40';
+    }
   } else if (r === 'guru') {
     if (groupAuth) groupAuth.classList.remove('hidden');
     if (groupAdmin) groupAdmin.classList.add('hidden');
@@ -724,6 +745,7 @@ function showVersionInfoModal(event) {
             <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Versi Aktif</span>
           </div>
           <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px] sm:text-xs leading-relaxed">
+            <li><strong>Role Akses "Guru Mapel"</strong>: Peran baru untuk guru mata pelajaran dengan keleluasaan memilih nama guru pengajar pada semua formulir, serta proteksi pengalihan otomatis ke Jurnal KBM jika kelas sudah diabsen oleh perwakilan murid di hari tersebut.</li>
             <li><strong>Akordion Menu Tunggal (Single-Open Accordion)</strong>: Membuka salah satu grup menu di sidebar akan otomatis melipat/menutup grup menu lainnya secara rapi dan fokus.</li>
             <li><strong>Deteksi Semester Otomatis</strong>: Seluruh formulir (Absensi, Jurnal, Rekap & Hasil) otomatis mengisi Semester <em>Ganjil</em> (Juli–Desember) atau <em>Genap</em> (Januari–Juni).</li>
             <li><strong>Tahun Ajaran Aktif Terpusat</strong>: Administrator dapat menetapkan Tahun Ajaran Aktif di Pengaturan yang otomatis menjadi default di seluruh menu.</li>

@@ -309,6 +309,40 @@
       google.script.run
         .withSuccessHandler(function(syncRes) {
           closeLoading();
+
+          // KHUSUS ROLE GURU MAPEL: Jika kelas sudah diabsen oleh murid pada tanggal tersebut
+          const currentRole = (getCurrentRole() || '').trim().toLowerCase();
+          if (currentRole === 'guru mapel' && syncRes && syncRes.found && syncRes.isHarian) {
+            Swal.fire({
+              icon: 'info',
+              title: '<span class="text-base sm:text-lg font-bold text-slate-800">Presensi Sudah Dicatat Murid</span>',
+              html: `
+                <div class="text-left text-xs sm:text-sm text-slate-600 space-y-3 pt-1">
+                  <p>Presensi harian untuk rombel <strong>${kelas}</strong> pada tanggal <strong>${tanggal}</strong> telah selesai dicatat oleh perwakilan murid (${syncRes.source}).</p>
+                  <div class="p-3 bg-blue-50/90 border border-blue-200 rounded-xl text-blue-900 text-xs flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-check text-brand-600 text-sm mt-0.5 flex-shrink-0"></i>
+                    <span>Anda tidak perlu mengabsen ulang. Anda dapat langsung melanjutkan untuk mencatat <strong>Jurnal Mengajar KBM</strong>.</span>
+                  </div>
+                </div>
+              `,
+              showCancelButton: true,
+              confirmButtonText: '<i class="fa-solid fa-pen-to-square mr-1.5"></i> Lanjut ke Input Jurnal',
+              cancelButtonText: 'Batal / Tetap di Sini',
+              confirmButtonColor: '#2563eb',
+              cancelButtonColor: '#64748b',
+              customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200/80',
+                confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md shadow-brand-600/30',
+                cancelButton: 'rounded-xl px-5 py-2.5 font-semibold text-xs'
+              }
+            }).then(result => {
+              if (result.isConfirmed) {
+                goToPage('form-jurnal', { kelas: kelas, tanggal: tanggal });
+              }
+            });
+            return;
+          }
+
           renderStudentAttendanceTable(filtered, kelas, tanggal, syncRes);
         })
         .withFailureHandler(function(err) {

@@ -216,8 +216,25 @@
   <?!= include('AppJS'); ?>
 
   <script>
+    function getQueryParam(key) {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has(key)) return urlParams.get(key);
+        if (window.top && window.top.location && window.top.location.search) {
+          const topParams = new URLSearchParams(window.top.location.search);
+          if (topParams.has(key)) return topParams.get(key);
+        }
+      } catch (e) {}
+      return '';
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById('jurnal-tanggal').valueAsDate = new Date();
+      const paramTgl = getQueryParam('tanggal');
+      if (paramTgl) {
+        document.getElementById('jurnal-tanggal').value = paramTgl;
+      } else {
+        document.getElementById('jurnal-tanggal').valueAsDate = new Date();
+      }
       if (typeof getAutoSemester === 'function') {
         document.getElementById('jurnal-semester').value = getAutoSemester(document.getElementById('jurnal-tanggal').value);
       }
@@ -225,7 +242,7 @@
     });
 
     function setupGuruField() {
-      const userRole = getCurrentRole();
+      const userRole = (getCurrentRole() || '').trim();
       const loggedGuru = getLoggedInNamaGuru();
       const selGuru = document.getElementById('jurnal-guru');
       if (!selGuru) return;
@@ -233,6 +250,7 @@
       const guruList = (window.globalData && window.globalData.guruList) ? window.globalData.guruList : [];
       const guruNames = guruList.map(g => g.nama);
 
+      // Hanya kunci nama guru jika rolenya adalah 'Guru' standar (Bukan Admin dan Bukan Guru Mapel)
       if (userRole === 'Guru') {
         const guruVal = loggedGuru || getCurrentUser();
         selGuru.innerHTML = `<option value="${guruVal}">${guruVal}</option>`;
@@ -251,9 +269,20 @@
       const p = data.pengaturan;
       setupGuruField();
 
+      const paramKelas = getQueryParam('kelas');
+      const paramTgl = getQueryParam('tanggal');
+      if (paramTgl) {
+        document.getElementById('jurnal-tanggal').value = paramTgl;
+      }
+
       populateSelect('jurnal-mapel', p.mapelList, '-- Pilih Mapel --');
-      populateSelect('jurnal-kelas', p.kelasList, '-- Pilih Kelas --');
+      populateSelect('jurnal-kelas', p.kelasList, '-- Pilih Kelas --', paramKelas);
       populateSelect('jurnal-ta', p.taList, '-- Pilih TA --', p.tahunAjaranAktif);
+
+      if (paramKelas) {
+        document.getElementById('jurnal-kelas').value = paramKelas;
+        showToast('info', 'Kelas Terhubung', `Parameter KBM untuk kelas ${paramKelas} siap digunakan.`);
+      }
 
       if (typeof getAutoSemester === 'function') {
         document.getElementById('jurnal-semester').value = getAutoSemester(document.getElementById('jurnal-tanggal').value);
