@@ -12,7 +12,7 @@
 
 ## 📖 Tentang Aplikasi
 
-**SIGURU v3.0** adalah aplikasi web modern berbasis cloud (*Serverless Google Workspace*) yang dirancang khusus untuk mendigitalisasi administrasi kegiatan belajar mengajar (KBM) di sekolah. Aplikasi ini mempermudah pencatatan presensi harian siswa (baik oleh guru maupun perwakilan murid), penyusunan jurnal mengajar KBM harian, pengarsipan dokumentasi kegiatan ke Google Drive, serta rekapitulasi dan pencetakan laporan resmi ber-kop surat.
+**SIGURU v3.2** adalah aplikasi web modern berbasis cloud (*Serverless Google Workspace*) yang dirancang khusus untuk mendigitalisasi administrasi kegiatan belajar mengajar (KBM) di sekolah. Aplikasi ini mempermudah pencatatan presensi harian siswa (baik oleh guru maupun perwakilan murid), penyusunan jurnal mengajar KBM harian, pengarsipan dokumentasi kegiatan ke Google Drive, serta rekapitulasi dan pencetakan laporan resmi ber-kop surat.
 
 Aplikasi ini berjalan 100% tanpa biaya server (*zero hosting cost* / tanpa sewa VPS maupun cPanel) karena seluruh backend dieksekusi oleh **Google Apps Script**, datanya tersimpan aman di **Google Spreadsheet**, dan bukti pembelajaran multi-foto otomatis tersimpan di **Google Drive**.
 
@@ -341,6 +341,15 @@ Saat fungsi `setupDatabaseSheets()` pertama kali dijalankan, sistem secara otoma
 
 ### 5. Mengapa akun Admin tidak terhapus saat melakukan Impor Excel Pengguna?
 - Sistem dilengkapi fitur proteksi akun administrator (`importUsersFromExcel()` di backend). Akun dengan role `Admin` akan selalu dipertahankan secara otomatis agar pengelola sekolah tidak pernah terkunci keluar dari sistem.
+
+### 6. Muncul error di Windows PowerShell: *"File ... npx.ps1 cannot be loaded because running scripts is disabled on this system"*?
+- **Penyebab**: Kebijakan keamanan bawaan Windows PowerShell (*ExecutionPolicy*) membatasi pengeksekusian berkas skrip `.ps1`.
+- **Solusi**: Gunakan perintah `npx.cmd` sebagai pengganti `npx`, misalnya:
+  ```bash
+  npx.cmd @google/clasp login
+  npx.cmd @google/clasp push
+  ```
+  Atau jalankan terminal melalui aplikasi **Command Prompt (CMD)** standar.
 
 ---
 
