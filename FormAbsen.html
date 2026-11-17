@@ -23,21 +23,21 @@
               <i class="fa-solid fa-clipboard-list"></i>
             </div>
             <div>
-              <h3 class="text-sm font-bold text-slate-800">Pilih Parameter Kelas & Pelajaran</h3>
-              <p class="text-[11px] text-slate-400">Tentukan data KBM sebelum memuat presensi murid</p>
+              <h3 id="form-absen-title" class="text-sm font-bold text-slate-800">Pilih Parameter Kelas & Pelajaran</h3>
+              <p id="form-absen-subtitle" class="text-[11px] text-slate-400">Tentukan data KBM sebelum memuat presensi murid</p>
             </div>
           </div>
-          <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span id="badge-form-status" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
             Form Aktif
           </span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
-          <div>
+        <div id="form-absen-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
+          <div id="container-field-guru">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Guru</label>
             <select id="form-absen-guru" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
           </div>
-          <div>
+          <div id="container-field-mapel">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Mata Pelajaran</label>
             <div class="datalist-input-wrapper">
               <input type="text" id="form-absen-mapel" list="list-form-absen-mapel" autocomplete="off"
@@ -49,7 +49,7 @@
               </div>
             </div>
           </div>
-          <div>
+          <div id="container-field-kelas">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Rombel / Kelas</label>
             <div class="datalist-input-wrapper">
               <input type="text" id="form-absen-kelas" list="list-form-absen-kelas" autocomplete="off"
@@ -61,18 +61,18 @@
               </div>
             </div>
           </div>
-          <div>
+          <div id="container-field-semester">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Semester</label>
             <select id="form-absen-semester" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
               <option value="Ganjil">Ganjil</option>
               <option value="Genap">Genap</option>
             </select>
           </div>
-          <div>
+          <div id="container-field-tanggal">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Tanggal Pertemuan</label>
             <input type="date" id="form-absen-tanggal" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
           </div>
-          <div>
+          <div id="container-field-ta">
             <label class="block text-[11px] font-bold text-slate-700 mb-1">Tahun Ajaran</label>
             <select id="form-absen-ta" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"></select>
           </div>
@@ -108,6 +108,9 @@
             </button>
           </div>
         </div>
+
+        <!-- Banner Presensi Tersinkron Otomatis -->
+        <div id="banner-presensi-sinkron" class="hidden"></div>
 
         <!-- Tabel Siswa -->
         <div class="overflow-x-auto border border-slate-200 rounded-xl">
@@ -145,9 +148,47 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('form-absen-tanggal').valueAsDate = new Date();
+      adjustFormForRole();
       setupGuruField();
       setupKelasField();
     });
+
+    function adjustFormForRole() {
+      const role = getCurrentRole();
+      const isMurid = role.toLowerCase() === 'murid';
+      const contGuru = document.getElementById('container-field-guru');
+      const contMapel = document.getElementById('container-field-mapel');
+      const grid = document.getElementById('form-absen-grid');
+      const title = document.getElementById('form-absen-title');
+      const subtitle = document.getElementById('form-absen-subtitle');
+      const badge = document.getElementById('badge-form-status');
+
+      if (isMurid) {
+        if (contGuru) contGuru.classList.add('hidden');
+        if (contMapel) contMapel.classList.add('hidden');
+        if (grid) {
+          grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5';
+        }
+        if (title) title.innerText = 'Presensi Harian Kehadiran Siswa';
+        if (subtitle) subtitle.innerText = 'Catat presensi harian kehadiran teman sekelas hari ini';
+        if (badge) {
+          badge.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+          badge.innerHTML = '<i class="fa-solid fa-user-graduate mr-1"></i> Presensi Murid';
+        }
+      } else {
+        if (contGuru) contGuru.classList.remove('hidden');
+        if (contMapel) contMapel.classList.remove('hidden');
+        if (grid) {
+          grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5';
+        }
+        if (title) title.innerText = 'Pilih Parameter Kelas & Pelajaran';
+        if (subtitle) subtitle.innerText = 'Tentukan data KBM sebelum memuat presensi murid';
+        if (badge) {
+          badge.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+          badge.innerText = 'Form Aktif';
+        }
+      }
+    }
 
     function onDataLoaded(data) {
       if (!data || !data.pengaturan) return;
@@ -156,6 +197,7 @@
       populateSelect('form-absen-kelas', p.kelasList, '-- Pilih Kelas --');
       populateSelect('form-absen-ta', p.taList, '-- Pilih TA --');
 
+      adjustFormForRole();
       setupGuruField();
       setupKelasField();
     }
@@ -224,6 +266,7 @@
       const role = getCurrentRole();
       const userKelas = getLoggedInKelas();
       let kelas = document.getElementById('form-absen-kelas').value;
+      const tanggal = document.getElementById('form-absen-tanggal').value;
 
       if (role.toLowerCase() === 'murid' && userKelas) {
         kelas = userKelas;
@@ -236,8 +279,6 @@
       }
 
       const filtered = (window.globalData.muridList || []).filter(m => m.kelas === kelas);
-      const tbody = document.getElementById('tbody-input-absen');
-      tbody.innerHTML = "";
 
       if (filtered.length === 0) {
         document.getElementById('container-input-absen').classList.add('hidden');
@@ -250,10 +291,71 @@
         return;
       }
 
+      showLoading('Memeriksa Catatan Presensi Kelas...');
+      google.script.run
+        .withSuccessHandler(function(syncRes) {
+          closeLoading();
+          renderStudentAttendanceTable(filtered, kelas, tanggal, syncRes);
+        })
+        .withFailureHandler(function(err) {
+          closeLoading();
+          renderStudentAttendanceTable(filtered, kelas, tanggal, { success: false, found: false });
+        })
+        .getExistingPresensiForClass(tanggal, kelas);
+    }
+
+    function renderStudentAttendanceTable(filtered, kelas, tanggal, syncRes) {
+      const tbody = document.getElementById('tbody-input-absen');
+      tbody.innerHTML = "";
+
       document.getElementById('label-kelas-terpilih').innerText = kelas;
       document.getElementById('count-murid-loaded').innerText = filtered.length;
 
+      const bannerSync = document.getElementById('banner-presensi-sinkron');
+      const hasExisting = syncRes && syncRes.found;
+
+      if (bannerSync) {
+        if (hasExisting) {
+          bannerSync.className = 'p-3.5 bg-blue-50/90 border border-blue-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-blue-900 shadow-sm animate-fadeIn mb-2';
+          bannerSync.innerHTML = `
+            <div class="flex items-start sm:items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-blue-100 text-brand-700 flex items-center justify-center text-sm flex-shrink-0">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-blue-900">Data Presensi Ditemukan (${syncRes.source})</p>
+                <p class="text-[11px] text-blue-700 leading-relaxed">
+                  Status kehadiran siswa telah disinkronkan otomatis dari rekaman tanggal <strong>${tanggal}</strong>. Anda dapat langsung meninjau atau memperbarui data jika terdapat perubahan.
+                </p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 bg-blue-200/70 text-blue-900 rounded-lg font-extrabold text-[10px] border border-blue-300 flex-shrink-0 flex items-center gap-1">
+              <i class="fa-solid fa-check-double"></i> Otomatis Terisi
+            </span>
+          `;
+          bannerSync.classList.remove('hidden');
+          showToast('info', 'Presensi Tersinkron', 'Status siswa otomatis terisi dari ' + syncRes.source);
+        } else {
+          bannerSync.classList.add('hidden');
+          bannerSync.innerHTML = '';
+        }
+      }
+
       filtered.forEach((m, i) => {
+        let currentKet = 'Hadir';
+        if (hasExisting) {
+          if (syncRes.studentsMap && syncRes.studentsMap[m.nisn]) {
+            currentKet = syncRes.studentsMap[m.nisn];
+          } else if (syncRes.studentsByName && syncRes.studentsByName[m.nama.toLowerCase()]) {
+            currentKet = syncRes.studentsByName[m.nama.toLowerCase()];
+          }
+        }
+
+        const options = ['Hadir', 'Sakit', 'Izin', 'Alpa', 'Dispen'].map(opt => {
+          const isSelected = opt.toLowerCase() === currentKet.toLowerCase() ? 'selected' : '';
+          return `<option value="${opt}" ${isSelected}>${opt}</option>`;
+        }).join('');
+
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50 transition">
             <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${i + 1}</td>
@@ -267,11 +369,7 @@
             <td class="p-3">
               <select data-nisn="${m.nisn}" data-nama="${m.nama}" data-jk="${m.jk}" 
                       class="select-ket-absen w-full text-xs p-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-brand-500 bg-white font-medium text-slate-700">
-                <option value="Hadir" selected>Hadir</option>
-                <option value="Sakit">Sakit</option>
-                <option value="Izin">Izin</option>
-                <option value="Alpa">Alpa</option>
-                <option value="Dispen">Dispen</option>
+                ${options}
               </select>
             </td>
           </tr>
@@ -293,9 +391,20 @@
       const role = getCurrentRole();
       const isMurid = role.toLowerCase() === 'murid';
       const userKelas = getLoggedInKelas();
-      const loggedGuru = getLoggedInNamaGuru();
-      const guru = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('form-absen-guru').value || loggedGuru || getCurrentUser());
-      const mapel = document.getElementById('form-absen-mapel').value;
+      const loggedName = getLoggedInNamaGuru() || getCurrentUser();
+      
+      let guru = '';
+      let mapel = '';
+
+      if (isMurid) {
+        guru = 'Murid (' + (loggedName || 'Sekretaris') + ')';
+        mapel = 'Presensi Harian';
+      } else {
+        const loggedGuru = getLoggedInNamaGuru();
+        guru = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('form-absen-guru').value || loggedGuru || getCurrentUser());
+        mapel = document.getElementById('form-absen-mapel').value;
+      }
+
       const kelas = (isMurid && userKelas) ? userKelas : document.getElementById('form-absen-kelas').value;
       const semester = document.getElementById('form-absen-semester').value;
       const tanggal = document.getElementById('form-absen-tanggal').value;

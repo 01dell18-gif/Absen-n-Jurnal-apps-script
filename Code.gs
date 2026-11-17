@@ -538,8 +538,88 @@ function getAutoPertemuan(namaGuru, semester, tahunAjaran, mapel, kelas) {
 }
 
 /**
+ * CEK DATA PRESENSI KELAS PADA TANGGAL TERTENTU (Untuk Pre-fill Otomatis Guru & Admin)
+ */
+function getExistingPresensiForClass(tanggal, kelas) {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("HasilAbsen");
+  if (!sheet || sheet.getLastRow() <= 1) {
+    return { success: true, found: false };
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const targetTgl = String(tanggal || '').trim();
+  const targetKelas = String(kelas || '').trim().toLowerCase();
+  const timeZone = Session.getScriptTimeZone();
+
+  const foundRecords = [];
+
+  for (let i = data.length - 1; i >= 1; i--) {
+    const row = data[i];
+    let rowTgl = row[4];
+    if (rowTgl instanceof Date) {
+      rowTgl = Utilities.formatDate(rowTgl, timeZone, "yyyy-MM-dd");
+    } else {
+      rowTgl = String(rowTgl || '').trim();
+      if (rowTgl.includes('T')) rowTgl = rowTgl.split('T')[0];
+    }
+
+    const rowKelas = String(row[3] || '').trim().toLowerCase();
+    if (rowTgl === targetTgl && rowKelas === targetKelas) {
+      let nisnRaw = String(row[0] || '').replace(/'/g, '').trim();
+      if (nisnRaw.length > 0 && !isNaN(nisnRaw)) {
+        nisnRaw = ("0000000000" + nisnRaw).slice(-10);
+      }
+      foundRecords.push({
+        nisn: nisnRaw,
+        nama: String(row[1] || '').trim(),
+        keterangan: String(row[5] || 'Hadir').trim(),
+        mapel: String(row[6] || '').trim(),
+        guru: String(row[9] || '').trim()
+      });
+    }
+  }
+
+  if (foundRecords.length === 0) {
+    return { success: true, found: false };
+  }
+
+  const studentsMap = {};
+  const studentsByName = {};
+  let sampleMapel = "";
+  let sampleGuru = "";
+
+  foundRecords.forEach(r => {
+    if (r.nisn && !studentsMap[r.nisn]) {
+      studentsMap[r.nisn] = r.keterangan;
+    }
+    if (r.nama && !studentsByName[r.nama.toLowerCase()]) {
+      studentsByName[r.nama.toLowerCase()] = r.keterangan;
+    }
+    if (!sampleMapel && r.mapel) sampleMapel = r.mapel;
+    if (!sampleGuru && r.guru) sampleGuru = r.guru;
+  });
+
+  const isHarian = sampleMapel.toLowerCase().includes('harian') || sampleGuru.toLowerCase().includes('murid');
+  const sourceInfo = isHarian 
+    ? "Presensi Harian Murid" 
+    : `Presensi Sebelumnya (${sampleGuru || 'Guru'} - ${sampleMapel || 'Mapel'})`;
+
+  return {
+    success: true,
+    found: true,
+    source: sourceInfo,
+    isHarian: isHarian,
+    studentsMap: studentsMap,
+    studentsByName: studentsByName
+  };
+}
+
+/**
  * CEK DATA PRESENSI MURID UNTUK LOG JURNAL KBM
- * Parameter: Tanggal, Nama Guru, Semester, Tahun Ajaran, Mapel, Kelas
+ * Mendukung Hierarki 2 Tingkat:
+ * 1. Prioritas Utama: Absensi Spesifik Mapel & Guru tersebut
+ * 2. Fallback Pintar: Presensi Harian yang sudah diisi oleh Murid pada tanggal tersebut
  */
 function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, kelas) {
   const ss = getSpreadsheet();
@@ -557,7 +637,9 @@ function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, ke
   const targetKelas = String(kelas || '').trim().toLowerCase();
 
   const timeZone = Session.getScriptTimeZone();
-  const students = [];
+  const exactStudents = [];
+  const fallbackHarianStudents = [];
+  const anyClassStudents = [];
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -566,6 +648,7 @@ function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, ke
       rowTgl = Utilities.formatDate(rowTgl, timeZone, "yyyy-MM-dd");
     } else {
       rowTgl = String(rowTgl || '').trim();
+      if (rowTgl.includes('T')) rowTgl = rowTgl.split('T')[0];
     }
 
     const rowKelas = String(row[3] || '').trim().toLowerCase();
@@ -574,41 +657,93 @@ function getAbsensiForJurnal(tanggal, namaGuru, semester, tahunAjaran, mapel, ke
     const rowTA = String(row[8] || '').trim().toLowerCase();
     const rowGuru = String(row[9] || '').trim().toLowerCase();
 
-    // Syarat pencocokan: Tanggal, Kelas, Mapel, Semester, Tahun Ajaran, dan Guru
-    const matchTgl = !targetTgl || rowTgl === targetTgl;
-    const matchKelas = !targetKelas || rowKelas === targetKelas;
-    const matchMapel = !targetMapel || rowMapel === targetMapel;
-    const matchSem = !targetSem || rowSem === targetSem;
-    const matchTA = !targetTA || rowTA === targetTA;
-    const matchGuru = !targetGuru || !rowGuru || rowGuru === targetGuru || rowGuru.includes(targetGuru) || targetGuru.includes(rowGuru);
-
-    if (matchTgl && matchKelas && matchMapel && matchSem && matchTA && matchGuru) {
+    // Syarat dasar: Tanggal dan Kelas wajib cocok
+    if (rowTgl === targetTgl && rowKelas === targetKelas) {
       let nisnRaw = String(row[0] || '').replace(/'/g, '').trim();
       if (nisnRaw.length > 0 && !isNaN(nisnRaw)) {
         nisnRaw = ("0000000000" + nisnRaw).slice(-10);
       }
-      students.push({
+      const stObj = {
         nisn: nisnRaw,
         nama: String(row[1] || '').trim(),
         jk: String(row[2] || '').trim(),
         keterangan: String(row[5] || 'H').trim()
-      });
+      };
+
+      // Tingkat 1: Cocok dengan Mapel & Guru KBM
+      if (rowMapel === targetMapel && (rowGuru === targetGuru || !targetGuru)) {
+        exactStudents.push(stObj);
+      }
+
+      // Tingkat 2: Presensi Harian dari Murid atau presensi umum hari itu
+      if (rowMapel.includes('harian') || rowGuru.includes('murid') || !rowMapel) {
+        fallbackHarianStudents.push(stObj);
+      } else {
+        anyClassStudents.push(stObj);
+      }
     }
   }
 
-  if (students.length === 0) {
+  // Jika ada presensi spesifik mapel guru
+  if (exactStudents.length > 0) {
     return {
       success: true,
-      found: false,
-      message: `Belum ada data presensi murid untuk kelas ${kelas}, mapel ${mapel}, pada tanggal ${tanggal}.`
+      found: true,
+      isFallbackHarian: false,
+      source: "Presensi Mapel Guru",
+      total: exactStudents.length,
+      students: exactStudents
+    };
+  }
+
+  // Fallback ke presensi harian yang dicatat murid pada hari itu
+  if (fallbackHarianStudents.length > 0) {
+    const uniqueHarian = [];
+    const seen = new Set();
+    fallbackHarianStudents.forEach(st => {
+      const key = st.nisn || st.nama;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueHarian.push(st);
+      }
+    });
+
+    return {
+      success: true,
+      found: true,
+      isFallbackHarian: true,
+      source: "Presensi Harian Murid",
+      total: uniqueHarian.length,
+      students: uniqueHarian
+    };
+  }
+
+  // Fallback tingkat 3: Presensi kelas lain yang tercatat hari itu
+  if (anyClassStudents.length > 0) {
+    const uniqueAny = [];
+    const seen = new Set();
+    anyClassStudents.forEach(st => {
+      const key = st.nisn || st.nama;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueAny.push(st);
+      }
+    });
+
+    return {
+      success: true,
+      found: true,
+      isFallbackHarian: true,
+      source: "Presensi Sebelumnya Hari Ini",
+      total: uniqueAny.length,
+      students: uniqueAny
     };
   }
 
   return {
     success: true,
-    found: true,
-    total: students.length,
-    students: students
+    found: false,
+    message: `Belum ada data presensi murid untuk kelas ${kelas} pada tanggal ${tanggal}.`
   };
 }
 

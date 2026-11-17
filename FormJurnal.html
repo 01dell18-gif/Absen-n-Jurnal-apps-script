@@ -356,7 +356,10 @@
 
           // Data presensi ditemukan
           currentAbsenStudents = res.students;
-          renderAbsenStudentsChecklist(res.students, k, m, tgl);
+          renderAbsenStudentsChecklist(res.students, k, m, tgl, res);
+          if (isManual) {
+            showToast('success', 'Presensi Ditemukan', res.isFallbackHarian ? ('Disinkronkan dari ' + res.source) : 'Menggunakan Presensi KBM Mapel');
+          }
         })
         .withFailureHandler(function(err) {
           if (container) {
@@ -371,7 +374,7 @@
         .getAbsensiForJurnal(tgl, g, sem, ta, m, k);
     }
 
-    function renderAbsenStudentsChecklist(students, kelas, mapel, tanggal) {
+    function renderAbsenStudentsChecklist(students, kelas, mapel, tanggal, resInfo) {
       const container = document.getElementById('container-absen-checker');
       if (!container) return;
 
@@ -418,16 +421,28 @@
         `;
       });
 
+      const isFallback = resInfo && resInfo.isFallbackHarian;
+      const sourceLabel = (resInfo && resInfo.source) ? resInfo.source : (isFallback ? 'Presensi Harian Murid' : 'Presensi Mapel Guru');
+
       container.innerHTML = `
         <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3 animate-fadeIn">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-clipboard-check"></i>
               </span>
               <span class="text-xs font-extrabold text-slate-800">
                 Presensi Kelas: ${students.length} Siswa (${nonHadirCount} Tidak Hadir)
               </span>
+              ${isFallback ? `
+                <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold flex items-center gap-1 shadow-xs">
+                  <i class="fa-solid fa-user-graduate text-amber-600"></i> Disinkronkan: ${sourceLabel}
+                </span>
+              ` : `
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold flex items-center gap-1 shadow-xs">
+                  <i class="fa-solid fa-check text-emerald-600"></i> Presensi KBM Mapel
+                </span>
+              `}
             </div>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="selectAllAbsentStudents()" 
