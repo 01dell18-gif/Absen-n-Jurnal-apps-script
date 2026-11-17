@@ -335,11 +335,17 @@
 
       if (role === 'Guru') {
         const guruVal = loggedGuru || getCurrentUser();
-        // Otomatis terisi nama guru yang login dan di-kunci
-        selectGuru.innerHTML = `<option value="${guruVal}">${guruVal}</option>`;
+        let optionsHtml = `<option value="${guruVal}" selected>${guruVal} (Saya)</option>`;
+        optionsHtml += `<option value="">-- Semua Guru / Presensi Murid --</option>`;
+        guruNames.forEach(gn => {
+          if (gn !== guruVal) {
+            optionsHtml += `<option value="${gn}">${gn}</option>`;
+          }
+        });
+        selectGuru.innerHTML = optionsHtml;
         selectGuru.value = guruVal;
-        selectGuru.disabled = true;
-        selectGuru.classList.add('bg-slate-100', 'cursor-not-allowed', 'font-bold', 'text-slate-700');
+        selectGuru.disabled = false;
+        selectGuru.classList.remove('bg-slate-100', 'cursor-not-allowed');
       } else {
         // Admin & Tamu
         selectGuru.disabled = false;
@@ -375,23 +381,73 @@
       const role = getCurrentRole();
       const loggedGuru = getLoggedInNamaGuru();
       const k = (document.getElementById('filter-rekap-kelas').value || '').trim();
-      const m = document.getElementById('filter-rekap-murid').value;
-      const g = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '');
+      const m = (document.getElementById('filter-rekap-murid').value || '').trim();
+      const g = (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '') || ((role === 'Guru') ? loggedGuru : '');
       const mp = (document.getElementById('filter-rekap-mapel').value || '').trim();
-      const s = document.getElementById('filter-rekap-semester').value;
-      const t = document.getElementById('filter-rekap-ta').value;
+      const s = (document.getElementById('filter-rekap-semester').value || '').trim();
+      const t = (document.getElementById('filter-rekap-ta').value || '').trim();
 
       const isAllKelas = !k || k === '-- Semua Kelas --';
       const isAllMapel = !mp || mp === '-- Semua Mapel --';
+      const isAllGuru = !g || g === '-- Semua Guru --';
 
-      rekapAbsenFiltered = rekapAbsenRaw.filter(r => 
-        (isAllKelas || r.kelas === k) &&
-        (!m || r.nama === m) &&
-        (!g || (r.namaGuru && r.namaGuru.trim().toLowerCase() === g.trim().toLowerCase())) &&
-        (isAllMapel || r.mapel === mp) &&
-        (!s || r.semester === s) &&
-        (!t || r.tahunAjaran === t)
-      );
+      const isMuridPresensi = (r) => {
+        const rg = String(r.namaGuru || '').toLowerCase();
+        const rm = String(r.mapel || '').toLowerCase();
+        return rg.includes('murid') || rm.includes('harian') || !rg || !rm;
+      };
+
+      // 1. Saring awal berdasarkan Kelas, Nama Siswa, Semester, dan Tahun Ajaran
+      let pool = rekapAbsenRaw.filter(r => {
+        const matchK = isAllKelas || (r.kelas && r.kelas.trim().toLowerCase() === k.toLowerCase());
+        const matchM = !m || (r.nama && r.nama.trim().toLowerCase() === m.toLowerCase());
+        const matchS = !s || (r.semester && r.semester.trim().toLowerCase() === s.toLowerCase());
+        const matchT = !t || (r.tahunAjaran && r.tahunAjaran.trim().toLowerCase() === t.toLowerCase());
+        return matchK && matchM && matchS && matchT;
+      });
+
+      // 2. Evaluasi Guru dan Mapel dengan Dukungan Fallback Adaptif dari Presensi Harian Murid
+      if (isAllGuru && isAllMapel) {
+        // Tampilkan seluruh data apa adanya
+        rekapAbsenFiltered = pool;
+      } else {
+        // Kelompokkan per tanggal + siswa (NISN / Nama) untuk memprioritaskan exact match
+        const groups = new Map();
+        pool.forEach(r => {
+          const key = (r.tanggal || '') + '___' + (r.nisn || r.nama || '');
+          if (!groups.has(key)) {
+            groups.set(key, []);
+          }
+          groups.get(key).push(r);
+        });
+
+        const result = [];
+        groups.forEach(records => {
+          // Cari record yang cocok langsung dengan Guru & Mapel KBM
+          const exactMatches = records.filter(r => {
+            const matchG = isAllGuru || (r.namaGuru && r.namaGuru.trim().toLowerCase() === g.trim().toLowerCase());
+            const matchM = isAllMapel || (r.mapel && r.mapel.trim().toLowerCase() === mp.trim().toLowerCase());
+            return matchG && matchM && !isMuridPresensi(r);
+          });
+
+          if (exactMatches.length > 0) {
+            exactMatches.forEach(em => result.push(em));
+          } else {
+            // Jika tidak ada presensi spesifik guru/mapel, gunakan presensi harian dari murid
+            const fallbacks = records.filter(r => isMuridPresensi(r));
+            fallbacks.forEach(fb => {
+              result.push({
+                ...fb,
+                _isAdapted: true,
+                _adaptedMapel: (!isAllMapel && mp) ? mp : (fb.mapel || 'Presensi Harian'),
+                _adaptedGuru: (!isAllGuru && g) ? g : (fb.namaGuru || 'Murid')
+              });
+            });
+          }
+        });
+
+        rekapAbsenFiltered = result;
+      }
 
       calculateAbsenStats();
       renderRekapAbsenTable(1);
@@ -462,6 +518,11 @@
           `;
         }
 
+        const displayMapel = (r._isAdapted && r._adaptedMapel) ? r._adaptedMapel : (r.mapel || '-');
+        const badgeAdapted = (r._isAdapted) 
+          ? ` <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-semibold" title="Presensi Harian dari Murid"><i class="fa-solid fa-user-graduate"></i> Presensi Murid</span>` 
+          : '';
+
         tb.innerHTML += `
           <tr class="hover:bg-slate-50 transition">
             <td class="p-3.5 text-center text-slate-400 font-mono text-[11px]">${(page - 1) * size + i + 1}</td>
@@ -474,7 +535,7 @@
                 ${r.keterangan}
               </span>
             </td>
-            <td class="p-3.5 text-slate-700 font-medium">${r.mapel}</td>
+            <td class="p-3.5 text-slate-700 font-medium">${displayMapel}${badgeAdapted}</td>
             ${actionTd}
           </tr>
         `;
@@ -671,8 +732,18 @@
       const p = window.globalData.pengaturan || {};
       const role = getCurrentRole();
       const loggedGuru = getLoggedInNamaGuru();
-      const ttdNama = (role === 'Guru' && loggedGuru) ? loggedGuru : ((document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : "") || "-");
-      const guruObj = (window.globalData.guruList || []).find(g => g.nama === ttdNama);
+      
+      const filterGuruVal = (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '') || ((role === 'Guru') ? loggedGuru : '');
+      const filterMapelVal = (document.getElementById('filter-rekap-mapel') ? document.getElementById('filter-rekap-mapel').value : '') || '';
+      const filterKelasVal = (document.getElementById('filter-rekap-kelas') ? document.getElementById('filter-rekap-kelas').value : '') || '';
+      const filterSemVal = (document.getElementById('filter-rekap-semester') ? document.getElementById('filter-rekap-semester').value : '') || '';
+      const filterTaVal = (document.getElementById('filter-rekap-ta') ? document.getElementById('filter-rekap-ta').value : '') || '';
+
+      let ttdNama = filterGuruVal;
+      if (!ttdNama || ttdNama.toLowerCase().includes('semua') || ttdNama.toLowerCase().includes('murid')) {
+        ttdNama = (role === 'Guru' && loggedGuru) ? loggedGuru : '-';
+      }
+      const guruObj = (window.globalData && window.globalData.guruList || []).find(g => g.nama === ttdNama);
       const ttdNip = guruObj ? guruObj.nip : ((role === 'Guru' && getLoggedInNip()) ? getLoggedInNip() : "-");
 
       let muridStats = {};
@@ -691,10 +762,16 @@
 
       let detailRowsHtml = "";
       rekapAbsenFiltered.forEach((r, i) => {
-        detailRowsHtml += `<tr><td style="text-align:center">${i + 1}</td><td style="mso-number-format:'\\@';">${r.nisn}</td><td>${r.nama}</td><td style="text-align:center">${r.jk}</td><td style="text-align:center">${r.kelas}</td><td style="text-align:center">${r.tanggal}</td><td style="text-align:center; font-weight:bold;">${r.keterangan}</td><td>${r.mapel}</td><td style="text-align:center">${r.semester}</td><td style="text-align:center">${r.tahunAjaran}</td></tr>`;
+        const pdfMapel = (r._isAdapted && r._adaptedMapel) ? r._adaptedMapel : (r.mapel || '-');
+        detailRowsHtml += `<tr><td style="text-align:center">${i + 1}</td><td style="mso-number-format:'\\@';">${r.nisn}</td><td>${r.nama}</td><td style="text-align:center">${r.jk}</td><td style="text-align:center">${r.kelas}</td><td style="text-align:center">${r.tanggal}</td><td style="text-align:center; font-weight:bold;">${r.keterangan}</td><td>${pdfMapel}</td><td style="text-align:center">${r.semester}</td><td style="text-align:center">${r.tahunAjaran}</td></tr>`;
       });
 
-      const filterGuruVal = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('filter-rekap-guru') ? document.getElementById('filter-rekap-guru').value : '');
+      const displayHeaderGuru = filterGuruVal || ((role === 'Guru') ? loggedGuru : 'Semua');
+      const displayHeaderMapel = filterMapelVal || 'Semua';
+      const displayHeaderKelas = filterKelasVal || 'Semua';
+      const displayHeaderSem = filterSemVal || 'Semua';
+      const displayHeaderTa = filterTaVal || 'Semua';
+
       const sumberData = p.linkHasilAbsen ? String(p.linkHasilAbsen).trim() : '';
       const sumberDataHtml = sumberData 
         ? `<div style="font-size: 10px; color: #475569; margin: 4px 0 12px 0; text-align: center;"><strong>Sumber Data:</strong> ${sumberData.startsWith('http') ? `<a href="${sumberData}" target="_blank" style="color: #1e40af; text-decoration: underline;">${sumberData}</a>` : sumberData}</div>` 
@@ -722,11 +799,11 @@
           </div>
           ${getKopSuratHtml('LAPORAN REKAPITULASI KEHADIRAN SISWA')}
           <p style="font-size: 11px; margin-bottom: 4px; text-align: center;">
-            <strong>Nama Guru:</strong> ${filterGuruVal || 'Semua'} &nbsp;|&nbsp; 
-            <strong>Kelas:</strong> ${document.getElementById('filter-rekap-kelas').value || 'Semua'} &nbsp;|&nbsp; 
-            <strong>Semester:</strong> ${document.getElementById('filter-rekap-semester').value || 'Semua'} &nbsp;|&nbsp; 
-            <strong>Tahun Ajaran:</strong> ${document.getElementById('filter-rekap-ta').value || 'Semua'} &nbsp;|&nbsp;
-            <strong>Mata Pelajaran:</strong> ${document.getElementById('filter-rekap-mapel').value || 'Semua'}
+            <strong>Nama Guru:</strong> ${displayHeaderGuru} &nbsp;|&nbsp; 
+            <strong>Kelas:</strong> ${displayHeaderKelas} &nbsp;|&nbsp; 
+            <strong>Semester:</strong> ${displayHeaderSem} &nbsp;|&nbsp; 
+            <strong>Tahun Ajaran:</strong> ${displayHeaderTa} &nbsp;|&nbsp;
+            <strong>Mata Pelajaran:</strong> ${displayHeaderMapel}
           </p>
           ${sumberDataHtml}
           <h4 style="margin-bottom: 6px; margin-top: 16px; color: #1e40af;">1. Ringkasan Persentase Kehadiran Per Siswa</h4>
