@@ -78,14 +78,15 @@
                 <th class="p-3.5">Username</th>
                 <th class="p-3.5 w-40">Password</th>
                 <th class="p-3.5 w-32">Hak Akses (Role)</th>
-                <th class="p-3.5">Nama Guru Terkait</th>
-                <th class="p-3.5 w-36">NIP</th>
+                <th class="p-3.5 w-32 text-center">Kelas Khusus</th>
+                <th class="p-3.5">Nama Guru / Murid</th>
+                <th class="p-3.5 w-36">NIP / NISN</th>
                 <th class="p-3.5 text-center w-36">Tindakan / Aksi</th>
               </tr>
             </thead>
             <tbody id="tbody-users" class="divide-y divide-slate-100">
               <tr>
-                <td colspan="7" class="text-center p-8 text-slate-400">
+                <td colspan="8" class="text-center p-8 text-slate-400">
                   <i class="fa-solid fa-spinner fa-spin text-brand-600 text-xl mb-2"></i>
                   <p>Memuat daftar pengguna...</p>
                 </td>
@@ -115,7 +116,7 @@
         </div>
         <div>
           <h3 id="user-form-title" class="text-sm font-extrabold text-slate-800">Tambah Pengguna Baru</h3>
-          <p class="text-[11px] text-slate-400">Kelola akun dan hubungkan ke data guru</p>
+          <p class="text-[11px] text-slate-400">Kelola akun dan hak akses pengguna</p>
         </div>
       </div>
 
@@ -146,14 +147,29 @@
         <div>
           <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Hak Akses
             (Role)</label>
-          <select id="user-role"
+          <select id="user-role" onchange="onUserRoleChange()"
             class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-semibold text-slate-700">
-            <option value="Guru">Guru / Staf (Standar)</option>
+            <option value="Guru">Guru / Staf (Standar KBM)</option>
             <option value="Admin">Administrator (Full Akses)</option>
+            <option value="Murid">Murid (Presensi Kelas Khusus)</option>
           </select>
         </div>
 
-        <div>
+        <!-- Khusus Role Murid: Tentukan Kelas Yang Dapat Diabsen -->
+        <div id="container-user-kelas" class="hidden">
+          <label class="block text-[11px] font-bold text-amber-800 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-door-open text-amber-600"></i>
+            <span>Tentukan Kelas yang Dapat Diabsen</span>
+            <span class="text-rose-500">*</span>
+          </label>
+          <select id="user-kelas"
+            class="w-full text-xs p-3 border rounded-xl bg-amber-50/70 border-amber-300 outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition font-bold text-slate-800">
+            <option value="">-- Pilih Kelas Khusus --</option>
+          </select>
+          <p class="text-[10px] text-amber-700 mt-1">Akun Murid ini hanya dapat mengakses dan mengabsen siswa pada kelas yang ditentukan di sini.</p>
+        </div>
+
+        <div id="container-user-guru">
           <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Pilih Guru Terkait
             (Opsional)</label>
           <select id="user-select-guru" onchange="onUserSelectGuruChange()"
@@ -163,15 +179,15 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Guru
+          <label id="label-nama-guru" class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nama Guru / Murid
             (Kustom/Tersimpan)</label>
-          <input type="text" id="user-nama-guru" placeholder="Nama Guru Lengkap..."
+          <input type="text" id="user-nama-guru" placeholder="Nama Lengkap..."
             class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-medium">
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">NIP Guru</label>
-          <input type="text" id="user-nip" placeholder="NIP (bisa dikosongkan)..."
+          <label id="label-nip-guru" class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">NIP / NISN</label>
+          <input type="text" id="user-nip" placeholder="NIP / NISN (bisa dikosongkan)..."
             class="w-full text-xs p-3 border rounded-xl bg-slate-50 border-slate-200 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition font-mono">
         </div>
 
@@ -205,11 +221,35 @@
       }
 
       populateGuruDropdown();
+      populateKelasDropdown();
       loadUsersTable();
     });
 
     function onDataLoaded(data) {
       populateGuruDropdown();
+      populateKelasDropdown();
+    }
+
+    function populateKelasDropdown() {
+      const el = document.getElementById('user-kelas');
+      if (!el) return;
+      const currentVal = el.value;
+      el.innerHTML = '<option value="">-- Pilih Kelas Khusus --</option>';
+
+      let classes = [];
+      if (window.globalData && window.globalData.pengaturan && window.globalData.pengaturan.kelasList) {
+        classes = [...classes, ...window.globalData.pengaturan.kelasList];
+      }
+      if (window.globalData && window.globalData.muridList) {
+        classes = [...classes, ...window.globalData.muridList.map(m => m.kelas).filter(Boolean)];
+      }
+
+      const uniqueClasses = [...new Set(classes)].filter(Boolean).sort();
+      uniqueClasses.forEach(k => {
+        el.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+
+      if (currentVal) el.value = currentVal;
     }
 
     function populateGuruDropdown() {
@@ -220,6 +260,33 @@
       list.forEach(g => {
         el.innerHTML += `<option value="${g.nama}" data-nip="${g.nip}">${g.nama} (NIP: ${g.nip || '-'})</option>`;
       });
+    }
+
+    function onUserRoleChange() {
+      const role = document.getElementById('user-role').value;
+      const contKelas = document.getElementById('container-user-kelas');
+      const contGuru = document.getElementById('container-user-guru');
+      const lblNama = document.getElementById('label-nama-guru');
+      const lblNip = document.getElementById('label-nip-guru');
+      const inputNama = document.getElementById('user-nama-guru');
+      const inputNip = document.getElementById('user-nip');
+
+      if (role === 'Murid') {
+        if (contKelas) contKelas.classList.remove('hidden');
+        if (contGuru) contGuru.classList.add('hidden');
+        if (lblNama) lblNama.innerText = 'Nama Lengkap Murid (Pengabsen)';
+        if (lblNip) lblNip.innerText = 'NISN / No. Induk Murid (Opsional)';
+        if (inputNama) inputNama.placeholder = 'Cth: Budi Pratama (Sekretaris Kelas)';
+        if (inputNip) inputNip.placeholder = 'NISN murid...';
+        populateKelasDropdown();
+      } else {
+        if (contKelas) contKelas.classList.add('hidden');
+        if (contGuru) contGuru.classList.remove('hidden');
+        if (lblNama) lblNama.innerText = 'Nama Guru (Kustom/Tersimpan)';
+        if (lblNip) lblNip.innerText = 'NIP Guru';
+        if (inputNama) inputNama.placeholder = 'Nama Guru Lengkap...';
+        if (inputNip) inputNip.placeholder = 'NIP (bisa dikosongkan)...';
+      }
     }
 
     function onUserSelectGuruChange() {
@@ -273,25 +340,47 @@
 
     function loadUsersTable() {
       const tb = document.getElementById('tbody-users');
-      tb.innerHTML = `<tr><td colspan="7" class="text-center p-8"><i class="fa-solid fa-spinner fa-spin text-brand-600 text-xl"></i></td></tr>`;
+      tb.innerHTML = `<tr><td colspan="8" class="text-center p-8"><i class="fa-solid fa-spinner fa-spin text-brand-600 text-xl"></i></td></tr>`;
 
       google.script.run
         .withSuccessHandler(function (res) {
           tb.innerHTML = "";
           usersList = res || [];
           if (!res || !res.length) {
-            tb.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-slate-400">Belum ada akun pengguna terdaftar di sheet DataUser.</td></tr>';
+            tb.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-400">Belum ada akun pengguna terdaftar di sheet DataUser.</td></tr>';
             return;
           }
 
           res.forEach((u, i) => {
             const isAdmin = u.role === 'Admin';
+            const isMurid = String(u.role || '').toLowerCase() === 'murid';
+
+            let roleBadge = '';
+            let kelasBadge = '<span class="text-slate-300 italic">Semua</span>';
+            let userIcon = 'fa-user';
+            let iconBg = 'bg-blue-50 text-brand-700 border-blue-200';
+
+            if (isAdmin) {
+              roleBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 border border-rose-200 text-rose-700">Admin</span>';
+              userIcon = 'fa-shield';
+              iconBg = 'bg-rose-50 text-rose-700 border-rose-200';
+            } else if (isMurid) {
+              roleBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-700"><i class="fa-solid fa-user-graduate mr-1"></i>Murid</span>';
+              userIcon = 'fa-user-graduate';
+              iconBg = 'bg-amber-50 text-amber-700 border-amber-200';
+              kelasBadge = u.kelas ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">${u.kelas}</span>` : '<span class="text-rose-500 italic text-[11px]">Belum diatur</span>';
+            } else {
+              roleBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 border border-blue-200 text-brand-700">Guru</span>';
+              userIcon = 'fa-chalkboard-user';
+              iconBg = 'bg-blue-50 text-brand-700 border-blue-200';
+            }
+
             tb.innerHTML += `
               <tr class="hover:bg-slate-50 transition">
                 <td class="p-3.5 text-center text-slate-400 font-mono text-[11px]">${u.no || (i + 1)}</td>
                 <td class="p-3.5 font-bold text-slate-800 flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-lg ${isAdmin ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-blue-50 text-brand-700 border border-blue-200'} flex items-center justify-center text-xs">
-                    <i class="fa-solid ${isAdmin ? 'fa-shield' : 'fa-user'}"></i>
+                  <span class="w-7 h-7 rounded-lg ${iconBg} flex items-center justify-center text-xs">
+                    <i class="fa-solid ${userIcon}"></i>
                   </span>
                   <span>${u.username}</span>
                 </td>
@@ -306,14 +395,15 @@
                   </div>
                 </td>
                 <td class="p-3.5">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isAdmin ? 'bg-rose-50 border border-rose-200 text-rose-700' : 'bg-blue-50 border border-blue-200 text-brand-700'}">
-                    ${u.role}
-                  </span>
+                  ${roleBadge}
+                </td>
+                <td class="p-3.5 text-center">
+                  ${kelasBadge}
                 </td>
                 <td class="p-3.5 font-medium text-slate-700">${u.namaGuru || '<span class="text-slate-300 italic">-</span>'}</td>
                 <td class="p-3.5 font-mono text-slate-500 text-[11px]">${u.nip || '-'}</td>
                 <td class="p-3.5 text-center space-x-1.5">
-                  <button onclick="openModalUser(true, '${u.username}', '${u.password}', '${u.role}', '${(u.namaGuru || '').replace(/'/g, "\\'")}', '${u.nip || ''}')" 
+                  <button onclick="openModalUser(true, '${u.username}', '${u.password}', '${u.role}', '${(u.namaGuru || '').replace(/'/g, "\\'")}', '${u.nip || ''}', '${u.kelas || ''}')" 
                           class="text-brand-600 hover:text-brand-800 transition bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg border border-blue-200 font-semibold text-xs" title="Edit Akun">
                     <i class="fa-solid fa-pen-to-square"></i> Edit
                   </button>
@@ -333,13 +423,14 @@
           });
         })
         .withFailureHandler(function (err) {
-          tb.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-rose-500">Gagal memuat pengguna: ${err.message}</td></tr>`;
+          tb.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-rose-500">Gagal memuat pengguna: ${err.message}</td></tr>`;
         })
         .getAllUsers();
     }
 
-    function openModalUser(isEdit = false, uname = '', pass = '', role = 'Guru', namaGuru = '', nip = '') {
+    function openModalUser(isEdit = false, uname = '', pass = '', role = 'Guru', namaGuru = '', nip = '', kelas = '') {
       populateGuruDropdown();
+      populateKelasDropdown();
       document.getElementById('user-old-username').value = isEdit ? uname : '';
       document.getElementById('user-username').value = uname;
       const passInput = document.getElementById('user-password');
@@ -352,14 +443,17 @@
         eyeIcon.classList.remove('fa-eye-slash', 'text-brand-600');
         eyeIcon.classList.add('fa-eye');
       }
-      document.getElementById('user-role').value = role;
+      document.getElementById('user-role').value = role || 'Guru';
       document.getElementById('user-nama-guru').value = namaGuru;
       document.getElementById('user-nip').value = nip;
+      document.getElementById('user-kelas').value = kelas || '';
 
       const sel = document.getElementById('user-select-guru');
       if (sel) {
         sel.value = namaGuru || '';
       }
+
+      onUserRoleChange();
 
       document.getElementById('user-form-title').innerText = isEdit ? 'Edit Akun Pengguna' : 'Tambah Pengguna Baru';
       document.getElementById('modal-user-form').classList.remove('hidden');
@@ -377,6 +471,17 @@
       const role = document.getElementById('user-role').value;
       const namaGuru = document.getElementById('user-nama-guru').value.trim();
       const nip = document.getElementById('user-nip').value.trim();
+      const kelas = document.getElementById('user-kelas').value.trim();
+
+      if (role === 'Murid' && !kelas) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tentukan Kelas',
+          text: 'Untuk akun hak akses Murid, Anda wajib memilih kelas yang dapat diabsen.',
+          confirmButtonColor: '#2563eb'
+        });
+        return;
+      }
 
       showLoading('Menyimpan Data Pengguna...');
       google.script.run
@@ -403,7 +508,7 @@
             text: err.message
           });
         })
-        .saveUser(oldU, nU, pwd, role, namaGuru, nip);
+        .saveUser(oldU, nU, pwd, role, namaGuru, nip, kelas);
     }
 
     function deleteUserRow(uname) {
@@ -458,22 +563,24 @@
       }
 
       // Filter non-admin users: Akun Admin TIDAK diekspor sesuai instruksi sistem
-      const guruUsers = (usersList || []).filter(u => String(u.role || '').toLowerCase() !== 'admin');
+      const nonAdminUsers = (usersList || []).filter(u => String(u.role || '').toLowerCase() !== 'admin');
 
       const aoa = [
-        ["No", "Username", "Password", "Hak Akses", "Nama Guru", "NIP"]
+        ["No", "Username", "Password", "Hak Akses", "Kelas Khusus", "Nama Guru / Murid", "NIP / NISN"]
       ];
 
-      if (guruUsers.length === 0) {
-        // Berikan contoh baris template jika belum ada data guru
-        aoa.push([1, "guru_contoh", "123456", "Guru", "Nama Guru Contoh, S.Pd", "'198501012010011001"]);
+      if (nonAdminUsers.length === 0) {
+        // Berikan contoh baris template jika belum ada data
+        aoa.push([1, "guru_contoh", "123456", "Guru", "", "Nama Guru Contoh, S.Pd", "'198501012010011001"]);
+        aoa.push([2, "murid_contoh", "123456", "Murid", "X-DKV", "Nama Murid Contoh", "'1234567890"]);
       } else {
-        guruUsers.forEach((u, idx) => {
+        nonAdminUsers.forEach((u, idx) => {
           aoa.push([
             idx + 1,
             u.username,
             u.password || "123456",
             u.role || "Guru",
+            u.kelas || "",
             u.namaGuru || "",
             u.nip ? "'" + u.nip : ""
           ]);
@@ -487,6 +594,7 @@
         { wch: 20 },
         { wch: 18 },
         { wch: 15 },
+        { wch: 16 },
         { wch: 30 },
         { wch: 24 }
       ];
@@ -495,7 +603,7 @@
       XLSX.utils.book_append_sheet(wb, ws, "DataUser");
 
       const ext = format === 'xls' ? 'xls' : 'xlsx';
-      const fileName = `Data_User_Guru_${new Date().toISOString().slice(0, 10)}.${ext}`;
+      const fileName = `Data_Pengguna_${new Date().toISOString().slice(0, 10)}.${ext}`;
       XLSX.writeFile(wb, fileName, { bookType: format === 'xls' ? 'biff8' : 'xlsx' });
 
       showToast('info', 'Ekspor Berhasil', `Berkas ${fileName} berhasil diunduh. Akun Administrator tidak disertakan.`);
@@ -503,7 +611,7 @@
 
     /**
      * IMPORT & TIMPA (REPLACE) DATA USER DARI EXCEL
-     * Skenario: Data user guru lama diganti data baru, akun Admin TIDAK ikut tertimpa/terhapus.
+     * Skenario: Data user guru/murid lama diganti data baru, akun Admin TIDAK ikut tertimpa/terhapus.
      */
     function processImportUserExcel(event) {
       const file = event.target.files[0];
@@ -536,15 +644,16 @@
           let unameCol = header.indexOf('username');
           let passCol = header.indexOf('password');
           let roleCol = header.findIndex(h => h.includes('role') || h.includes('akses') || h.includes('hak'));
-          let guruCol = header.findIndex(h => h.includes('nama') || h.includes('guru'));
-          let nipCol = header.indexOf('nip');
+          let kelasCol = header.findIndex(h => h.includes('kelas') || h.includes('rombel'));
+          let guruCol = header.findIndex(h => h.includes('nama') || h.includes('guru') || h.includes('murid'));
+          let nipCol = header.findIndex(h => h.includes('nip') || h.includes('nisn'));
 
-          // Fallback posisi standar jika header tidak cocok persis: No (0), Username (1), Password (2), Role (3), Guru (4), NIP (5)
+          // Fallback posisi standar
           if (unameCol === -1) unameCol = 1;
           if (passCol === -1) passCol = 2;
           if (roleCol === -1) roleCol = 3;
-          if (guruCol === -1) guruCol = 4;
-          if (nipCol === -1) nipCol = 5;
+          if (guruCol === -1) guruCol = (kelasCol !== -1 && kelasCol === 4) ? 5 : 4;
+          if (nipCol === -1) nipCol = (kelasCol !== -1) ? 6 : 5;
 
           const parsedUsers = [];
           let skippedAdminCount = 0;
@@ -556,9 +665,11 @@
             const username = String(row[unameCol] || '').trim();
             if (!username) continue;
 
-            const role = String(row[roleCol] || 'Guru').trim();
-            // Larangan: Akun Admin tidak dapat diimpor dari Excel
-            if (role.toLowerCase() === 'admin' || username.toLowerCase() === 'admin') {
+            let roleRaw = String(row[roleCol] || 'Guru').trim();
+            let roleFormatted = 'Guru';
+            if (roleRaw.toLowerCase() === 'murid') {
+              roleFormatted = 'Murid';
+            } else if (roleRaw.toLowerCase() === 'admin' || username.toLowerCase() === 'admin') {
               skippedAdminCount++;
               continue;
             }
@@ -566,13 +677,17 @@
             const password = String(row[passCol] || '123456').trim();
             const namaGuru = String(row[guruCol] || '').trim();
             let nip = String(row[nipCol] || '').replace(/'/g, '').trim();
+            let kelas = kelasCol !== -1 ? String(row[kelasCol] || '').trim() : '';
 
             parsedUsers.push({
               username: username,
               password: password,
-              role: 'Guru',
+              role: roleFormatted,
               namaGuru: namaGuru,
-              nip: nip
+              nip: nip,
+              kelas: kelas
+            });
+          }
             });
           }
 

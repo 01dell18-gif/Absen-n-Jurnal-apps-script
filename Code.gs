@@ -140,7 +140,7 @@ function setupDatabaseSheets() {
     { name: "HasilAbsen", headers: ["NISN", "Nama Murid", "Jenis Kelamin", "Kelas", "Tanggal", "Keterangan", "Mata Pelajaran", "Semester", "Tahun Ajaran", "Nama Guru"] },
     { name: "DataJurnalGlobal", headers: ["Tanggal", "Nama Guru", "Semester", "Tahun Ajaran", "Mata Pelajaran", "Jam Ke", "Kelas", "Pertemuan Ke", "Model Pembelajaran", "Materi Pembelajaran", "Murid Tidak Hadir", "Ketuntasan Materi", "Bukti Kegiatan"] },
     { name: "Pengaturan", headers: ["Nama Sekolah", "URL Logo Sekolah", "Mata Pelajaran", "Kelas", "Tahun Ajaran", "Kop Surat", "", "", "Link Hasil Absen", "Link Hasil Jurnal", "Folder ID Drive"] },
-    { name: "DataUser", headers: ["No", "Username", "Password", "Roll", "Nama Guru", "NIP"] }
+    { name: "DataUser", headers: ["No", "Username", "Password", "Roll", "Nama Guru", "NIP", "Kelas"] }
   ];
 
   requiredSheets.forEach(item => {
@@ -162,10 +162,18 @@ function setupDatabaseSheets() {
     }
   }
 
-  // Pastikan ada akun admin default jika DataUser masih kosong
+  // Pastikan kolom 7 pada DataUser memiliki header "Kelas" jika belum ada
   const sheetUser = ss.getSheetByName("DataUser");
+  if (sheetUser && sheetUser.getLastRow() >= 1) {
+    const h7 = sheetUser.getRange(1, 7).getValue();
+    if (!h7) {
+      sheetUser.getRange(1, 7).setValue("Kelas");
+    }
+  }
+
+  // Pastikan ada akun admin default jika DataUser masih kosong
   if (sheetUser && sheetUser.getLastRow() <= 1) {
-    sheetUser.appendRow([1, "admin", "admin123", "Admin", "Administrator", ""]);
+    sheetUser.appendRow([1, "admin", "admin123", "Admin", "Administrator", "", ""]);
   }
 
   return "Database berhasil diverifikasi/dibuat.";
@@ -243,14 +251,16 @@ function getInitialData() {
     }
   }
 
-  // 3. Masukkan juga guru dari sheet DataUser jika ada
+  // 3. Masukkan juga guru dari sheet DataUser jika ada (hanya akun Guru, bukan Murid atau Admin)
   const sheetUser = ss.getSheetByName("DataUser");
   if (sheetUser && sheetUser.getLastRow() > 1) {
-    const dataUser = sheetUser.getRange(2, 1, sheetUser.getLastRow() - 1, 6).getValues();
+    const maxCol = Math.max(sheetUser.getLastColumn(), 7);
+    const dataUser = sheetUser.getRange(2, 1, sheetUser.getLastRow() - 1, maxCol).getValues();
     dataUser.forEach(r => {
+      const uRole = String(r[3] || '').trim().toLowerCase();
       const nGuru = String(r[4] || '').trim();
       const nNip = String(r[5] || '').replace(/'/g, '').trim();
-      if (nGuru && !guruList.some(g => g.nama.toLowerCase() === nGuru.toLowerCase())) {
+      if (uRole !== 'murid' && uRole !== 'admin' && nGuru && !guruList.some(g => g.nama.toLowerCase() === nGuru.toLowerCase())) {
         guruList.push({
           nama: nGuru,
           nip: nNip
@@ -290,8 +300,9 @@ function checkLogin(username, password) {
   if (sheet) {
     const lastRow = sheet.getLastRow();
     if (lastRow > 1) {
-      // Baca Kolom A: No, B: Username, C: Password, D: Roll, E: Nama Guru, F: NIP
-      const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+      // Baca Kolom A: No, B: Username, C: Password, D: Roll, E: Nama Guru, F: NIP, G: Kelas
+      const maxCol = Math.max(sheet.getLastColumn(), 7);
+      const data = sheet.getRange(2, 1, lastRow - 1, maxCol).getValues();
       for (let i = 0; i < data.length; i++) {
         const u = String(data[i][1] || '').trim();
         const p = String(data[i][2] || '').trim();
@@ -299,9 +310,10 @@ function checkLogin(username, password) {
           const role = String(data[i][3] || '').trim() || "Guru";
           let namaGuru = String(data[i][4] || '').trim();
           let nip = String(data[i][5] || '').trim();
+          let kelas = String(data[i][6] || '').trim();
 
-          // Jika namaGuru belum diisi pada sheet DataUser, cari berdasarkan DataMuridGuru
-          if (!namaGuru) {
+          // Jika namaGuru belum diisi pada sheet DataUser dan bukan role Murid, cari berdasarkan DataMuridGuru
+          if (!namaGuru && role.toLowerCase() !== 'murid') {
             const sheetMG = ss.getSheetByName("DataMuridGuru");
             if (sheetMG && sheetMG.getLastRow() > 1) {
               const dataMG = sheetMG.getRange(2, 6, sheetMG.getLastRow() - 1, 2).getValues();
@@ -327,7 +339,8 @@ function checkLogin(username, password) {
             username: u,
             role: role,
             namaGuru: namaGuru || u,
-            nip: nip
+            nip: nip,
+            kelas: kelas
           };
         }
       }
@@ -342,7 +355,8 @@ function checkLogin(username, password) {
       username: "admin",
       role: "Admin",
       namaGuru: "Administrator",
-      nip: ""
+      nip: "",
+      kelas: ""
     };
   }
   return { success: false, message: "Username atau Password salah!" };
@@ -819,8 +833,8 @@ function deleteJurnal(rowIndex) {
 }
 
 /**
- * MANAJEMEN PENGGUNA (CRUD AKUN GURU & ADMIN PADA SHEET "DataUser")
- * Format Kolom: A: No, B: Username, C: Password, D: Roll, E: Nama Guru, F: NIP
+ * MANAJEMEN PENGGUNA (CRUD AKUN GURU, ADMIN & MURID PADA SHEET "DataUser")
+ * Format Kolom: A: No, B: Username, C: Password, D: Roll, E: Nama Guru/Pengguna, F: NIP, G: Kelas
  */
 function getAllUsers() {
   const ss = getSpreadsheet();
@@ -834,18 +848,25 @@ function getAllUsers() {
   const lr = sheet.getLastRow();
   if (lr <= 1) return [];
 
-  const data = sheet.getRange(2, 1, lr - 1, 6).getValues();
+  // Pastikan kolom 7 ada header "Kelas" jika belum ada
+  if (sheet.getLastColumn() < 7 || !sheet.getRange(1, 7).getValue()) {
+    sheet.getRange(1, 7).setValue("Kelas");
+  }
+
+  const maxCol = Math.max(sheet.getLastColumn(), 7);
+  const data = sheet.getRange(2, 1, lr - 1, maxCol).getValues();
   return data.filter(r => r[1]).map((r, i) => ({
     no: r[0] || (i + 1),
     username: String(r[1] || '').trim(),
     password: String(r[2] || '').trim(),
     role: String(r[3] || 'Guru').trim(),
     namaGuru: String(r[4] || '').trim(),
-    nip: String(r[5] || '').replace(/'/g, '').trim()
+    nip: String(r[5] || '').replace(/'/g, '').trim(),
+    kelas: String(r[6] || '').trim()
   }));
 }
 
-function saveUser(oldUsername, newUsername, password, role, namaGuru, nip) {
+function saveUser(oldUsername, newUsername, password, role, namaGuru, nip, kelas) {
   const ss = getSpreadsheet();
   let sheet = ss.getSheetByName("DataUser");
   if (!sheet) {
@@ -854,8 +875,15 @@ function saveUser(oldUsername, newUsername, password, role, namaGuru, nip) {
   }
   if (!sheet) return { success: false, message: "Sheet DataUser tidak ditemukan." };
 
+  // Pastikan kolom 7 ada header "Kelas" jika belum ada
+  if (sheet.getLastColumn() < 7 || !sheet.getRange(1, 7).getValue()) {
+    sheet.getRange(1, 7).setValue("Kelas");
+  }
+
+  role = role ? String(role).trim() : "Guru";
   namaGuru = namaGuru ? String(namaGuru).trim() : "";
   nip = nip ? String(nip).trim() : "";
+  kelas = kelas ? String(kelas).trim() : "";
   const nipVal = nip ? "'" + nip.replace(/'/g, '') : "";
 
   const lr = sheet.getLastRow();
@@ -865,7 +893,7 @@ function saveUser(oldUsername, newUsername, password, role, namaGuru, nip) {
     for (let i = 0; i < data.length; i++) {
       if (String(data[i][0]).trim() === oldUsername) {
         const rowNum = i + 2;
-        sheet.getRange(rowNum, 2, 1, 5).setValues([[newUsername, password, role, namaGuru, nipVal]]);
+        sheet.getRange(rowNum, 2, 1, 6).setValues([[newUsername, password, role, namaGuru, nipVal, kelas]]);
         return { success: true, message: "Data pengguna berhasil diperbarui di sheet DataUser!" };
       }
     }
@@ -882,7 +910,7 @@ function saveUser(oldUsername, newUsername, password, role, namaGuru, nip) {
   }
 
   const nextNo = lr > 1 ? lr : 1;
-  sheet.appendRow([nextNo, newUsername, password, role, namaGuru, nipVal]);
+  sheet.appendRow([nextNo, newUsername, password, role, namaGuru, nipVal, kelas]);
   return { success: true, message: "Pengguna baru berhasil disimpan ke sheet DataUser!" };
 }
 
@@ -932,13 +960,14 @@ function importUsersFromExcel(usersArray) {
   const lr = sheet.getLastRow();
   let existingAdmins = [];
   if (lr > 1) {
-    const currentData = sheet.getRange(2, 1, lr - 1, 6).getValues();
+    const maxCol = Math.max(sheet.getLastColumn(), 7);
+    const currentData = sheet.getRange(2, 1, lr - 1, maxCol).getValues();
     existingAdmins = currentData.filter(r => r[1] && String(r[3] || '').trim().toLowerCase() === 'admin');
   }
 
   // Jika belum ada admin sama sekali, buat admin bawaan sistem
   if (existingAdmins.length === 0) {
-    existingAdmins = [[1, "admin", "admin123", "Admin", "Administrator", ""]];
+    existingAdmins = [[1, "admin", "admin123", "Admin", "Administrator", "", ""]];
   }
 
   // 2. Filter input usersArray agar tidak dapat mengimpor / mengubah akun Admin dari Excel
@@ -948,7 +977,7 @@ function importUsersFromExcel(usersArray) {
     return uname && role !== 'admin';
   });
 
-  // 3. Gabungkan Admin lama + User Guru baru
+  // 3. Gabungkan Admin lama + User Guru/Murid baru
   const finalRows = [];
   let noCounter = 1;
 
@@ -960,7 +989,8 @@ function importUsersFromExcel(usersArray) {
       String(adm[2]).trim(),
       "Admin",
       String(adm[4] || 'Administrator').trim(),
-      String(adm[5] || '').trim() ? ("'" + String(adm[5]).replace(/'/g, '').trim()) : ""
+      String(adm[5] || '').trim() ? ("'" + String(adm[5]).replace(/'/g, '').trim()) : "",
+      String(adm[6] || '').trim()
     ]);
   });
 
@@ -973,17 +1003,23 @@ function importUsersFromExcel(usersArray) {
       String(u.password || '123456').trim(),
       String(u.role || 'Guru').trim(),
       String(u.namaGuru || '').trim(),
-      nipVal
+      nipVal,
+      String(u.kelas || '').trim()
     ]);
   });
 
+  // Pastikan kolom 7 ada header "Kelas" jika belum ada
+  if (sheet.getLastColumn() < 7 || !sheet.getRange(1, 7).getValue()) {
+    sheet.getRange(1, 7).setValue("Kelas");
+  }
+
   // 4. Hapus data lama (mulai baris 2) dan tulis data gabungan baru
   if (lr > 1) {
-    sheet.getRange(2, 1, lr - 1, 6).clearContent();
+    sheet.getRange(2, 1, lr - 1, 7).clearContent();
   }
 
   if (finalRows.length > 0) {
-    sheet.getRange(2, 1, finalRows.length, 6).setValues(finalRows);
+    sheet.getRange(2, 1, finalRows.length, 7).setValues(finalRows);
   }
 
   return {

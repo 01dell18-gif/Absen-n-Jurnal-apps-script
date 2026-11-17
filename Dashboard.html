@@ -256,6 +256,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+      const role = getCurrentRole();
+      if (role && role.toLowerCase() === 'murid') {
+        navigateTo('form-absen');
+        return;
+      }
       updateDeviceDateTime();
       setInterval(updateDeviceDateTime, 1000);
       updateDashboardWelcome();

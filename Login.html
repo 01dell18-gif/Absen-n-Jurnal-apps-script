@@ -120,7 +120,7 @@
         .withSuccessHandler(function(res) {
           closeLoading();
           if (res && res.success) {
-            setSessionUser(u, res.role, res.namaGuru || '', res.nip || '');
+            setSessionUser(u, res.role, res.namaGuru || '', res.nip || '', res.kelas || '');
             Swal.fire({
               icon: 'success',
               title: 'Login Berhasil',
@@ -128,7 +128,11 @@
               timer: 1800,
               showConfirmButton: false
             }).then(() => {
-              navigateTo('dashboard');
+              if (res.role && res.role.toLowerCase() === 'murid') {
+                navigateTo('form-absen');
+              } else {
+                navigateTo('dashboard');
+              }
             });
           } else {
             Swal.fire({

@@ -55,13 +55,23 @@ function getAppUrl() {
 
 function goToPage(page, params) {
   const currentRole = getCurrentRole();
+  const r = (currentRole || 'Guest').trim().toLowerCase();
 
-  // Role Gatekeeping
-  if ((page === 'form-absen' || page === 'form-jurnal') && currentRole === 'Guest') {
+  // Role Gatekeeping untuk Murid: HANYA BOLEH AKSES 'form-absen'
+  if (r === 'murid') {
+    if (page !== 'form-absen') {
+      showToast('info', 'Akses Terbatas', 'Akun Murid hanya memiliki akses ke menu Absen Siswa.');
+      navigateTo('form-absen');
+      return;
+    }
+  }
+
+  // Role Gatekeeping untuk Guest
+  if ((page === 'form-absen' || page === 'form-jurnal') && r === 'guest') {
     Swal.fire({
       icon: 'warning',
       title: 'Akses Dibatasi',
-      text: 'Silakan login sebagai Guru atau Admin untuk mengisi absensi & jurnal.',
+      text: 'Silakan login sebagai Guru, Admin, atau Murid untuk mengisi presensi.',
       confirmButtonColor: '#2563eb',
       confirmButtonText: 'Login Sekarang',
       showCancelButton: true,
@@ -141,6 +151,10 @@ function getCurrentRole() {
   return localStorage.getItem('siguru_role') || 'Guest';
 }
 
+function getLoggedInKelas() {
+  return localStorage.getItem('siguru_kelas') || '';
+}
+
 function getLoggedInNamaGuru() {
   let ng = localStorage.getItem('siguru_nama_guru') || '';
   const role = getCurrentRole();
@@ -150,6 +164,8 @@ function getLoggedInNamaGuru() {
   if (!ng || ng.toLowerCase() === 'user' || (role === 'Admin' && ng.toLowerCase() === 'admin')) {
     if (role === 'Admin') {
       ng = (ng && ng.toLowerCase() !== 'admin') ? ng : 'Administrator';
+    } else if (role.toLowerCase() === 'murid') {
+      ng = ng || uname;
     } else if (uname && window.globalData && window.globalData.guruList && window.globalData.guruList.length > 0) {
       // Cari nama guru di Master Data yang cocok dengan username atau NIP
       const match = window.globalData.guruList.find(g => 
@@ -170,12 +186,13 @@ function getLoggedInNip() {
   return localStorage.getItem('siguru_nip') || '';
 }
 
-function setSessionUser(username, role, namaGuru = '', nip = '') {
+function setSessionUser(username, role, namaGuru = '', nip = '', kelas = '') {
   if (role === 'Admin' && !namaGuru) namaGuru = 'Administrator';
   localStorage.setItem('siguru_username', username);
   localStorage.setItem('siguru_role', role);
   localStorage.setItem('siguru_nama_guru', namaGuru);
   localStorage.setItem('siguru_nip', nip);
+  localStorage.setItem('siguru_kelas', kelas || '');
   applyRoleUI();
 }
 
@@ -184,6 +201,7 @@ function clearSession() {
   localStorage.removeItem('siguru_role');
   localStorage.removeItem('siguru_nama_guru');
   localStorage.removeItem('siguru_nip');
+  localStorage.removeItem('siguru_kelas');
   applyRoleUI();
 }
 
@@ -280,15 +298,19 @@ function handleLoginSubmit(e) {
     .withSuccessHandler(function(res) {
       closeLoading();
       if (res.success) {
-        setSessionUser(username, res.role, res.namaGuru || '', res.nip || '');
+        setSessionUser(username, res.role, res.namaGuru || '', res.nip || '', res.kelas || '');
         closeLoginModal();
         Swal.fire({
           icon: 'success',
           title: 'Login Berhasil',
           text: `Selamat datang, ${res.namaGuru || username}! Anda masuk sebagai ${res.role}.`,
-          timer: 2000,
+          timer: 1800,
           showConfirmButton: false
         }).then(() => {
+          if (res.role && res.role.toLowerCase() === 'murid') {
+            navigateTo('form-absen');
+            return;
+          }
           // If on login page, go to dashboard
           const urlParams = new URLSearchParams(window.location.search);
           const p = urlParams.get('page');
@@ -345,12 +367,14 @@ function applyRoleUI() {
   const role = getCurrentRole();
   const username = getCurrentUser();
   const namaGuru = getLoggedInNamaGuru();
+  const kelas = getLoggedInKelas();
   const displayName = (role === 'Admin') 
     ? (namaGuru || 'Administrator') 
     : (namaGuru || username);
 
   const groupAuth = document.getElementById('nav-group-auth');
   const groupAdmin = document.getElementById('nav-group-admin');
+  const groupRekap = document.getElementById('nav-group-rekap');
   const groupPengaturan = document.getElementById('nav-group-pengaturan');
   const btnLogin = document.getElementById('btn-login-trigger');
   const btnLogout = document.getElementById('btn-logout');
@@ -359,19 +383,34 @@ function applyRoleUI() {
   const indicatorRole = document.getElementById('indicator-role');
   const sidebarUserName = document.getElementById('sidebar-user-name');
   const sidebarUserRole = document.getElementById('sidebar-user-role');
+  const userAvatarBadge = document.getElementById('user-avatar-badge');
+
+  const linkDash = document.getElementById('nav-link-dashboard');
+  const linkAbsen = document.getElementById('nav-link-absen');
+  const linkJurnal = document.getElementById('nav-link-jurnal');
+  const labelMenuUtama = document.getElementById('label-menu-utama');
 
   if (sidebarUserName) {
     sidebarUserName.innerText = username ? displayName : 'Tamu (Guest)';
   }
   if (sidebarUserRole) {
-    sidebarUserRole.innerText = 'Hak Akses: ' + role;
+    if (role.toLowerCase() === 'murid') {
+      sidebarUserRole.innerText = 'Hak Akses: Murid' + (kelas ? ` (${kelas})` : '');
+    } else {
+      sidebarUserRole.innerText = 'Hak Akses: ' + role;
+    }
   }
 
   const r = (role || 'Guest').trim().toLowerCase();
   if (r === 'guest') {
     if (groupAuth) groupAuth.classList.add('hidden');
     if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupRekap) groupRekap.classList.remove('hidden');
     if (groupPengaturan) groupPengaturan.classList.add('hidden');
+    if (linkDash) linkDash.classList.remove('hidden');
+    if (linkAbsen) linkAbsen.classList.remove('hidden');
+    if (linkJurnal) linkJurnal.classList.remove('hidden');
+    if (labelMenuUtama) labelMenuUtama.innerText = 'Menu Utama';
     if (btnLogin) btnLogin.classList.remove('hidden');
     if (btnLogout) btnLogout.classList.add('hidden');
     if (badgeRole) {
@@ -379,10 +418,49 @@ function applyRoleUI() {
     }
     if (labelRole) labelRole.innerText = 'Tamu (Publik)';
     if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-slate-400';
+    if (userAvatarBadge) {
+      userAvatarBadge.innerHTML = '<i class="fa-solid fa-user"></i>';
+      userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-brand-500/30 text-brand-300 flex items-center justify-center font-bold text-xs border border-brand-500/40';
+    }
+  } else if (r === 'murid') {
+    // KHUSUS HAK AKSES MURID: HANYA MENAMPILKAN MENU ABSEN SAJA
+    if (groupAuth) groupAuth.classList.remove('hidden');
+    if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupRekap) groupRekap.classList.add('hidden');
+    if (groupPengaturan) groupPengaturan.classList.add('hidden');
+
+    // Sembunyikan Dashboard & Input Jurnal KBM, HANYA tampilkan Absen Murid
+    if (linkDash) linkDash.classList.add('hidden');
+    if (linkJurnal) linkJurnal.classList.add('hidden');
+    if (linkAbsen) linkAbsen.classList.remove('hidden');
+    if (labelMenuUtama) labelMenuUtama.innerText = 'Presensi Siswa';
+
+    // Buka submenu utama secara otomatis agar tombol Absen Murid langsung tampak
+    const subUtama = document.getElementById('submenu-utama');
+    const chevUtama = document.getElementById('chevron-utama');
+    if (subUtama) subUtama.classList.remove('hidden');
+    if (chevUtama) chevUtama.classList.remove('-rotate-90');
+
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnLogout) btnLogout.classList.remove('hidden');
+    if (badgeRole) {
+      badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200';
+    }
+    if (labelRole) labelRole.innerText = displayName + (kelas ? ` (Murid - ${kelas})` : ' (Murid)');
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-amber-500';
+    if (userAvatarBadge) {
+      userAvatarBadge.innerHTML = '<i class="fa-solid fa-user-graduate"></i>';
+      userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-500/40';
+    }
   } else if (r === 'guru') {
     if (groupAuth) groupAuth.classList.remove('hidden');
     if (groupAdmin) groupAdmin.classList.add('hidden');
+    if (groupRekap) groupRekap.classList.remove('hidden');
     if (groupPengaturan) groupPengaturan.classList.add('hidden');
+    if (linkDash) linkDash.classList.remove('hidden');
+    if (linkAbsen) linkAbsen.classList.remove('hidden');
+    if (linkJurnal) linkJurnal.classList.remove('hidden');
+    if (labelMenuUtama) labelMenuUtama.innerText = 'Menu Utama';
     if (btnLogin) btnLogin.classList.add('hidden');
     if (btnLogout) btnLogout.classList.remove('hidden');
     if (badgeRole) {
@@ -390,16 +468,30 @@ function applyRoleUI() {
     }
     if (labelRole) labelRole.innerText = displayName + ' (Guru)';
     if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-emerald-500';
+    if (userAvatarBadge) {
+      userAvatarBadge.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
+      userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-emerald-500/30 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-500/40';
+    }
   } else if (r === 'admin') {
     if (groupAuth) groupAuth.classList.remove('hidden');
     if (groupAdmin) groupAdmin.classList.remove('hidden');
+    if (groupRekap) groupRekap.classList.remove('hidden');
     if (groupPengaturan) groupPengaturan.classList.remove('hidden');
+    if (linkDash) linkDash.classList.remove('hidden');
+    if (linkAbsen) linkAbsen.classList.remove('hidden');
+    if (linkJurnal) linkJurnal.classList.remove('hidden');
+    if (labelMenuUtama) labelMenuUtama.innerText = 'Menu Utama';
     if (btnLogin) btnLogin.classList.add('hidden');
     if (btnLogout) btnLogout.classList.remove('hidden');
     if (badgeRole) {
       badgeRole.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
     }
     if (labelRole) labelRole.innerText = (namaGuru || 'Administrator') + ' (Admin)';
+    if (indicatorRole) indicatorRole.className = 'w-2 h-2 rounded-full bg-rose-500';
+    if (userAvatarBadge) {
+      userAvatarBadge.innerHTML = '<i class="fa-solid fa-shield"></i>';
+      userAvatarBadge.className = 'w-8 h-8 rounded-lg bg-rose-500/30 text-rose-300 flex items-center justify-center font-bold text-xs border border-rose-500/40';
+    }
   }
 }
 

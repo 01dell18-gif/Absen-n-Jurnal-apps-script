@@ -146,6 +146,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('form-absen-tanggal').valueAsDate = new Date();
       setupGuruField();
+      setupKelasField();
     });
 
     function onDataLoaded(data) {
@@ -156,6 +157,41 @@
       populateSelect('form-absen-ta', p.taList, '-- Pilih TA --');
 
       setupGuruField();
+      setupKelasField();
+    }
+
+    function setupKelasField() {
+      const role = getCurrentRole();
+      const userKelas = getLoggedInKelas();
+      const inputKelas = document.getElementById('form-absen-kelas');
+      if (!inputKelas) return;
+
+      if (role.toLowerCase() === 'murid' && userKelas) {
+        inputKelas.value = userKelas;
+        inputKelas.readOnly = true;
+        inputKelas.classList.add('bg-amber-50', 'border-amber-300', 'font-bold', 'text-amber-900', 'cursor-not-allowed');
+
+        // Batasi datalist hanya berisi kelas murid tersebut
+        const dl = document.getElementById('list-form-absen-kelas');
+        if (dl) {
+          dl.innerHTML = `<option value="${userKelas}"></option>`;
+        }
+
+        // Tampilkan badge indikator kelas terkunci
+        let badgeKelas = document.getElementById('badge-kelas-locked');
+        if (!badgeKelas) {
+          badgeKelas = document.createElement('div');
+          badgeKelas.id = 'badge-kelas-locked';
+          badgeKelas.className = 'mt-1 text-[10px] text-amber-700 font-semibold flex items-center gap-1';
+          badgeKelas.innerHTML = `<i class="fa-solid fa-lock text-amber-600"></i> Terkunci untuk kelas: <strong>${userKelas}</strong> (Hak Akses Murid)`;
+          inputKelas.parentElement.parentElement.appendChild(badgeKelas);
+        }
+      } else {
+        inputKelas.readOnly = false;
+        inputKelas.classList.remove('bg-amber-50', 'border-amber-300', 'font-bold', 'text-amber-900', 'cursor-not-allowed');
+        const badgeKelas = document.getElementById('badge-kelas-locked');
+        if (badgeKelas) badgeKelas.remove();
+      }
     }
 
     function setupGuruField() {
@@ -173,6 +209,10 @@
         selGuru.value = guruVal;
         selGuru.disabled = true;
         selGuru.classList.add('bg-slate-100', 'cursor-not-allowed', 'font-bold', 'text-slate-700');
+      } else if (role.toLowerCase() === 'murid') {
+        selGuru.disabled = false;
+        selGuru.classList.remove('bg-slate-100', 'cursor-not-allowed', 'font-bold');
+        populateSelect('form-absen-guru', guruNames, '-- Pilih Guru Pengajar --');
       } else {
         selGuru.disabled = false;
         selGuru.classList.remove('bg-slate-100', 'cursor-not-allowed', 'font-bold');
@@ -181,7 +221,15 @@
     }
 
     function loadMuridForAbsen() {
-      const kelas = document.getElementById('form-absen-kelas').value;
+      const role = getCurrentRole();
+      const userKelas = getLoggedInKelas();
+      let kelas = document.getElementById('form-absen-kelas').value;
+
+      if (role.toLowerCase() === 'murid' && userKelas) {
+        kelas = userKelas;
+        document.getElementById('form-absen-kelas').value = userKelas;
+      }
+
       if (!kelas) {
         showToast('warning', 'Pilih Kelas', 'Silakan pilih kelas terlebih dahulu.');
         return;
@@ -243,10 +291,12 @@
 
     function submitAbsensiData() {
       const role = getCurrentRole();
+      const isMurid = role.toLowerCase() === 'murid';
+      const userKelas = getLoggedInKelas();
       const loggedGuru = getLoggedInNamaGuru();
       const guru = (role === 'Guru' && loggedGuru) ? loggedGuru : (document.getElementById('form-absen-guru').value || loggedGuru || getCurrentUser());
       const mapel = document.getElementById('form-absen-mapel').value;
-      const kelas = document.getElementById('form-absen-kelas').value;
+      const kelas = (isMurid && userKelas) ? userKelas : document.getElementById('form-absen-kelas').value;
       const semester = document.getElementById('form-absen-semester').value;
       const tanggal = document.getElementById('form-absen-tanggal').value;
       const ta = document.getElementById('form-absen-ta').value;
@@ -275,21 +325,33 @@
         .withSuccessHandler(function(res) {
           closeLoading();
           if (res && res.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Absensi Tersimpan!',
-              text: `Berhasil mencatat ${res.count} presensi siswa kelas ${kelas} ke database.`,
-              confirmButtonColor: '#2563eb',
-              confirmButtonText: 'Buka Rekap Absen',
-              showCancelButton: true,
-              cancelButtonText: 'Input Lagi'
-            }).then(result => {
-              if (result.isConfirmed) {
-                navigateTo('rekap-absen');
-              } else {
+            if (isMurid) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Absensi Tersimpan!',
+                text: `Berhasil mencatat ${res.count} presensi siswa kelas ${kelas} ke database.`,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Selesai / Input Lagi'
+              }).then(() => {
                 document.getElementById('container-input-absen').classList.add('hidden');
-              }
-            });
+              });
+            } else {
+              Swal.fire({
+                icon: 'success',
+                title: 'Absensi Tersimpan!',
+                text: `Berhasil mencatat ${res.count} presensi siswa kelas ${kelas} ke database.`,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Buka Rekap Absen',
+                showCancelButton: true,
+                cancelButtonText: 'Input Lagi'
+              }).then(result => {
+                if (result.isConfirmed) {
+                  navigateTo('rekap-absen');
+                } else {
+                  document.getElementById('container-input-absen').classList.add('hidden');
+                }
+              });
+            }
           } else {
             Swal.fire({
               icon: 'error',

@@ -7,7 +7,7 @@
   </button>
 
   <!-- BRAND HEADER: Logo & Identitas Sekolah (Klik menuju Beranda / Dashboard) -->
-  <a href="javascript:void(0)" onclick="goToPage('dashboard')" 
+  <a href="javascript:void(0)" onclick="goToPage('dashboard')" id="sidebar-brand-link"
      class="p-5 border-b border-white/10 flex flex-col items-center text-center pt-8 md:pt-6 relative group cursor-pointer hover:bg-white/5 transition-all duration-200"
      title="Menuju Beranda / Dashboard Utama">
     <div class="relative mb-2.5 transform group-hover:scale-105 transition-transform duration-200">
@@ -24,34 +24,33 @@
   </a>
   
   <!-- MENU NAVIGASI -->
-  <!-- MENU NAVIGASI -->
   <nav class="flex-1 overflow-y-auto py-4 px-3 text-xs font-medium space-y-4">
     
-    <!-- GROUP 1: MENU UTAMA (Guru & Admin) -->
+    <!-- GROUP 1: MENU UTAMA (Guru, Admin & Murid) -->
     <div id="nav-group-auth" class="space-y-1">
       <button type="button" onclick="toggleNavGroup('utama')" 
               class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition rounded-lg hover:bg-white/5 focus:outline-none">
         <span class="flex items-center gap-1.5">
           <i class="fa-solid fa-layer-group text-[9px] text-brand-400"></i>
-          <span>Menu Utama</span>
+          <span id="label-menu-utama">Menu Utama</span>
         </span>
         <i id="chevron-utama" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 -rotate-90"></i>
       </button>
       
       <div id="submenu-utama" class="space-y-1 transition-all duration-200 pt-1 hidden">
-        <a href="javascript:void(0)" onclick="goToPage('dashboard')" 
+        <a href="javascript:void(0)" onclick="goToPage('dashboard')" id="nav-link-dashboard"
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'dashboard') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-house-chimney"></i></div>
           <span>Dashboard</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="goToPage('form-absen')" 
+        <a href="javascript:void(0)" onclick="goToPage('form-absen')" id="nav-link-absen"
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'form-absen') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-clipboard-user text-emerald-400"></i></div>
           <span>Absen Murid</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="goToPage('form-jurnal')" 
+        <a href="javascript:void(0)" onclick="goToPage('form-jurnal')" id="nav-link-jurnal"
            class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 <?= (typeof currentPage !== 'undefined' && currentPage === 'form-jurnal') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30 ring-1 ring-white/20' : 'text-slate-300 hover:text-white hover:bg-white/5' ?>">
           <div class="w-6 text-center text-base"><i class="fa-solid fa-pen-to-square text-amber-400"></i></div>
           <span>Input Jurnal KBM</span>
