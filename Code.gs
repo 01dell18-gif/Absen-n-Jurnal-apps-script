@@ -618,6 +618,8 @@ function getExistingPresensiForClass(tanggal, kelas) {
     found: true,
     source: sourceInfo,
     isHarian: isHarian,
+    guru: sampleGuru || (isHarian ? 'Perwakilan Murid' : 'Guru Pengajar'),
+    mapel: sampleMapel || (isHarian ? 'Presensi Harian' : 'Mata Pelajaran'),
     studentsMap: studentsMap,
     studentsByName: studentsByName
   };

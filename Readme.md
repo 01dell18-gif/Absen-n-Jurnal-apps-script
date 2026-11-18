@@ -79,6 +79,7 @@ Aplikasi ini berjalan 100% tanpa biaya server (*zero hosting cost* / tanpa sewa 
   - Searchable Combobox untuk pemilihan cepat Mata Pelajaran dan Rombel/Kelas.
   - Opsi status lengkap: **Hadir (H)**, **Sakit (S)**, **Izin (I)**, **Alpa (A)**, dan **Dispensasi (Dispen)**.
   - Tombol aksi instan *Set Semua Hadir* dan *Reset* untuk efisiensi pengisian.
+  - **Pedoman Presensi Lintas Guru & Mapel**: Ketika kelas sudah diabsen sebelumnya di hari tersebut (baik oleh perwakilan murid maupun guru jam pertama), data tersebut otomatis dijadikan pedoman dasar bagi guru sesi berikutnya, lengkap dengan dialog interaktif untuk memilih langsung *Lanjut ke Jurnal KBM* atau *Absen Lagi* (dengan status siswa yang sudah otomatis terisi).
 - **Input Jurnal KBM**:
   - Jam pelajaran, pertemuan ke-, model pembelajaran, rincian materi, murid tidak hadir, dan status ketuntasan materi.
   - Upload multi-foto bukti dokumentasi KBM langsung ke folder Google Drive.

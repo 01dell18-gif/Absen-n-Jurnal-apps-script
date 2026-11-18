@@ -310,34 +310,59 @@
         .withSuccessHandler(function(syncRes) {
           closeLoading();
 
-          // KHUSUS ROLE GURU MAPEL: Jika kelas sudah diabsen oleh murid pada tanggal tersebut
+          // Jika sudah ada catatan presensi sebelumnya (baik oleh murid maupun guru lain) dan user bukan murid
           const currentRole = (getCurrentRole() || '').trim().toLowerCase();
-          if (currentRole === 'guru mapel' && syncRes && syncRes.found && syncRes.isHarian) {
+          if (currentRole !== 'murid' && syncRes && syncRes.found) {
+            const pencatatText = syncRes.guru || (syncRes.isHarian ? 'Perwakilan Murid' : 'Pengajar Sebelumnya');
+            const mapelText = syncRes.mapel || (syncRes.isHarian ? 'Presensi Harian' : 'Mata Pelajaran Sebelumnya');
+
             Swal.fire({
               icon: 'info',
-              title: '<span class="text-base sm:text-lg font-bold text-slate-800">Presensi Sudah Dicatat Murid</span>',
+              title: '<span class="text-base sm:text-lg font-bold text-slate-800">Presensi Kelas Sudah Tercatat di Hari Ini</span>',
               html: `
                 <div class="text-left text-xs sm:text-sm text-slate-600 space-y-3 pt-1">
-                  <p>Presensi harian untuk rombel <strong>${kelas}</strong> pada tanggal <strong>${tanggal}</strong> telah selesai dicatat oleh perwakilan murid (${syncRes.source}).</p>
-                  <div class="p-3 bg-blue-50/90 border border-blue-200 rounded-xl text-blue-900 text-xs flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-check text-brand-600 text-sm mt-0.5 flex-shrink-0"></i>
-                    <span>Anda tidak perlu mengabsen ulang. Anda dapat langsung melanjutkan untuk mencatat <strong>Jurnal Mengajar KBM</strong>.</span>
+                  <p>Presensi untuk rombel <strong>${kelas}</strong> pada tanggal <strong>${tanggal}</strong> sudah tercatat sebelumnya oleh:</p>
+                  <div class="p-3 bg-blue-50/90 border border-blue-200/80 rounded-2xl text-blue-900 text-xs space-y-1.5 shadow-xs">
+                    <div class="flex items-center gap-2 font-bold text-slate-900">
+                      <div class="w-6 h-6 rounded-lg bg-blue-200 text-brand-700 flex items-center justify-center text-[11px]">
+                        <i class="fa-solid fa-user-check"></i>
+                      </div>
+                      <span>${pencatatText}</span>
+                    </div>
+                    <div class="text-blue-800 text-[11px] pl-8">
+                      Mata Pelajaran: <strong>${mapelText}</strong>
+                    </div>
                   </div>
+                  <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-start gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-sm mt-0.5 flex-shrink-0"></i>
+                    <span>Data kehadiran siswa di atas telah disiapkan sebagai <strong>pedoman otomatis</strong>.</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 text-center pt-1 font-medium">
+                    Apakah Anda ingin langsung melanjutkan ke <strong>Jurnal KBM</strong> atau ingin <strong>mengabsen lagi</strong> untuk mata pelajaran Anda?
+                  </p>
                 </div>
               `,
+              showDenyButton: true,
               showCancelButton: true,
-              confirmButtonText: '<i class="fa-solid fa-pen-to-square mr-1.5"></i> Lanjut ke Input Jurnal',
-              cancelButtonText: 'Batal / Tetap di Sini',
+              confirmButtonText: '<i class="fa-solid fa-pen-to-square mr-1.5"></i> Lanjut ke Jurnal KBM',
+              denyButtonText: '<i class="fa-solid fa-clipboard-check mr-1.5"></i> Absen Lagi (Jadikan Pedoman)',
+              cancelButtonText: 'Batal',
               confirmButtonColor: '#2563eb',
+              denyButtonColor: '#059669',
               cancelButtonColor: '#64748b',
               customClass: {
                 popup: 'rounded-3xl shadow-2xl border border-slate-200/80',
-                confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md shadow-brand-600/30',
-                cancelButton: 'rounded-xl px-5 py-2.5 font-semibold text-xs'
+                confirmButton: 'rounded-xl px-4 py-2.5 font-bold text-xs shadow-md shadow-brand-600/30',
+                denyButton: 'rounded-xl px-4 py-2.5 font-bold text-xs shadow-md shadow-emerald-600/30',
+                cancelButton: 'rounded-xl px-4 py-2.5 font-semibold text-xs'
               }
             }).then(result => {
               if (result.isConfirmed) {
+                // Pilihan 1: Langsung lanjut ke Form Jurnal KBM dengan parameter kelas & tanggal
                 goToPage('form-jurnal', { kelas: kelas, tanggal: tanggal });
+              } else if (result.isDenied) {
+                // Pilihan 2: Buka tabel presensi dengan data sebelumnya sebagai pedoman dasar
+                renderStudentAttendanceTable(filtered, kelas, tanggal, syncRes);
               }
             });
             return;
@@ -371,14 +396,14 @@
                 <i class="fa-solid fa-cloud-arrow-down"></i>
               </div>
               <div>
-                <p class="text-xs font-bold text-blue-900">Data Presensi Ditemukan (${syncRes.source})</p>
+                <p class="text-xs font-bold text-blue-900">Pedoman Presensi Digunakan (${syncRes.source})</p>
                 <p class="text-[11px] text-blue-700 leading-relaxed">
-                  Status kehadiran siswa telah disinkronkan otomatis dari rekaman tanggal <strong>${tanggal}</strong>. Anda dapat langsung meninjau atau memperbarui data jika terdapat perubahan.
+                  Status kehadiran siswa telah terisi otomatis berdasarkan rekaman tanggal <strong>${tanggal}</strong>. Silakan periksa atau ubah status jika terdapat perbedaan untuk sesi Anda, lalu simpan.
                 </p>
               </div>
             </div>
             <span class="px-2.5 py-1 bg-blue-200/70 text-blue-900 rounded-lg font-extrabold text-[10px] border border-blue-300 flex-shrink-0 flex items-center gap-1">
-              <i class="fa-solid fa-check-double"></i> Otomatis Terisi
+              <i class="fa-solid fa-check-double"></i> Siap Sebagai Pedoman
             </span>
           `;
           bannerSync.classList.remove('hidden');
